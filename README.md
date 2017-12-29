@@ -1,6 +1,7 @@
 # FooChat
 ---
 A chat application using Firebase & React Native
+(under construction)
 
 ## Installation
 ```

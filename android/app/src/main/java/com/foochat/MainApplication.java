@@ -3,6 +3,9 @@ package com.foochat;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import fr.bamlab.rnimageresizer.ImageResizerPackage;
+import com.imagepicker.ImagePickerPackage;
+import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import io.realm.react.RealmReactPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import io.invertase.firebase.RNFirebasePackage;
@@ -26,6 +29,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ImageResizerPackage(),
+            new ImagePickerPackage(),
+            new RNDeviceInfo(),
             new RealmReactPackage(),
             new LinearGradientPackage(),
             new RNFirebasePackage()

@@ -137,6 +137,9 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-image-resizer')
+    compile project(':react-native-image-picker')
+    compile project(':react-native-device-info')
     compile project(':realm')
     compile project(':react-native-linear-gradient')
     compile(project(':react-native-firebase')) {
