@@ -6,6 +6,8 @@ import {
   Image 
 } from 'react-native';
 
+import FBDatabaseManager from '../../manager/FBDatabaseManager';
+
 // --------------------------------------------------
 
 /* eslint-disable */
@@ -18,6 +20,11 @@ const LOG_TAG = '7777: ContactsListScreen.js';
 // --------------------------------------------------
 
 class ContactsListScreen extends Component {
+  componentDidMount() {
+    setTimeout(() => {
+      FBDatabaseManager.createSingleThread();
+    }, 500);
+  }
   render() {
     return (
       <Text 

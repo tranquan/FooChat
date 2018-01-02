@@ -1,5 +1,8 @@
+import { AsyncStorage } from 'react-native';
 import Reactotron from 'reactotron-react-native';
-import { Configs } from '../constants/configs';
+import Configs from '../constants/configs';
+
+const LOG_TAG = 'Utils.js';
 
 // --------------------------------------------------
 
@@ -29,6 +32,32 @@ export default class Utils {
       value: { message, args },
       important: true,
     });
+  }
+}
+
+export async function saveMyUser(user) {
+  try {
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(1000);
+    await AsyncStorage.setItem('MY_USER', JSON.stringify(user));
+    return true;
+  } catch (error) {
+    Utils.log(`${LOG_TAG}: myUser save user error: `, error);
+    return false;
+  }
+}
+
+export async function loadMyUser() {
+  try {
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(1000);
+    const json = await AsyncStorage.getItem('MY_USER');
+    if (!json) { return null; }
+    const user = JSON.parse(json);
+    return user;
+  } catch (error) {
+    Utils.warn(`${LOG_TAG}: loadSavedAccount error: `, error);
+    return null;
   }
 }
 

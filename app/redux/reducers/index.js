@@ -4,8 +4,13 @@ import {
   rootScreen,
 } from './navigation';
 
+import {
+  myUser,
+} from './user';
+
 const appReducer = combineReducers({
   rootScreen,
+  myUser,
 });
 
 const rootReducer = (state, action) => {

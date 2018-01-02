@@ -9,7 +9,8 @@ import rootReducer from './reducers';
 // --------------------------------------------------
 
 const initialState = {
-
+  rootScreen: 'LOADING',
+  myUser: null,
 };
 
 // --------------------------------------------------

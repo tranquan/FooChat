@@ -6,13 +6,19 @@ import {
 import { Provider } from 'react-redux';
 import moment from 'moment/min/moment-with-locales';
 
+import {
+  switchToLogin,
+  switchToMain,
+  myUser,
+} from './redux/actions';
+
 import './constants/reactotron';
 
 import store from './redux/store';
-import MainScreen from './screens/Main';
+import RootScreen from './screens/Root/RootScreen';
 
 /* eslint-disable */
-import Utils, { getAppVersion, compareVersion } from './utils/Utils';
+import Utils, { loadMyUser } from './utils/Utils';
 const LOG_TAG = '7777: App.js';
 /* eslint-enable */
 
@@ -24,7 +30,9 @@ export default class App extends Component {
   componentDidMount() {
     this.currentAppState = AppState.currentState;
     AppState.addEventListener('change', this.handleAppStateChange);
+    
     this.initApp();
+    this.startApp();
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this.handleAppStateChange);
@@ -40,12 +48,24 @@ export default class App extends Component {
   initApp() {
     moment.locale('vi');
   }
+  startApp() {
+    const asyncTask = async () => {
+      const user = await loadMyUser();
+      if (user.uid && user.uid.length > 0) {
+        store.dispatch(myUser(user));
+        store.dispatch(switchToMain());
+      } else {
+        store.dispatch(switchToLogin());
+      } 
+    };
+    asyncTask();
+  }
   // --------------------------------------------------
   render() {
     StatusBar.setBarStyle('light-content', true);
     return (
       <Provider store={store}>
-        <MainScreen />
+        <RootScreen />
       </Provider>
     );
   }

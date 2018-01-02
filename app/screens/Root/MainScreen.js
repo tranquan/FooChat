@@ -1,10 +1,20 @@
 import React, { Component } from 'react';
 import { DrawerNavigator, StackNavigator, TabNavigator } from 'react-navigation';
 
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+
+import {
+  switchToLogin,
+  switchToLoading,
+  switchToMain,
+} from '../../redux/actions';
+
 import SlideMenuScreen from '../SlideMenu';
 import ContactsListScreen from '../ContactsList';
 import ChatsListScreen from '../ChatsList';
 import ChatScreen from '../Chat';
+import ProfileScreen from '../Profile';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
@@ -31,6 +41,9 @@ const MainTabNavigator = TabNavigator(
     },
     ChatsListTab: {
       screen: ChatsListStackNavigator,
+    },
+    ProfileTab: {
+      screen: ProfileScreen,
     },
   },
   {
@@ -69,4 +82,23 @@ class MainScreen extends Component {
   }
 }
 
-export default MainScreen;
+// --------------------------------------------------
+// react-redux
+// --------------------------------------------------
+
+MainScreen.contextTypes = {
+  store: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  rootScreen: state.rootScreen,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  switchToLoading: () => dispatch(switchToLoading()),
+  switchToLogin: () => dispatch(switchToLogin()),
+  switchToMain: () => dispatch(switchToMain()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(MainScreen);
+

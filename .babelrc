@@ -4,5 +4,5 @@
       "plugins": ["transform-remove-console"]
     }
   },
-  "presets": ["react-native", "flow"],
+  "presets": ["react-native", "flow"]
 }
