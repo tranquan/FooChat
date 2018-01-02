@@ -1,51 +1,74 @@
 import firebase from 'react-native-firebase';
+import User from '../models/User';
+import Thread from '../models/Thread';
 import Utils from '../utils/Utils';
 
-const database = firebase.database();
-const chatRef = database.ref('chat');
-const usersRef = chatRef.child('users');
-const threadsRef = chatRef.child('threads');
+const DATABASE = firebase.database();
+const CHAT_REF = DATABASE.ref('chat');
+const USERS_REF = CHAT_REF.child('users');
+const THREADS_REF = CHAT_REF.child('threads');
+
+const THREAD_TYPES = {
+  SINGLE: 'single',
+  GROUP: 'group',
+};
 
 const ERRORS = {
   THREAD_NOT_FOUND: 'THREAD_NOT_FOUND',
   USER_NOT_FOUND: 'THREAD_NOT_FOUND',
   SINGLE_THREAD_INVALID_ID: 'SINGLE_THREAD_INVALID_ID',
+  SINGLE_THREAD_ALREADY_EXISTS: 'SINGLE_THREAD_ALREADY_EXISTS',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
 };
 
 class RealtimeDatabase {
 
+  // --------------------------------------------------
+  // Methods - Public API
+  // --------------------------------------------------
+
   static test() {
-    // const thread = RealtimeDatabase.getThread('single_1_2');
-    // Utils.log('get thread: ', thread);
+    const asyncTask = async () => {
+      try {
+        const user1 = {
+          uid: '1',
+          name: 'User 1',
+        };
+        const user2 = {
+          uid: '2',
+          name: 'User 2',
+        };
+        const thread = await RealtimeDatabase.createSingleThread(user1, user2);
+        Utils.log(`create thread success: ${JSON.stringify(thread)}`, thread);
+      } catch (err) {
+        Utils.log(`create thread exception: ${err}`);
+      }
+    };
+    asyncTask();
+    
+    // RealtimeDatabase.testAddThreadsToUser();
+  }
 
-    // RealtimeDatabase.getThread('single_1_4')
-    // .then((snapshot) => {
-    //   Utils.log('get thread: ', snapshot);
-    // })
-    // .catch((error) => {
-    //   Utils.log(`get thread error: ${error}`);
-    // });
-
-    // const asyncTask = async () => {
-    //   try {
-    //     const thread = await RealtimeDatabase.getThread('single_1_2');
-    //     Utils.log('get thread: ', thread);
-    //   }
-    //   catch (error) {
-    //     Utils.log('get thread: ', error);
-    //   }
-    // };
-    // asyncTask();
-
-    // RealtimeDatabase.addThreadsToUser('1', ['1', '2']);
-    // RealtimeDatabase.removeThreadsFromUser('1', ['2']);
+  static testAddThreadsToUser() {
+    const asyncTask = async () => {
+      try {
+        await RealtimeDatabase.mAddThreadIDsToUser('1', ['single_1_2']);
+        await RealtimeDatabase.mAddThreadIDsToUser('2', ['single_1_2']);
+      } catch (err) {
+        Utils.log(`add thread to user exception: ${err}`);
+      }
+    };
+    asyncTask();
   }
 
   static getDatabase() {
-    return database;
+    return DATABASE;
   }
 
+  /**
+   * For single thread, threadID has format: `single_user1UID_user2UID`
+   * where user1UID < user2UID
+   */
   static generateSingleThreadID(userID1, userID2) {
     const uid1 = parseInt(userID1, 10);
     const uid2 = parseInt(userID2, 10);
@@ -61,65 +84,72 @@ class RealtimeDatabase {
     return null;
   }
 
-  static createSingleThread(userID1, userID2) {
-    return new Promise((resolve, reject) => {
-      // get single thread id
-      const singleThreadId = RealtimeDatabase.generateSingleThreadID(userID1, userID2);
-      if (!singleThreadId) {
-        reject(ERRORS.SINGLE_THREAD_INVALID_USERS);
-        return;
+  /**
+   * Get Thread object from firebase base on threadID
+   * @param {string} threadID
+   * @returns nullable Thread object
+   */
+  static async getThread(threadID) {
+    try {
+      const thread = await THREADS_REF.child(threadID).once('value');
+      if (thread && thread.val()) {
+        return thread.val();
       }
-      // is single thread id exists
-      RealtimeDatabase.getThread(singleThreadId)
-      .then((snapshot) => {
-        
-      })
-      .catch((error) => {
-        if (error.message === ERRORS.THREAD_NOT_FOUND) {
-          
-        }
-      });
-    });
+      return null;
+    } catch (err) {
+      return null;
+    }
+  }
 
-    // is single thread id exists
-    threadsRef.child(singleThreadId).once('value', (snapshot) => {
-      if (snapshot.val()) {
+  /**
+   * Create single thread for conversation between user1 & user2
+   * If thread already created, return that thread
+   * @param {User} user1
+   * @param {User} user2
+   * @return nullable Thread object
+   */
+  static async createSingleThread(user1, user2) {
+    try {
+      // get threadID
+      const threadID = RealtimeDatabase.generateSingleThreadID(user1.uid, user2.uid);
+      if (!threadID) {
         return null;
       }
+      // return thread if it's already exists
+      const thread = await RealtimeDatabase.getThread(threadID);
+      if (thread) {
+        return thread;
+      }
+      // create new thread
+      const result = await RealtimeDatabase.mAddSingleThread(user1, user2);
+      if (!result) {
+        return null;
+      }
+      const newThread = await RealtimeDatabase.getThread(threadID);
+      // add thread to user1 & user2
+      await RealtimeDatabase.mAddThreadIDsToUser(user1.uid, [newThread.uid]);
+      await RealtimeDatabase.mAddThreadIDsToUser(user2.uid, [newThread.uid]);
+      // return
+      return newThread;
+    } catch (err) {
+      Utils.warn(`createSingleThread: ${err}`, err);
       return null;
-    }, () => {
-      return null;
-    });
-    // create thread
-    // add thread to each user
-    threadsRef.set({
-      single_1_2: {
-        title: 'single chat',
-      },
-    });
+    }
   }
 
-  static createGroupThread(title, members) {
+  static testCreateSingleThread() {
 
   }
 
-  static getThread(threadID) {
-    return new Promise((resolve, reject) => {
-      threadsRef.child(threadID).once('value', (snapshot) => {
-        if (snapshot.val()) {
-          resolve(snapshot);
-          return;
-        }
-        resolve(null);
-        reject(new Error(ERRORS.THREAD_NOT_FOUND));
-      }, (error) => {
-        Utils.log(`getThread error: ${error}`, error);
-        reject(new Error(ERRORS.UNKNOWN_ERROR));
-      });
-    });
+  static createGroupThread() {
+    
   }
 
-  static updateGroupThread(uid) {
+  /**
+   * 
+   * @param {*} hello 
+   */
+  static updateGroupThread(hello) {
 
   }
 
@@ -136,24 +166,109 @@ class RealtimeDatabase {
   }
 
   // --------------------------------------------------
-  // Helpers
+  // Helpers - Private API
   // --------------------------------------------------
 
-  static addThreadsToUser(userID, threadIDs) {
-    const userThreadsRef = usersRef.child(userID).child('threads');
-    for (let i = 0; i < threadIDs.length; i += 1) {
-      const threadID = threadIDs[i];
-      userThreadsRef.child(threadID).set({ uid: threadID });
-    }
+  /**
+   * Caller must check for the exist of thread before calling this function
+   * otherwise the old thread will be deleted, because each single chat between 2 user is unique
+   * @param {User} user1
+   * @param {User} user2
+   * @returns Promise contain true if success
+   */
+  static mAddSingleThread(user1, user2) {
+    return new Promise((resolve, reject) => {
+      const threadID = RealtimeDatabase.generateSingleThreadID(user1.uid, user2.uid);
+      if (!threadID) {
+        reject(new Error(ERRORS.SINGLE_THREAD_INVALID_ID));
+        return;
+      }
+      const members = [];
+      members[user1.uid] = user1;
+      members[user2.uid] = user2;
+      THREADS_REF.child(threadID).set({
+        uid: threadID,
+        type: THREAD_TYPES.SINGLE,
+        messages: [],
+        users: members,
+        create_time: firebase.database.ServerValue.TIMESTAMP,
+        update_time: firebase.database.ServerValue.TIMESTAMP,
+      }, (err) => {
+        if (!err) {
+          resolve(true);
+        } else {
+          Utils.warn('addSingleThread add error: ', err);
+          reject(err);
+        }
+      });
+    });
   }
 
-  static removeThreadsFromUser(userID, threadIDs) {
-    const userThreadsRef = usersRef.child(userID).child('threads');
+  /**
+   * Create a conversation for a group of users
+   */
+  // static mAddGroupThread(users, title = '', photoURL = null) {
+  //   // generate members with key is user uid
+  //   const members = [];
+  //   for (let i = 0; i < users.length; i += 1) {
+  //     const user = users[i];
+  //     members[user.uid] = user;
+  //   }
+  //   // add thread
+  //   return new Promise((resolve, reject) => {
+  //     const threadRef = THREADS_REF.push({
+  //       title,
+  //       photoURL,
+  //       type: THREAD_TYPES.GROUP,
+  //       messages: [],
+  //       users: members,
+  //       create_time: firebase.database.ServerValue.TIMESTAMP,
+  //       update_time: firebase.database.ServerValue.TIMESTAMP,
+  //     }, (error) => {
+  //       if (!error) {
+  //         resolve(true);
+  //       } else {
+  //         reject(error);
+  //       }
+  //     });
+  //     // add thread id to each user
+  //     if (!threadRef) {
+  //       reject(new Error(ERRORS.UNKNOWN_ERROR));
+  //       return;
+  //     }
+  //     const threadID = threadRef.key;
+  //     for (let i = 0; i < users.length; i += 1) {
+  //       const userID = users[i].uid;
+  //       RealtimeDatabase.addThreadsToUser([threadID], userID);
+  //     }
+  //   });
+  // }
+
+  /**
+   * Add list of threadID to a user
+   * @param {string} userID 
+   * @param {[string]} threadIDs 
+   * @returns Promise when all of threads is added to user
+   */
+  static mAddThreadIDsToUser(userID, threadIDs) {
+    const userThreadsRef = USERS_REF.child(userID).child('threads');
+    const results = [];
     for (let i = 0; i < threadIDs.length; i += 1) {
       const threadID = threadIDs[i];
-      userThreadsRef.child(threadID).remove();
+      results.push(userThreadsRef.child(threadID).set({ uid: threadID }));
     }
+    return Promise.all(results);
   }
+
+  // static removeThreadsFromUser(userID, threadIDs) {
+  //   const userThreadsRef = USERS_REF.child(userID).child('threads');
+  //   const results = [];
+  //   for (let i = 0; i < threadIDs.length; i += 1) {
+  //     const threadID = threadIDs[i];
+  //     results.push(userThreadsRef.child(threadID).remove());
+  //   }
+  //   return Promise.all(results);
+  // }
 }
 
 export default RealtimeDatabase;
