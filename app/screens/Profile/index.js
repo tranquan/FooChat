@@ -10,6 +10,8 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import Styles from '../../constants/styles';
+
 import {
   switchToLogin,
   switchToLoading,
@@ -52,14 +54,14 @@ class ProfileScreen extends Component {
     asyncTask();
   }
   render() {
-    const { myUser } = this.props;
+    const me = this.props.myUser;
     return (
       <View style={styles.container}>
         <Text style={styles.userIdText}>
-          {`User ID: ${myUser.uid}`}
+          {`User ID: ${me.uid}`}
         </Text>
         <Text style={styles.userNameText}>
-          {`User Name: ${myUser.name}`}
+          {`User Name: ${me.name}`}
         </Text>
         <TouchableOpacity
           style={styles.logoutButton}
@@ -80,6 +82,15 @@ class ProfileScreen extends Component {
 }
 
 // --------------------------------------------------
+
+ProfileScreen.navigationOptions = () => ({
+  title: 'Profile', // must have a space or navigation will crash
+  headerStyle: Styles.navigator_header_no_border,
+  headerTitleStyle: Styles.navigator_header_title,
+  headerTintColor: '#fff',
+});
+
+// --------------------------------------------------
 // react-redux
 // --------------------------------------------------
 
@@ -96,7 +107,7 @@ const mapDispatchToProps = (dispatch) => ({
   switchToLoading: () => dispatch(switchToLoading()),
   switchToLogin: () => dispatch(switchToLogin()),
   switchToMain: () => dispatch(switchToMain()),
-  setMyUser: (user) => dispatchEvent(myUser(user)),
+  setMyUser: (user) => dispatch(myUser(user)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProfileScreen);

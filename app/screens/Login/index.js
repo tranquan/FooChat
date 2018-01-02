@@ -113,7 +113,7 @@ const mapDispatchToProps = (dispatch) => ({
   switchToLoading: () => dispatch(switchToLoading()),
   switchToLogin: () => dispatch(switchToLogin()),
   switchToMain: () => dispatch(switchToMain()),
-  setMyUser: (user) => dispatchEvent(myUser(user)),
+  setMyUser: (user) => dispatch(myUser(user)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

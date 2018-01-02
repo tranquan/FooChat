@@ -16,6 +16,7 @@ import './constants/reactotron';
 
 import store from './redux/store';
 import RootScreen from './screens/Root/RootScreen';
+import RealtimeDatabase from './firebase/RealtimeDatabase';
 
 /* eslint-disable */
 import Utils, { loadMyUser } from './utils/Utils';
@@ -33,6 +34,8 @@ export default class App extends Component {
     
     this.initApp();
     this.startApp();
+
+    RealtimeDatabase.test();
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this.handleAppStateChange);
@@ -51,7 +54,7 @@ export default class App extends Component {
   startApp() {
     const asyncTask = async () => {
       const user = await loadMyUser();
-      if (user.uid && user.uid.length > 0) {
+      if (user && user.uid && user.uid.length > 0) {
         store.dispatch(myUser(user));
         store.dispatch(switchToMain());
       } else {

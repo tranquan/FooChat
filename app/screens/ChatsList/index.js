@@ -6,6 +6,8 @@ import {
   Image 
 } from 'react-native';
 
+import Styles from '../../constants/styles';
+
 // --------------------------------------------------
 
 /* eslint-disable */
@@ -32,6 +34,16 @@ class ChatsListScreen extends Component {
 }
 
 export default ChatsListScreen;
+
+// --------------------------------------------------
+
+ChatsListScreen.navigationOptions = () => ({
+  title: 'Contacts List', // must have a space or navigation will crash
+  headerStyle: Styles.navigator_header_no_border,
+  headerTitleStyle: Styles.navigator_header_title,
+  headerTintColor: '#fff',
+});
+
 
 // --------------------------------------------------
 
