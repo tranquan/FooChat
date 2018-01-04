@@ -16,7 +16,7 @@ import './constants/reactotron';
 
 import store from './redux/store';
 import RootScreen from './screens/Root/RootScreen';
-import RealtimeDatabase from './firebase/RealtimeDatabase';
+import RealtimeDatabaseTest from './firebase/RealtimeDatabaseTest';
 
 /* eslint-disable */
 import Utils, { loadMyUser } from './utils/Utils';
@@ -35,7 +35,7 @@ export default class App extends Component {
     this.initApp();
     this.startApp();
 
-    RealtimeDatabase.test();
+    RealtimeDatabaseTest.test();
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this.handleAppStateChange);

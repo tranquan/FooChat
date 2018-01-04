@@ -1,4 +1,11 @@
+/**
+ * Entity in Realtime Database on firebase will have this format
+ * -> <entity>/<entity_uid>/<entity_props>
+ * -> uid will be used as the key to access an entity.
+ * -> inside entity props, uid is not required to have
+ */
 import firebase from 'react-native-firebase';
+
 import User from '../models/User';
 import Thread from '../models/Thread';
 import Utils from '../utils/Utils';
@@ -27,42 +34,20 @@ class RealtimeDatabase {
   // Methods - Public API
   // --------------------------------------------------
 
-  static test() {
-    const asyncTask = async () => {
-      try {
-        const user1 = {
-          uid: '1',
-          name: 'User 1',
-        };
-        const user2 = {
-          uid: '2',
-          name: 'User 2',
-        };
-        const thread = await RealtimeDatabase.createSingleThread(user1, user2);
-        Utils.log(`create thread success: ${JSON.stringify(thread)}`, thread);
-      } catch (err) {
-        Utils.log(`create thread exception: ${err}`);
-      }
-    };
-    asyncTask();
-    
-    // RealtimeDatabase.testAddThreadsToUser();
-  }
-
-  static testAddThreadsToUser() {
-    const asyncTask = async () => {
-      try {
-        await RealtimeDatabase.mAddThreadIDsToUser('1', ['single_1_2']);
-        await RealtimeDatabase.mAddThreadIDsToUser('2', ['single_1_2']);
-      } catch (err) {
-        Utils.log(`add thread to user exception: ${err}`);
-      }
-    };
-    asyncTask();
-  }
-
   static getDatabase() {
     return DATABASE;
+  }
+
+  static getChatRef() {
+    return CHAT_REF;
+  }
+
+  static getUsersRef() {
+    return USERS_REF;
+  }
+
+  static getThreadsRef() {
+    return THREADS_REF;
   }
 
   /**
@@ -92,7 +77,7 @@ class RealtimeDatabase {
   static async getThread(threadID) {
     try {
       const thread = await THREADS_REF.child(threadID).once('value');
-      if (thread && thread.val()) {
+      if (thread && thread.exists()) {
         return thread.val();
       }
       return null;
@@ -127,8 +112,8 @@ class RealtimeDatabase {
       }
       const newThread = await RealtimeDatabase.getThread(threadID);
       // add thread to user1 & user2
-      await RealtimeDatabase.mAddThreadIDsToUser(user1.uid, [newThread.uid]);
-      await RealtimeDatabase.mAddThreadIDsToUser(user2.uid, [newThread.uid]);
+      await RealtimeDatabase.mAddThreadIDsToUser(user1.uid, [threadID]);
+      await RealtimeDatabase.mAddThreadIDsToUser(user2.uid, [threadID]);
       // return
       return newThread;
     } catch (err) {
@@ -137,19 +122,11 @@ class RealtimeDatabase {
     }
   }
 
-  static testCreateSingleThread() {
-
-  }
-
   static createGroupThread() {
     
   }
 
-  /**
-   * 
-   * @param {*} hello 
-   */
-  static updateGroupThread(hello) {
+  static updateGroupThread() {
 
   }
 
@@ -184,10 +161,9 @@ class RealtimeDatabase {
         return;
       }
       const members = [];
-      members[user1.uid] = user1;
-      members[user2.uid] = user2;
+      members[user1.uid] = { ...user1, uid: null };
+      members[user2.uid] = { ...user2, uid: null };
       THREADS_REF.child(threadID).set({
-        uid: threadID,
         type: THREAD_TYPES.SINGLE,
         messages: [],
         users: members,
@@ -255,7 +231,9 @@ class RealtimeDatabase {
     const results = [];
     for (let i = 0; i < threadIDs.length; i += 1) {
       const threadID = threadIDs[i];
-      results.push(userThreadsRef.child(threadID).set({ uid: threadID }));
+      results.push(userThreadsRef.child(threadID).set({ 
+        create_time: firebase.database.ServerValue.TIMESTAMP,
+      }));
     }
     return Promise.all(results);
   }
