@@ -70,6 +70,22 @@ class RealtimeDatabase {
   }
 
   /**
+   * Get a User base on userID
+   * @param {string} userID 
+   */
+  static async getUser(userID) {
+    try {
+      const user = await USERS_REF.child(userID).once('value');
+      if (user && user.exists()) {
+        return user.val();
+      }
+      return null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  /**
    * Get Thread object from firebase base on threadID
    * @param {string} threadID
    * @returns nullable Thread object
@@ -79,6 +95,24 @@ class RealtimeDatabase {
       const thread = await THREADS_REF.child(threadID).once('value');
       if (thread && thread.exists()) {
         return thread.val();
+      }
+      return null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  /**
+   * Get Message object in a Thread from firebase base on messageID
+   * @param {string} threadID
+   * @param {string} messageID
+   * @returns nullable Message object
+   */
+  static async getMessageInThread(threadID, messageID) {
+    try {
+      const message = await THREADS_REF.child(threadID).child(`messages/${messageID}`).once('value');
+      if (message && message.exists()) {
+        return message.val();
       }
       return null;
     } catch (err) {
@@ -110,11 +144,11 @@ class RealtimeDatabase {
       if (!result) {
         return null;
       }
-      const newThread = await RealtimeDatabase.getThread(threadID);
       // add thread to user1 & user2
       await RealtimeDatabase.mAddThreadIDsToUser(user1.uid, [threadID]);
       await RealtimeDatabase.mAddThreadIDsToUser(user2.uid, [threadID]);
-      // return
+      // return new thread
+      const newThread = await RealtimeDatabase.getThread(threadID);
       return newThread;
     } catch (err) {
       Utils.warn(`createSingleThread: ${err}`, err);
@@ -122,36 +156,173 @@ class RealtimeDatabase {
     }
   }
 
-  static createGroupThread() {
-    
+  /**
+   * Create group thread for conversation for many users
+   * @param {User} users 
+   * @param {string} title 
+   * @param {string} photoURL
+   * @returns nullable Thread object
+   */
+  static async createGroupThread(users, metaData) {
+    try {
+      // create new thread
+      const threadID = await RealtimeDatabase.mAddGroupThread(users, metaData);
+      // add thread to users
+      const tasks = [];
+      for (let i = 0; i < users.length; i += 1) {
+        const user = users[i];
+        tasks.push(RealtimeDatabase.mAddThreadIDsToUser(user.uid, [threadID]));
+      }
+      await Promise.all(tasks);
+      // return new thread
+      const newThread = await RealtimeDatabase.getThread(threadID);
+      return newThread;
+    } catch (err) {
+      Utils.warn(`createGroupThread: ${err}`, err);
+      return null;
+    }
   }
 
-  static updateGroupThread() {
-
+  /**
+   * Add list of users to a thread
+   * @param {User} users 
+   * @param {string} threadID 
+   * @returns true/false
+   */
+  static async addUsersToGroupThread(threadID, users) {
+    try {
+      // is thread exist
+      const thread = await RealtimeDatabase.getThread(threadID);
+      if (!thread) {
+        Utils.warn(`addUsersToGroupThread: thread is not found: ${threadID}`);
+        return false;
+      }
+      // is thread a group
+      if (thread.type !== THREAD_TYPES.GROUP) {
+        Utils.warn(`addUsersToGroupThread: thread is not a group: ${thread.type}`);
+        return false;
+      }
+      // add users to thread
+      await RealtimeDatabase.mAddUsersToThread(threadID, users);
+      // add threadID to each user
+      const tasks = [];
+      for (let i = 0; i < users.length; i += 1) {
+        const user = users[i];
+        tasks.push(RealtimeDatabase.mAddThreadIDsToUser(user.uid, [threadID]));
+      }
+      await Promise.all(tasks);
+      return true;
+    } catch (err) {
+      Utils.warn(`addUsersToGroupThread: ${err}`, err);
+      return false;
+    }
   }
 
-  static updateUser() {
-
+  /**
+   * Remove list of users from a thread
+   * @param {array of string} userIDs 
+   * @param {string} threadID 
+   */
+  static async removeUsersFromGroupThread(threadID, userIDs) {
+    try {
+      // is thread exist
+      const thread = await RealtimeDatabase.getThread(threadID);
+      if (!thread) {
+        Utils.warn(`removeUsersFromGroupThread: thread is not found: ${threadID}`);
+        return false;
+      }
+      // is thread a group
+      if (thread.type !== THREAD_TYPES.GROUP) {
+        Utils.warn(`removeUsersFromGroupThread: thread is not a group: ${thread.type}`);
+        return false;
+      }
+      // remove users from thread
+      await RealtimeDatabase.mRemoveUsersFromThread(threadID, userIDs);
+      // remove threadID from user
+      const tasks = [];
+      for (let i = 0; i < userIDs.length; i += 1) {
+        const userID = userIDs[i];
+        tasks.push(RealtimeDatabase.mRemoveThreadIDsFromUser(userID, [threadID]));
+      }
+      await Promise.all(tasks);
+      return true;
+    } catch (err) {
+      Utils.warn(`removeUsersFromGroupThread: ${err}`, err);
+      return false;
+    }
   }
 
-  static sendTextMessage(message, threadID, fromUser) {
-    
+  /**
+   * Update group thread meta data
+   * @param {string} title 
+   * @param {string} photoURL 
+   * @returns true/false
+   */
+  static async updateGroupThreadMetadata(threadID, metaData) {
+    try {
+      // is thread exist
+      const thread = await RealtimeDatabase.getThread(threadID);
+      if (!thread) {
+        Utils.warn(`updateGroupThreadMetadata: thread is not found: ${threadID}`);
+        return false;
+      }
+      // is thread a group
+      if (thread.type !== THREAD_TYPES.GROUP) {
+        Utils.warn(`updateGroupThreadMetadata: thread is not a group: ${thread.type}`);
+        return false;
+      }
+      // update
+      await RealtimeDatabase.mUpdateThreadMetaData(threadID, metaData);
+      return true;
+    } catch (err) {
+      Utils.warn(`updateGroupThreadMetadata: ${err}`, err);
+      return false;
+    }
   }
 
-  static sendImageMessage(message, imageURL, threadID, fromUser) {
-
+  /**
+   * Add a message to a Thread. Message can have many type
+   * At this level, we don't care about Message structure
+   * @param {Message} message 
+   * @param {string} threadID 
+   * @returns nullable Message object
+   */
+  static async sendMessage(message, threadID) {
+    try {
+      // is thread exist
+      const thread = await RealtimeDatabase.getThread(threadID);
+      if (!thread) {
+        return null;
+      }
+      // add message to thread
+      const messageID = await RealtimeDatabase.mAddMessageToThread(threadID, message);
+      if (!messageID) {
+        return null;
+      }
+      // fetch message & return
+      const newMessage = await RealtimeDatabase.getMessageInThread(threadID, messageID);
+      return newMessage;
+    } catch (err) {
+      Utils.warn(`sendMessage: ${err}`, err);
+      return false;
+    }
   }
 
   // --------------------------------------------------
   // Helpers - Private API
+  // -> these are just simple functions help to insert/remove/edit firebase db
+  // -> caller must responsible to do appropriate logic check if needed
+  // -> for instance: if add user to thread, caller need to check whether thread exists or not
   // --------------------------------------------------
 
   /**
-   * Caller must check for the exist of thread before calling this function
-   * otherwise the old thread will be deleted, because each single chat between 2 user is unique
+   * Create a single conversation
+   * -> caller must check for the exist of thread before calling this function
+   * -> otherwise the old thread will be deleted, 
+   * -> because each single chat between 2 user is unique
    * @param {User} user1
    * @param {User} user2
-   * @returns Promise contain true if success
+   * @returns Promise contain true if success, or exception
    */
   static mAddSingleThread(user1, user2) {
     return new Promise((resolve, reject) => {
@@ -161,19 +332,21 @@ class RealtimeDatabase {
         return;
       }
       const members = [];
-      members[user1.uid] = { ...user1, uid: null };
-      members[user2.uid] = { ...user2, uid: null };
+      members[user1.uid] = { ...user1 };
+      members[user2.uid] = { ...user2 };
       THREADS_REF.child(threadID).set({
+        uid: threadID,
         type: THREAD_TYPES.SINGLE,
         messages: [],
         users: members,
-        create_time: firebase.database.ServerValue.TIMESTAMP,
-        update_time: firebase.database.ServerValue.TIMESTAMP,
+        createTime: firebase.database.ServerValue.TIMESTAMP,
+        updateTime: firebase.database.ServerValue.TIMESTAMP,
+        isDeleted: false,
       }, (err) => {
         if (!err) {
           resolve(true);
         } else {
-          Utils.warn('addSingleThread add error: ', err);
+          Utils.warn('mAddSingleThread error: ', err);
           reject(err);
         }
       });
@@ -182,43 +355,45 @@ class RealtimeDatabase {
 
   /**
    * Create a conversation for a group of users
+   * @param {User} users: list of member in the conversation
+   * @param {string} title
+   * @param {string} photoURL
+   * @returns Promise contain true if success, or exception 
    */
-  // static mAddGroupThread(users, title = '', photoURL = null) {
-  //   // generate members with key is user uid
-  //   const members = [];
-  //   for (let i = 0; i < users.length; i += 1) {
-  //     const user = users[i];
-  //     members[user.uid] = user;
-  //   }
-  //   // add thread
-  //   return new Promise((resolve, reject) => {
-  //     const threadRef = THREADS_REF.push({
-  //       title,
-  //       photoURL,
-  //       type: THREAD_TYPES.GROUP,
-  //       messages: [],
-  //       users: members,
-  //       create_time: firebase.database.ServerValue.TIMESTAMP,
-  //       update_time: firebase.database.ServerValue.TIMESTAMP,
-  //     }, (error) => {
-  //       if (!error) {
-  //         resolve(true);
-  //       } else {
-  //         reject(error);
-  //       }
-  //     });
-  //     // add thread id to each user
-  //     if (!threadRef) {
-  //       reject(new Error(ERRORS.UNKNOWN_ERROR));
-  //       return;
-  //     }
-  //     const threadID = threadRef.key;
-  //     for (let i = 0; i < users.length; i += 1) {
-  //       const userID = users[i].uid;
-  //       RealtimeDatabase.addThreadsToUser([threadID], userID);
-  //     }
-  //   });
-  // }
+  static mAddGroupThread(users, metaData) {
+    // generate members with key is user uid
+    const members = [];
+    for (let i = 0; i < users.length; i += 1) {
+      const user = users[i];
+      members[user.uid] = { ...user };
+    }
+    // add thread
+    return new Promise((resolve, reject) => {
+      const threadRef = THREADS_REF.push();
+      if (!threadRef) {
+        resolve(null);
+        return;
+      }
+      const threadID = threadRef.key;
+      threadRef.set({
+        ...metaData,
+        uid: threadID,
+        type: THREAD_TYPES.GROUP,
+        messages: [],
+        users: members,
+        createTime: firebase.database.ServerValue.TIMESTAMP,
+        updateTime: firebase.database.ServerValue.TIMESTAMP,
+        isDeleted: false,
+      }, (err) => {
+        if (!err) {
+          resolve(threadID);
+        } else {
+          Utils.warn('mAddGroupThread error: ', err);
+          reject(err);
+        }
+      });
+    });
+  }
 
   /**
    * Add list of threadID to a user
@@ -228,25 +403,141 @@ class RealtimeDatabase {
    */
   static mAddThreadIDsToUser(userID, threadIDs) {
     const userThreadsRef = USERS_REF.child(userID).child('threads');
-    const results = [];
+    const tasks = [];
     for (let i = 0; i < threadIDs.length; i += 1) {
       const threadID = threadIDs[i];
-      results.push(userThreadsRef.child(threadID).set({ 
-        create_time: firebase.database.ServerValue.TIMESTAMP,
+      tasks.push(userThreadsRef.child(threadID).set({ 
+        createTime: firebase.database.ServerValue.TIMESTAMP,
       }));
     }
-    return Promise.all(results);
+    return Promise.all(tasks);
   }
 
-  // static removeThreadsFromUser(userID, threadIDs) {
-  //   const userThreadsRef = USERS_REF.child(userID).child('threads');
-  //   const results = [];
-  //   for (let i = 0; i < threadIDs.length; i += 1) {
-  //     const threadID = threadIDs[i];
-  //     results.push(userThreadsRef.child(threadID).remove());
-  //   }
-  //   return Promise.all(results);
-  // }
+  /**
+   * Remove list of threadID from a user
+   * @param {string} userID 
+   * @param {array of string} threadIDs 
+   */
+  static mRemoveThreadIDsFromUser(userID, threadIDs) {
+    const userThreadsRef = USERS_REF.child(userID).child('threads');
+    const tasks = [];
+    for (let i = 0; i < threadIDs.length; i += 1) {
+      const threadID = threadIDs[i];
+      tasks.push(userThreadsRef.child(threadID).remove());
+    }
+    return Promise.all(tasks);
+  }
+
+  /**
+   * Add list of Users to a thread
+   * @param {string} threadID 
+   * @param {array of User} users 
+   * @returns Promise contain true/false
+   */
+  static mAddUsersToThread(threadID, users) {
+    const threadUsersRef = THREADS_REF.child(threadID).child('users');
+    const tasks = [];
+    for (let i = 0; i < users.length; i += 1) {
+      const user = users[i];
+      tasks.push(threadUsersRef.child(user.uid).set(user));
+    }
+    return Promise.all(tasks);
+  }
+
+  /**
+   * Remove list of Users from a thread
+   * @param {string} threadID 
+   * @param {array of string} userIDs 
+   */
+  static mRemoveUsersFromThread(threadID, userIDs) {
+    const threadUsersRef = THREADS_REF.child(threadID).child('users');
+    const tasks = [];
+    for (let i = 0; i < userIDs.length; i += 1) {
+      const userID = userIDs[i];
+      tasks.push(threadUsersRef.child(userID).remove());
+    }
+    return Promise.all(tasks);
+  }
+
+  /**
+   * Update thread details props. 
+   * The meta-data object will be spread to flatten props inside
+   * @param {string} threadID 
+   * @param {Object} metaData
+   * @returns true/false
+   */
+  static mUpdateThreadMetaData(threadID, metaData) {
+    return new Promise((resolve, reject) => {
+      THREADS_REF.child(threadID).update({
+        ...metaData,
+      }, (err) => {
+        if (!err) {
+          resolve(true);
+        } else {
+          Utils.warn('mUpdateThreadMetaData error: ', err);
+          reject(err);
+        }
+      });
+    });
+  }
+
+  /**
+   * Add a message into a thread
+   * -> Caller must check whether thread exists or not
+   * @param {Message} message 
+   * @param {string} threadID 
+   * @returns a Promise contains messageID or null
+   */
+  static mAddMessageToThread(threadID, message) {
+    return new Promise((resolve, reject) => {
+      const threadMessagesRef = THREADS_REF.child(threadID).child('messages');
+      const messageRef = threadMessagesRef.push({});
+      if (!messageRef) {
+        resolve(null);
+        return;
+      }
+      const messageID = messageRef.key;
+      messageRef.set({
+        ...message,
+        uid: messageID,
+        createTime: firebase.database.ServerValue.TIMESTAMP,
+        updateTime: firebase.database.ServerValue.TIMESTAMP,
+        isDeleted: false,
+      }, (err) => {
+        if (!err) {
+          resolve(messageID);
+        } else {
+          Utils.warn('mAddMessageToThread error: ', err);
+          reject(err);
+        }
+      });
+    });
+  }
+
+  /**
+   * Remove a message in a thread by change its props isDeleted to true
+   * @param {string} messageID 
+   * @param {string} threadID
+   * @returns a Promise contain true/false
+   */
+  static mRemoveMessageFromThread(messageID, threadID) {
+    return new Promise((resolve, reject) => {
+      const messageRef = THREADS_REF.child(threadID).child('messages').child(messageID);
+      if (!messageRef) {
+        resolve(false);
+        return;
+      }
+      messageRef.remove((err) => {
+        if (!err) {
+          resolve(true);
+        } else {
+          Utils.warn('mRemoveMessageFromThread error: ', err);
+          reject(err);
+        }
+      });
+    });
+  }
+
 }
 
 export default RealtimeDatabase;

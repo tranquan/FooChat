@@ -17,6 +17,7 @@ import './constants/reactotron';
 import store from './redux/store';
 import RootScreen from './screens/Root/RootScreen';
 import RealtimeDatabaseTest from './firebase/RealtimeDatabaseTest';
+import ChatManager from './manager/ChatManager';
 
 /* eslint-disable */
 import Utils, { loadMyUser } from './utils/Utils';
@@ -34,6 +35,8 @@ export default class App extends Component {
     
     this.initApp();
     this.startApp();
+
+    ChatManager.shared();
 
     RealtimeDatabaseTest.test();
   }
