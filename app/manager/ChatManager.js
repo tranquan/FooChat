@@ -13,7 +13,8 @@ function initChatManager() {
 
   function subscribeMessageEvents() {
     
-    Utils.log('subscribeMessageEvents');
+    // Utils.log('subscribeMessageEvents');
+    
     const threadsRef = RealtimeDatabase.getThreadsRef();
 
     // threadsRef.child('single_1_2/messages')

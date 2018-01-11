@@ -68,7 +68,7 @@ class RealtimeDatabaseTest {
 
           // await RealtimeDatabaseTest.testGetMessagesOrderDescending('-L2BRVGsZIQK2eEBkb36');
 
-          await RealtimeDatabaseTest.testGetMessages('-L2BRVGsZIQK2eEBkb36');
+          // await RealtimeDatabaseTest.testGetMessages('-L2BRVGsZIQK2eEBkb36');
 
         } catch (err) {
           Utils.log(`test exception: ${err}`);
@@ -179,7 +179,12 @@ class RealtimeDatabaseTest {
   static testSendMessage(message, threadID) {
     const asyncTask = async () => {
       try {
-        await RealtimeDatabase.sendMessage(message, threadID);
+        const newMessage = await RealtimeDatabase.sendMessage(message, threadID);
+        if (newMessage) {
+          Utils.log('testSendMessage PASSED');
+        } else {
+          Utils.log('testSendMessage FAILED');
+        }
       } catch (err) {
         Utils.log(`testSendMessage error: ${err}`);
       }
@@ -199,6 +204,7 @@ class RealtimeDatabaseTest {
           }
           RealtimeDatabase.sendMessage(message, threadID);
         }
+        Utils.log('testSendManyMessages PASSED');
       } catch (err) {
         Utils.log(`testSendManyMessages error: ${err}`);
       }
