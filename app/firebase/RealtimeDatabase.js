@@ -116,6 +116,46 @@ class RealtimeDatabase {
       }
       return null;
     } catch (err) {
+      Utils.warn(`createSingleThread error: ${err}`, err);
+      return null;
+    }
+  }
+
+  /**
+   * Get messages in a Thread, messages are or
+   * @param {string} threadID 
+   * @param {string} fromMessage: message key / uid
+   * @param {number} maxMessages
+   * @returns nullable array of Message, order by createTime, 1st message is the newest
+   */
+  static async getMessagesInThread(threadID, fromMessage = null, maxMessages = 44) {
+    try {
+      let maxMessagesFetch = maxMessages;
+      let messagesQuery = THREADS_REF.child(threadID).child('messages').orderByKey();
+      // need to fetch one additional message if fetch from a message
+      if (fromMessage) {
+        maxMessagesFetch += 1;
+        messagesQuery = messagesQuery.endAt(fromMessage);
+      }
+      const messages = await messagesQuery.limitToLast(maxMessagesFetch).once('value');
+      if (messages && messages.exists()) {
+        // convert object to array & sort by time desceding
+        // since key is already sort by create time ascending, we only need to reverse
+        const messagesObj = messages.val();
+        const keys = Object.keys(messagesObj).sort().reverse();
+        // remove the first one if fetch from a message
+        if (keys.length > 0 && fromMessage) {
+          keys.shift();
+        }
+        // map to array
+        const messagesArray = keys.map((key) => {
+          return { uid: key, ...messagesObj[key] };
+        });
+        return messagesArray;
+      }
+      return null;
+    } catch (err) {
+      Utils.warn(`getMessagesInThread error: ${err}`, err);
       return null;
     }
   }
@@ -151,7 +191,7 @@ class RealtimeDatabase {
       const newThread = await RealtimeDatabase.getThread(threadID);
       return newThread;
     } catch (err) {
-      Utils.warn(`createSingleThread: ${err}`, err);
+      Utils.warn(`createSingleThread error: ${err}`, err);
       return null;
     }
   }
