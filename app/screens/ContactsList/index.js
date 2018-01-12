@@ -38,14 +38,19 @@ class ContactsListScreen extends Component {
       FBDatabaseManager.createSingleThread();
     }, 500);
   }
+  onContactPress = (user) => {
+    this.props.navigation.navigate('Chat');
+  }
   render() {
     return (
       <View style={styles.container}>
         <ContactRow
           user={CONTACTS[0]}
+          onPress={this.onContactPress}
         />
         <ContactRow
           user={CONTACTS[1]}
+          onPress={this.onContactPress}
         />
       </View>
     );

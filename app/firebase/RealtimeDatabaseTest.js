@@ -77,8 +77,8 @@ class RealtimeDatabaseTest {
           //   title: 'title 1',
           // });
 
-          const threads = await RealtimeDatabase.getThreadsOfUser('1');
-          Utils.log(`getThreadsOfUser ${threads.length}`, threads);
+          // const threads = await RealtimeDatabase.getThreadsOfUser('1', 1515749409427);
+          // Utils.log(`getThreadsOfUser ${threads.length}`, threads);
 
         } catch (err) {
           Utils.log(`test exception: ${err}`);

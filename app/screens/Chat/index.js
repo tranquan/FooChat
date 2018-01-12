@@ -6,6 +6,10 @@ import {
   Image 
 } from 'react-native';
 
+import { GiftedChat } from 'react-native-gifted-chat';
+
+import Styles from '../../constants/styles';
+
 // --------------------------------------------------
 
 /* eslint-disable */
@@ -30,6 +34,15 @@ class ChatScreen extends Component {
     );
   }
 }
+
+ChatScreen.navigationOptions = () => ({
+  title: 'Thông tin cá nhân',
+  headerBackTitle: ' ',
+  headerStyle: Styles.navigator_header_no_border,
+  headerTitleStyle: Styles.navigator_header_title,
+  headerTintColor: '#fff',
+  tabBarVisible: false,
+});
 
 export default ChatScreen;
 
