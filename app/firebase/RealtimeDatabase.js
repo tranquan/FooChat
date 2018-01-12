@@ -14,6 +14,7 @@ const DATABASE = firebase.database();
 const CHAT_REF = DATABASE.ref('chat');
 const USERS_REF = CHAT_REF.child('users');
 const THREADS_REF = CHAT_REF.child('threads');
+const THREADS_MESSAGES_REF = CHAT_REF.child('threads_messages');
 
 const THREAD_TYPES = {
   SINGLE: 'single',
@@ -48,6 +49,10 @@ class RealtimeDatabase {
 
   static getThreadsRef() {
     return THREADS_REF;
+  }
+
+  static getThreadsMessagesRef() {
+    return THREADS_MESSAGES_REF;
   }
 
   /**
@@ -98,7 +103,51 @@ class RealtimeDatabase {
       }
       return null;
     } catch (err) {
+      Utils.warn(`getThread error: ${err}`, err);
       return null;
+    }
+  }
+
+  /**
+   * Get user's threads base on userID
+   * @param {string} userID
+   * @param {timestamp} fromUpdateTime
+   * @returns array of Thread, order by updateTime, 1st one is the newest
+   */
+  static async getThreadsOfUser(userID, fromUpdateTime) {
+    try {
+      let threadsQuery = USERS_REF.child(userID).child('threads').orderByChild('updateTime');
+      if (fromUpdateTime) {
+        threadsQuery = threadsQuery.startAt(fromUpdateTime);
+      }
+      const threads = await threadsQuery.once('value');
+      if (threads && threads.exists()) {
+        // convert object to array
+        const threadsObj = threads.val();
+        const keys = Object.keys(threadsObj);
+        // fetch threads
+        const threadsArray = [];
+        for (let i = 0; i < keys.length; i += 1) {
+          const threadID = keys[i];
+          const thread = await RealtimeDatabase.getThread(threadID); // eslint-disable-line
+          if (thread) {
+            threadsArray.push(thread);
+          }
+        }
+        threadsArray.sort((thread1, thread2) => {
+          if (thread1.updateTime > thread2.updateTime) {
+            return -1;
+          } else if (thread1.updateTime < thread2.updateTime) {
+            return 1;
+          }
+          return 0;
+        });
+        return threadsArray;
+      }
+      return [];
+    } catch (err) {
+      Utils.warn(`getThreadsOfUser error: ${err}`, err);
+      return [];
     }
   }
 
@@ -110,7 +159,9 @@ class RealtimeDatabase {
    */
   static async getMessageInThread(threadID, messageID) {
     try {
-      const message = await THREADS_REF.child(threadID).child(`messages/${messageID}`).once('value');
+      const message = await THREADS_MESSAGES_REF
+        .child(threadID).child(`messages/${messageID}`)
+        .once('value');
       if (message && message.exists()) {
         return message.val();
       }
@@ -126,12 +177,12 @@ class RealtimeDatabase {
    * @param {string} threadID 
    * @param {string} fromMessage: message key / uid
    * @param {number} maxMessages
-   * @returns nullable array of Message, order by createTime, 1st message is the newest
+   * @returns array of Message, order by createTime, 1st message is the newest
    */
   static async getMessagesInThread(threadID, fromMessage = null, maxMessages = 44) {
     try {
       let maxMessagesFetch = maxMessages;
-      let messagesQuery = THREADS_REF.child(threadID).child('messages').orderByKey();
+      let messagesQuery = THREADS_MESSAGES_REF.child(threadID).child('messages').orderByKey();
       // need to fetch one additional message if fetch from a message
       if (fromMessage) {
         maxMessagesFetch += 1;
@@ -153,10 +204,10 @@ class RealtimeDatabase {
         });
         return messagesArray;
       }
-      return null;
+      return [];
     } catch (err) {
       Utils.warn(`getMessagesInThread error: ${err}`, err);
-      return null;
+      return [];
     }
   }
 
@@ -377,7 +428,6 @@ class RealtimeDatabase {
       THREADS_REF.child(threadID).set({
         uid: threadID,
         type: THREAD_TYPES.SINGLE,
-        messages: [],
         users: members,
         createTime: firebase.database.ServerValue.TIMESTAMP,
         updateTime: firebase.database.ServerValue.TIMESTAMP,
@@ -419,7 +469,6 @@ class RealtimeDatabase {
         ...metaData,
         uid: threadID,
         type: THREAD_TYPES.GROUP,
-        messages: [],
         users: members,
         createTime: firebase.database.ServerValue.TIMESTAMP,
         updateTime: firebase.database.ServerValue.TIMESTAMP,
@@ -448,6 +497,7 @@ class RealtimeDatabase {
       const threadID = threadIDs[i];
       tasks.push(userThreadsRef.child(threadID).set({ 
         createTime: firebase.database.ServerValue.TIMESTAMP,
+        updateTime: firebase.database.ServerValue.TIMESTAMP,
       }));
     }
     return Promise.all(tasks);
@@ -501,7 +551,9 @@ class RealtimeDatabase {
 
   /**
    * Update thread details props. 
-   * The meta-data object will be spread to flatten props inside
+   * - The meta-data object will be spread to flatten props inside
+   * - The thread's updateTime on `users/<user_id>/threads/<thread_id>` 
+   *  will also be updated by Cloud Functions
    * @param {string} threadID 
    * @param {Object} metaData
    * @returns true/false
@@ -510,6 +562,7 @@ class RealtimeDatabase {
     return new Promise((resolve, reject) => {
       THREADS_REF.child(threadID).update({
         ...metaData,
+        updateTime: firebase.database.ServerValue.TIMESTAMP,
       }, (err) => {
         if (!err) {
           resolve(true);
@@ -530,7 +583,7 @@ class RealtimeDatabase {
    */
   static mAddMessageToThread(threadID, message) {
     return new Promise((resolve, reject) => {
-      const threadMessagesRef = THREADS_REF.child(threadID).child('messages');
+      const threadMessagesRef = THREADS_MESSAGES_REF.child(threadID).child('messages');
       const messageRef = threadMessagesRef.push({});
       if (!messageRef) {
         resolve(null);
@@ -562,12 +615,12 @@ class RealtimeDatabase {
    */
   static mRemoveMessageFromThread(messageID, threadID) {
     return new Promise((resolve, reject) => {
-      const messageRef = THREADS_REF.child(threadID).child('messages').child(messageID);
-      if (!messageRef) {
+      const threadMessagesRef = THREADS_MESSAGES_REF.child(threadID).child('messages').child(messageID);
+      if (!threadMessagesRef) {
         resolve(false);
         return;
       }
-      messageRef.remove((err) => {
+      threadMessagesRef.remove((err) => {
         if (!err) {
           resolve(true);
         } else {

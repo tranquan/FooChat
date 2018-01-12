@@ -45,7 +45,10 @@ class RealtimeDatabaseTest {
       const asyncTask = async () => {
         try {
 
-          // RealtimeDatabase.createGroupThread([USER_1, USER_2, USER_3], { title: 'hello', photoURL: 'https://google.com' });
+          // const thread = await RealtimeDatabase.createGroupThread(
+          //   [USER_1, USER_2], 
+          //   { title: 'hello', photoURL: 'https://google.com' },
+          // );
           // RealtimeDatabase.addUsersToGroupThread('-L2-krkIhG5Fuwb4YbFA', [USER_1, USER_2]);
           // RealtimeDatabase.addUsersToGroupThread('-L2B2jhNA0ZzMN1CL3rl', [USER_1, USER_2, USER_3]);
           // RealtimeDatabase.removeUsersFromGroupThread('-L2-krkIhG5Fuwb4YbFA', ['1', '2']);
@@ -54,9 +57,9 @@ class RealtimeDatabaseTest {
           // RealtimeDatabase.mAddMessageToThread(MESSAGE_2, 'single_1_2');
           
           // await RealtimeDatabaseTest.testCreateGroupThread();
-          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_1, '-L2BRVGsZIQK2eEBkb36');
-          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_2, '-L2BRVGsZIQK2eEBkb36');
-          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_1, '-L2BRVGsZIQK2eEBkb36');
+          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
+          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_2, '-L2dC-Dpc3BSjG7ieTbS');
+          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
 
           // await RealtimeDatabaseTest.testGetGroupThread('-L2BRVGsZIQK2eEBkb36');
 
@@ -69,6 +72,13 @@ class RealtimeDatabaseTest {
           // await RealtimeDatabaseTest.testGetMessagesOrderDescending('-L2BRVGsZIQK2eEBkb36');
 
           // await RealtimeDatabaseTest.testGetMessages('-L2BRVGsZIQK2eEBkb36');
+
+          // await RealtimeDatabase.updateGroupThreadMetadata('-L2de8KBI3P38dSatXgy', {
+          //   title: 'title 1',
+          // });
+
+          const threads = await RealtimeDatabase.getThreadsOfUser('1');
+          Utils.log(`getThreadsOfUser ${threads.length}`, threads);
 
         } catch (err) {
           Utils.log(`test exception: ${err}`);
@@ -89,9 +99,9 @@ class RealtimeDatabaseTest {
     const asyncTask = async () => {
       try {
         const thread = await RealtimeDatabase.createSingleThread(USER_1, USER_2);
-        Utils.log('create single thread: ', thread);
+        Utils.log('create single thread PASSED: ', thread);
       } catch (err) {
-        Utils.log(`create single thread exception: ${err}`);
+        Utils.log(`create single thread FAILED: ${err}`);
       }
     };
     asyncTask();
@@ -100,12 +110,12 @@ class RealtimeDatabaseTest {
   static testCreateGroupThread() {
     const asyncTask = async () => {
       try {
-        const users = [USER_1, USER_2, USER_3];
+        const users = [USER_1, USER_2];
         const metaData = { title: 'group 1', photoURL: 'http://image.png' };
         const thread = await RealtimeDatabase.createGroupThread(users, metaData);
-        Utils.log('create group thread: ', thread);
+        Utils.log('create group thread PASSED: ', thread);
       } catch (err) {
-        Utils.log(`create group thread exception: ${err}`);
+        Utils.log(`create group thread FAILED: ${err}`);
       }
     };
     asyncTask();
@@ -166,6 +176,17 @@ class RealtimeDatabaseTest {
           }
         }
         Utils.log(`testRemoveUserFromGroupThread PASSED: ${thread.uid}`);
+      } catch (err) {
+        Utils.log(`testAddUserToGroupThread FAILED: ${err}`);
+      }
+    };
+    asyncTask();
+  }
+
+  static testUpdateThreadMetaData(threadID, metaData) {
+    const asyncTask = async () => {
+      try {
+        await RealtimeDatabase.mUpdateThreadMetaData(threadID, metaData);
       } catch (err) {
         Utils.log(`testAddUserToGroupThread FAILED: ${err}`);
       }
