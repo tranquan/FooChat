@@ -60,6 +60,8 @@ export default class App extends Component {
       if (user && user.uid && user.uid.length > 0) {
         store.dispatch(myUser(user));
         store.dispatch(switchToMain());
+        // setup chat
+        ChatManager.shared().setup(user);
       } else {
         store.dispatch(switchToLogin());
       } 

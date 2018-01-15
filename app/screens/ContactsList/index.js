@@ -6,8 +6,11 @@ import {
   Image 
 } from 'react-native';
 
-import FBDatabaseManager from '../../manager/FBDatabaseManager';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+
 import Styles from '../../constants/styles';
+import ChatManager from '../../manager/ChatManager';
 import ContactRow from './ContactRow';
 
 // --------------------------------------------------
@@ -26,6 +29,10 @@ const CONTACTS = [
     uid: '2',
     name: 'User 2',
   },
+  {
+    uid: '3',
+    name: 'User 3',
+  },
 ];
 
 // -------------------------------------------------- 
@@ -33,31 +40,72 @@ const CONTACTS = [
 // --------------------------------------------------
 
 class ContactsListScreen extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      contacts: {},
+    };
+  }
+  componentWillMount() {
+    // filter me out
+    const contacts = CONTACTS.filter((contact) => {
+      return contact.uid !== this.props.myUser.uid;
+    });
+    this.setState({
+      contacts,
+    });
+  }
   componentDidMount() {
-    setTimeout(() => {
-      FBDatabaseManager.createSingleThread();
-    }, 500);
+    // test: auto pick 1st user to chat
+    // setTimeout(() => {
+    //   const target = this.state.contacts[0];
+    //   this.openChatWithUser(target)
+    // }, 1000);
+    // end
   }
   onContactPress = (user) => {
-    this.props.navigation.navigate('Chat');
+    this.openChatWithUser(user);
+  }
+  openChatWithUser(user) {
+    // Utils.log('openChatWithUser: ', userID);
+    const asyncTask = async () => {
+      try {
+        const thread = await ChatManager.shared().createSingleThreadWithTarget(user);
+        if (!thread) { return; }
+        this.props.navigation.navigate('Chat', { thread });
+      } catch (err) {
+        Utils.warn('openChatWithUser: error', err);
+      }
+    };
+    asyncTask();
+  }
+  renderContacts() {
+    const contacts = this.state.contacts;
+    return (
+      <View style={styles.container}>
+        {
+          contacts.map((contact) => {
+            return (
+              <ContactRow
+                key={contact.uid}
+                user={contact}
+                onPress={() => this.onContactPress(contact)}
+              />
+            );
+          })
+        }
+      </View>
+    );
   }
   render() {
     return (
       <View style={styles.container}>
-        <ContactRow
-          user={CONTACTS[0]}
-          onPress={this.onContactPress}
-        />
-        <ContactRow
-          user={CONTACTS[1]}
-          onPress={this.onContactPress}
-        />
+        {this.renderContacts()}
       </View>
     );
   }
 }
-
-export default ContactsListScreen;
 
 // --------------------------------------------------
 
@@ -69,10 +117,27 @@ ContactsListScreen.navigationOptions = () => ({
 });
 
 // --------------------------------------------------
+// react-redux
+// --------------------------------------------------
+
+ContactsListScreen.contextTypes = {
+  store: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  myUser: state.myUser,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ContactsListScreen);
+
+// --------------------------------------------------
 
 const styles = StyleSheet.create({
   container: {
 
   },
-
 });

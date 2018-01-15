@@ -17,6 +17,8 @@ import {
   myUser,
 } from '../../redux/actions';
 
+import ChatManager from '../../manager/ChatManager';
+
 // --------------------------------------------------
 
 /* eslint-disable */
@@ -64,6 +66,8 @@ class LoginScreen extends Component {
       }
     };
     asyncTask();
+    // init chat
+    ChatManager.shared().setup(user);
   }
   // --------------------------------------------------
   render() {
