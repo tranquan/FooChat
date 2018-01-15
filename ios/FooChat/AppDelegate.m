@@ -18,7 +18,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  // config firebase
   [FIRApp configure];
+  // enable offline capabilities
+  [FIRDatabase database].persistenceEnabled = YES;
   
   NSURL *jsCodeLocation;
 
