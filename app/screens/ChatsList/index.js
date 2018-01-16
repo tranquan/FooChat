@@ -66,7 +66,7 @@ class ChatsListScreen extends Component {
     const user2 = allContacts[1];
     const user3 = allContacts[2];
     ChatManager.shared().createGroupThread([user1, user2, user3], {
-      title: 'Test Group Thread of User1, 2, 3',
+      title: '',
       photoURL: '',
     });
     // end
@@ -82,7 +82,7 @@ class ChatsListScreen extends Component {
   handleNewThread(thread) {
     // Utils.log(`ChatsListScreen: handleNewThread: ${thread.uid}`, thread);
     this.setState((prevState) => ({
-      threads: prevState.threads.concat(thread),
+      threads: [thread].concat(prevState.threads),
     }));
   }
   loadPreviousThreads() {

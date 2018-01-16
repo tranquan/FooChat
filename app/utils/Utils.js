@@ -7,27 +7,27 @@ const LOG_TAG = 'Utils.js';
 const CONTACTS = [
   {
     uid: '1',
-    name: 'User 1',
+    name: 'Phan Thanh Vinh',
   },
   {
     uid: '2',
-    name: 'User 2',
+    name: 'Trần Anh Quân',
   },
   {
     uid: '3',
-    name: 'User 3',
+    name: 'Trần Quang Khải',
   },
   {
     uid: '4',
-    name: 'User 4',
+    name: 'Nguyen Hong Dao',
   },
   {
     uid: '5',
-    name: 'User 5',
+    name: 'Lưu Trọng Phúc',
   },
   {
     uid: '6',
-    name: 'User 6',
+    name: 'Trần Hùy Kiến',
   },
 ];
 

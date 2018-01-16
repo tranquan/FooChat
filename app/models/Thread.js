@@ -35,6 +35,30 @@ export default class Thread {
     return null;
   }
 
+  mGetDefaultSingleThreadTitle() {
+    let title = 'Chat';
+    const users = this.arrayOfUsers();
+    if (users.length >= 2) {
+      if (users[0].uid !== Thread.mMyUser.uid) {
+        title = users[0].name;
+      }
+      else if (users[1].uid !== Thread.mMyUser.uid) {
+        title = users[1].name;
+      }
+    }
+    return title;
+  }
+
+  mGetDefaultGroupThreadTitle() {
+    const users = this.arrayOfUsers();
+    const names = users.map((user) => {
+      const words = user.name.trim().split(' ');
+      return words.length > 0 ? words[words.length - 1] : user.name.trim();
+    });
+    const title = names.join(', ');
+    return title;
+  }
+
   // --------------------------------------------------
 
   arrayOfUsers() {
@@ -78,22 +102,23 @@ export default class Thread {
   }
 
   titleString() {
+    // single
     if (this.type === THREAD_TYPES.SINGLE) {
       if (!this.mSingleThreadTitle) {
-        let title = 'N/A';
-        const users = this.arrayOfUsers();
-        if (users.length >= 2) {
-          if (users[0].uid !== Thread.mMyUser.uid) {
-            title = users[0].name;
-          }
-          else if (users[1].uid !== Thread.mMyUser.uid) {
-            title = users[1].name;
-          }
-        }
-        this.mSingleThreadTitle = title;
+        this.mSingleThreadTitle = this.mGetDefaultSingleThreadTitle();
       }
       return this.mSingleThreadTitle;
     }
+    // group
+    if (this.type === THREAD_TYPES.GROUP) {
+      if (!this.title || this.title.length === 0) {
+        if (!this.mGroupThreadTitle) {
+          this.mGroupThreadTitle = this.mGetDefaultGroupThreadTitle();
+        }
+        return this.mGroupThreadTitle;
+      }
+    }
+    // others
     return this.title;
   }
 

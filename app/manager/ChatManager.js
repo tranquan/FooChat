@@ -107,7 +107,8 @@ function initChatManager() {
           threadsMessagesRef.child(`${thread.uid}/messages`)
             .limitToLast(1)
             .on('child_added', (snapshot) => {
-              const message = snapshot.val();
+              const messageJSON = snapshot.val();
+              const message = Object.assign(new Message(), messageJSON);
               const threadID = snapshot.ref.parent.parent.key;
               mNotifyObservers(CHAT_EVENTS.NEW_MESSAGE, message, threadID);
             });
