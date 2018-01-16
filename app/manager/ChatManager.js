@@ -10,6 +10,7 @@ import Message from '../models/Message';
 import Thread from '../models/Thread';
 
 export const CHAT_EVENTS = {
+  MY_USER_CHANGE: 'MY_USER_CHANGE',
   NEW_MESSAGE: 'NEW_MESSAGE',
   NEW_THREAD: 'NEW_THREAD',
   THREAD_CHANGE: 'THREAD_CHANGE',
@@ -24,48 +25,79 @@ function initChatManager() {
   let mMyUser = '';
   let mObservers = {};
 
-  function mSetupEvents(userID) {
-    // 1. listen for users/<my_user_id> -> `value`
-
-    // 2. listen for users/<my_user_id>/threads -> `child_added`
-
-    // 3. listen for threads/<my_thread_id>/messages -> `child_added`
-    // => to get update when a new message arrives
-
-    // 4. listen for threads/<my_thread_id>/users -> `child_added`, `child_removed`
-    // => get update when user join, leaves group
-
-    // 5. for each user in group, listen for /threads/<my_thread_id>/users -> value
-  }
-
-  // function subscribeMyUser() {
-
+  /**
+   * listen for /users/<my_user_id> -> `value`
+   */
+  // function mSubscribeMyUserChange() {
+  //   const usersRef = RealtimeDatabase.getUsersRef();
+  //   usersRef.child(`${mMyUser.uid}`)
+  //     .limitToLast(1)
+  //     .on('value', (snapshot) => {
+  //       const user = snapshot.val();
+  //       mNotifyObservers(CHAT_EVENTS.MY_USER_CHANGE, user);
+  //     });
   // }
 
   /**
-   * listen for users/<my_user_id>/threads -> `child_added`
+   * for each of my thread
+   * listen for /threads/<my_thread_id> -> `value`
    */
-  function mSubscribeNewThread() {
-    const asyncTask = async () => {
-      try {
-        const usersRef = RealtimeDatabase.getUsersRef();
-        usersRef.child(`${mMyUser.uid}/threads`)
-          .limitToLast(1)
-          .on('child_added', (snapshot) => {
-            const thread = snapshot.val();
-            mNotifyObservers(CHAT_EVENTS.NEW_THREAD, thread);
-          });
-      } catch (err) {
-        Utils.warn('mSubscribeNewThread: error', err);
-      }
-    };
-    asyncTask();
+  // function mSubscribeMyThreadsChange() {
+  //   const asyncTask = async () => {
+  //     try {
+  //       const threads = await RealtimeDatabase.getThreadsOfUser(mMyUser.uid);
+  //       for (let i = 0; i < threads.length; i += 1) {
+  //         const thread = threads[i];
+  //         mSubscribeMyThreadsChangeForThread(thread.uid);
+  //       }
+  //     } catch (err) {
+  //       Utils.warn('mSubscribeMyThreadsChange: error', err);
+  //     }
+  //   };
+  //   asyncTask();
+  // }
+
+  function mSubscribeMyThreadsChangeForThread(threadID) {
+    const threadRef = RealtimeDatabase.getThreadsRef();
+    threadRef.child(threadID)
+      .on('value', (snapshot) => {
+        const thread = snapshot.val();
+        mNotifyObservers(CHAT_EVENTS.THREAD_CHANGE, thread);
+      });
   }
 
   /**
-   * listen for threads/<my_thread_id>/messages -> `child_added`
+   * listen for /users/<my_user_id>/threads -> `child_added`
    */
-  function mSubscribeIncomingMessage() {
+  function mSubscribeNewThread() {
+    const usersRef = RealtimeDatabase.getUsersRef();
+    const fbUserID = RealtimeDatabase.firebaseUserID(mMyUser.uid);
+    usersRef.child(`${fbUserID}/threads`)
+      .limitToLast(1)
+      .on('child_added', (snapshot) => {
+        // fetch thread
+        const threadID = snapshot.key;
+        if (threadID) {
+          const asyncTask = async () => {
+            try {
+              const threadJSON = await RealtimeDatabase.getThread(threadID);
+              const thread = Object.assign(new Thread(), threadJSON);
+              mNotifyObservers(CHAT_EVENTS.NEW_THREAD, thread);
+              mSubscribeMyThreadsChangeForThread(thread.uid);
+            } catch (err) {
+              Utils.warn(`mSubscribeNewThread: fetch thread error: ${err}`, err);
+            }
+          };
+          asyncTask();
+        }
+      });
+  }
+
+  /**
+   * for each of my thread
+   * listen for /threads_messages/<my_thread_id>/messages -> `child_added`
+   */
+  function mSubscribeNewMessage() {
     const asyncTask = async () => {
       try {
         const threadsMessagesRef = RealtimeDatabase.getThreadsMessagesRef();
@@ -87,6 +119,38 @@ function initChatManager() {
     asyncTask();
   }
 
+  /**
+   * for each of my thread
+   * listen for /threads/<my_thread_id>/users -> `child_added`, `child_removed`
+   */
+  // function mSubscribeThreadUsersChange() {
+  //   const asyncTask = async () => {
+  //     try {
+  //       const threadsMessagesRef = RealtimeDatabase.getThreadsMessagesRef();
+  //       const threads = await RealtimeDatabase.getThreadsOfUser(mMyUser.uid);
+  //       for (let i = 0; i < threads.length; i += 1) {
+  //         const thread = threads[i];
+  //         threadsMessagesRef.child(`${thread.uid}/users`)
+  //           .on('child_added', (snapshot) => {
+  //             const user = snapshot.val();
+  //           });
+  //         threadsMessagesRef.child(`${thread.uid}/users`)
+  //           .on('child_removed', (snapshot) => {
+  //             const user = snapshot.val();
+  //           });
+  //       }
+  //     } catch (err) {
+  //       Utils.warn('mSubscribeThreadUsersChange: error', err);
+  //     }
+  //   };
+  //   asyncTask();
+  // }
+
+  /**
+   * notify observers
+   * @param {string} name 
+   * @param {array} args 
+   */
   function mNotifyObservers(name, ...args) {
     const observers = mObservers[name];
     if (observers) {
@@ -115,8 +179,11 @@ function initChatManager() {
       Thread.setup(user);
       Message.setup(user);
 
+      // mSubscribeMyUserChange();
+      // mSubscribeMyThreadsChange();
       mSubscribeNewThread();
-      mSubscribeIncomingMessage();
+      mSubscribeNewMessage();
+      // mSubscribeThreadUsersChange();
     },
     addObserver(name, target, callback) {
       // Utils.log(`addObserver: ${name}, callback: ${callback}`);

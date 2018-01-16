@@ -5,6 +5,7 @@ import {
   Text,
   Image,
   FlatList,
+  TouchableOpacity,
 } from 'react-native';
 
 import Styles from '../../constants/styles';
@@ -38,21 +39,38 @@ class ChatsListScreen extends Component {
   componentWillMount() {
     // add observer
     ChatManager.shared().addObserver(CHAT_EVENTS.NEW_THREAD, this, (thread) => {
-      // Utils.log(`ChatScreen: observer: ${message.uid} thread: ${threadID}`, message);
-      if (this.state.thread && this.state.thread.uid === threadID) {
-        this.handleIncomingMessage(message);
-      }
+      // Utils.warn(`ChatsListScreen: observer: ${thread.uid}`, thread);
+      this.handleNewThread(thread);
     });
+    
   }
   componentDidMount() {
+    // navigation bar right button
+    if (this.props.navigation) {
+      this.props.navigation.setParams({ 
+        onHeaderRightButtonPress: this.onHeaderRightButtonPress,
+      });
+    }
     // load initial messages
     this.loadPreviousThreads(INITIAL_THREADS_LOAD);
   }
   componentWillUnmount() {
     // remove observer
-    ChatManager.shared().removeObserver(CHAT_EVENTS.NEW_MESSAGE, this);
+    ChatManager.shared().removeObserver(CHAT_EVENTS.NEW_THREAD, this);
   }
   // --------------------------------------------------
+  onHeaderRightButtonPress = () => {
+    // test create threads
+    const allContacts = Utils.getFakeContacts();
+    const user1 = allContacts[0];
+    const user2 = allContacts[1];
+    const user3 = allContacts[2];
+    ChatManager.shared().createGroupThread([user1, user2, user3], {
+      title: 'Test Group Thread of User1, 2, 3',
+      photoURL: '',
+    });
+    // end
+  };
   onThreadPress = (thread) => {
     this.openChatWithThread(thread);
   }
@@ -61,13 +79,19 @@ class ChatsListScreen extends Component {
     const n = this.state.threads.length;
     return n > 0 ? this.state.threads[n - 1] : null;
   }
+  handleNewThread(thread) {
+    // Utils.log(`ChatsListScreen: handleNewThread: ${thread.uid}`, thread);
+    this.setState((prevState) => ({
+      threads: prevState.threads.concat(thread),
+    }));
+  }
   loadPreviousThreads() {
     const oldestThread = this.getOldestThread();
     const fromUpdateTime = oldestThread ? oldestThread.updateTime : null;
     const asyncTask = async () => {
       try {
         const threads = await ChatManager.shared().getMyThreads(fromUpdateTime);
-        Utils.warn(`ChatsListScreen threads: ${threads.length}`, threads);
+        Utils.log(`ChatsListScreen: loadPreviousThreads: ${threads.length}`, threads);
         this.setState({
           threads,
         });
@@ -78,16 +102,19 @@ class ChatsListScreen extends Component {
     asyncTask();
   }
   openChatWithThread(localThread) {
-    const asyncTask = async () => {
-      try {
-        const thread = await ChatManager.shared().getThread(localThread.uid);
-        if (!thread) { return; }
-        this.props.navigation.navigate('Chat', { thread });
-      } catch (err) {
-        Utils.warn('openChatWithThread: error', err);
-      }
-    };
-    asyncTask();
+    // open thread right away
+    this.props.navigation.navigate('Chat', { thread: localThread });
+    // fetch thread then open
+    // const asyncTask = async () => {
+    //   try {
+    //     const thread = await ChatManager.shared().getThread(localThread.uid);
+    //     if (!thread) { return; }
+    //     this.props.navigation.navigate('Chat', { thread });
+    //   } catch (err) {
+    //     Utils.warn('openChatWithThread: error', err);
+    //   }
+    // };
+    // asyncTask();
   }
   // --------------------------------------------------
   renderItem(item) {
@@ -118,12 +145,31 @@ export default ChatsListScreen;
 
 // --------------------------------------------------
 
-ChatsListScreen.navigationOptions = () => ({
+ChatsListScreen.navigationOptions = ({ navigation }) => ({
   title: 'Chat List',
   headerStyle: Styles.navigator_header_no_border,
   headerTitleStyle: Styles.navigator_header_title,
   headerTintColor: '#fff',
+  headerRight: <HeaderRightButton navigation={navigation} />,
 });
+
+const HeaderRightButton = (props) => {
+  const params = props.navigation.state.params;
+  return (
+    <TouchableOpacity
+      style={styles.headerRightButton}
+      onPress={() => {
+        if (params.onHeaderRightButtonPress) {
+          params.onHeaderRightButtonPress();
+        }
+      }}
+    >
+      <Text style={styles.headerRightButtonTitle}>
+        {'Create'}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 // --------------------------------------------------
 
@@ -134,5 +180,16 @@ const styles = StyleSheet.create({
   threadsContainer: {
 
   },
-
+  headerRightButton: {
+    width: 64,
+    height: 44,
+    paddingLeft: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerRightButtonTitle: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });

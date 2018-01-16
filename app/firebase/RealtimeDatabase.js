@@ -86,7 +86,7 @@ class RealtimeDatabase {
    */
   static mAddGroupThread(users, metaData) {
     // generate members with key is user uid
-    const members = [];
+    const members = {};
     for (let i = 0; i < users.length; i += 1) {
       const user = users[i];
       const fbUserID = RealtimeDatabase.firebaseUserID(user.uid);

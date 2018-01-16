@@ -58,10 +58,11 @@ export default class App extends Component {
     const asyncTask = async () => {
       const user = await loadMyUser();
       if (user && user.uid && user.uid.length > 0) {
-        store.dispatch(myUser(user));
-        store.dispatch(switchToMain());
         // setup chat
         ChatManager.shared().setup(user);
+        // switch to main
+        store.dispatch(myUser(user));
+        store.dispatch(switchToMain());
       } else {
         store.dispatch(switchToLogin());
       } 

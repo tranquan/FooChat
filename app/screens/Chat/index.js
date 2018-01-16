@@ -55,7 +55,7 @@ class ChatScreen extends Component {
     ChatManager.shared().addObserver(CHAT_EVENTS.NEW_MESSAGE, this, (message, threadID) => {
       // Utils.log(`ChatScreen: observer: ${message.uid} thread: ${threadID}`, message);
       if (this.state.thread && this.state.thread.uid === threadID) {
-        this.handleIncomingMessage(message);
+        this.handleNewMessage(message);
       }
     });
   }
@@ -88,8 +88,8 @@ class ChatScreen extends Component {
     const n = this.state.giftedMessages.length;
     return n > 0 ? this.state.giftedMessages[n - 1] : null;
   }
-  handleIncomingMessage(message) {
-    Utils.log(`ChatScreen: handleIncomingMessage: ${message.uid}`, message);
+  handleNewMessage(message) {
+    Utils.log(`ChatScreen: handleNewMessage: ${message.uid}`, message);
     this.appendMessages([message]);
   }
   // --------------------------------------------------

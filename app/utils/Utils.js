@@ -4,6 +4,33 @@ import Configs from '../constants/configs';
 
 const LOG_TAG = 'Utils.js';
 
+const CONTACTS = [
+  {
+    uid: '1',
+    name: 'User 1',
+  },
+  {
+    uid: '2',
+    name: 'User 2',
+  },
+  {
+    uid: '3',
+    name: 'User 3',
+  },
+  {
+    uid: '4',
+    name: 'User 4',
+  },
+  {
+    uid: '5',
+    name: 'User 5',
+  },
+  {
+    uid: '6',
+    name: 'User 6',
+  },
+];
+
 // --------------------------------------------------
 
 export default class Utils {
@@ -32,6 +59,9 @@ export default class Utils {
       value: { message, args },
       important: true,
     });
+  }
+  static getFakeContacts() {
+    return CONTACTS;
   }
 }
 

@@ -20,21 +20,6 @@ import Utils from '../../utils/Utils';
 const LOG_TAG = '7777: ContactsListScreen.js';
 /* eslint-enable */
 
-const CONTACTS = [
-  {
-    uid: '1',
-    name: 'User 1',
-  },
-  {
-    uid: '2',
-    name: 'User 2',
-  },
-  {
-    uid: '3',
-    name: 'User 3',
-  },
-];
-
 // -------------------------------------------------- 
 // ContactsListScreen
 // --------------------------------------------------
@@ -49,7 +34,8 @@ class ContactsListScreen extends Component {
   }
   componentWillMount() {
     // filter me out
-    const contacts = CONTACTS.filter((contact) => {
+    const allContacts = Utils.getFakeContacts();
+    const contacts = allContacts.filter((contact) => {
       return contact.uid !== this.props.myUser.uid;
     });
     this.setState({
