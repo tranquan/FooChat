@@ -61,7 +61,7 @@ class ChatsListScreen extends Component {
   // --------------------------------------------------
   onHeaderRightButtonPress = () => {
     // test create threads
-    const allContacts = Utils.getFakeContacts();
+    const allContacts = Utils.getTestContacts();
     const user1 = allContacts[0];
     const user2 = allContacts[1];
     const user3 = allContacts[2];

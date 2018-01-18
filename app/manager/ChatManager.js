@@ -4,6 +4,8 @@
  * - Thread, Message objects return from this class are already set with Thread, Message prototype
  */
 
+import firebase from 'react-native-firebase';
+
 import FirebaseDatabase from '../firebase/FirebaseDatabase';
 import Utils from '../utils/Utils';
 import Message from '../models/Message';
@@ -22,8 +24,32 @@ function initChatManager() {
   // PRIVATE
   // --------------------------------------------------
 
-  let mMyUser = '';
+  let mMyUser = {};
   let mObservers = {};
+  // const mSubscribePaths = [];
+
+  /**
+   * Setup user presence (aka online/offline)
+   */
+  function mSetupMyUserPresence(status = 'online') {
+    if (!(mMyUser && mMyUser.uid)) {
+      return;
+    }
+    FirebaseDatabase.getConnectedRef().on('value', (snapshot) => {
+      if (!snapshot.exists()) {
+        return;
+      }
+      const fbUserID = FirebaseDatabase.firebaseUserID(mMyUser.uid);
+      const userStatusRef = FirebaseDatabase.getUsersPresenceRef().child(`${fbUserID}`);
+      userStatusRef.onDisconnect().update({
+        status: 'offline',
+        lastTimeOnline: firebase.database.ServerValue.TIMESTAMP,
+      });
+      userStatusRef.update({
+        status,
+      });
+    });
+  }
 
   /**
    * listen for /users/<my_user_id> -> `value`
@@ -147,6 +173,33 @@ function initChatManager() {
   //   asyncTask();
   // }
 
+  // function mUnSubsribePath(path) {
+  //   // turn-off event
+  //   const database = FirebaseDatabase.getDatabase();
+  //   const ref = database.ref(path);
+  //   ref.off();
+  //   // remove path in cached
+  //   let removeIndex = -1;
+  //   for (let i = 0; i < mSubscribePaths.length; i += 1) {
+  //     if (mSubscribePaths[i] === path) {
+  //       removeIndex = i;
+  //       break;
+  //     }
+  //   }
+  //   if (removeIndex >= 0) {
+  //     mSubscribePaths.splice(removeIndex, 1);
+  //   }
+  // }
+
+  // function mUnSubscribeAllPaths() {
+  //   const database = FirebaseDatabase.getDatabase();
+  //   while (mSubscribePaths.length > 0) {
+  //     const path = mSubscribePaths.pop();
+  //     const ref = database.ref(path);
+  //     ref.off();
+  //   }
+  // }
+
   /**
    * notify observers
    * @param {string} name 
@@ -172,6 +225,13 @@ function initChatManager() {
     },
     deinitChat() {
     },
+    goOnline() {
+      FirebaseDatabase.getDatabase().goOnline();
+    },
+    goOffline() {
+      FirebaseDatabase.getDatabase().goOffline();
+      FirebaseDatabase.getConnectedRef().off();
+    },
     setup(user) {
 
       mMyUser = user;
@@ -179,6 +239,9 @@ function initChatManager() {
       
       Thread.setup(user);
       Message.setup(user);
+
+      // setup online status
+      mSetupMyUserPresence();
 
       // mSubscribeMyUserChange();
       // mSubscribeMyThreadsChange();

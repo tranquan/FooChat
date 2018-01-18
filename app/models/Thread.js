@@ -41,10 +41,10 @@ export default class Thread {
     const users = this.arrayOfUsers();
     if (users.length >= 2) {
       if (users[0].uid !== Thread.mMyUser.uid) {
-        title = users[0].name;
+        title = users[0].fullName;
       }
       else if (users[1].uid !== Thread.mMyUser.uid) {
-        title = users[1].name;
+        title = users[1].fullName;
       }
     }
     return title;
@@ -53,8 +53,8 @@ export default class Thread {
   mGetDefaultGroupThreadTitle() {
     const users = this.arrayOfUsers();
     const names = users.map((user) => {
-      const words = user.name.trim().split(' ');
-      return words.length > 0 ? words[words.length - 1] : user.name.trim();
+      const words = user.fullName.trim().split(' ');
+      return words.length > 0 ? words[words.length - 1] : user.fullName.trim();
     });
     const title = names.join(', ');
     return title;

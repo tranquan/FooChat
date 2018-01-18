@@ -79,6 +79,7 @@ class LoginScreen extends Component {
     };
     asyncTask();
     // init chat
+    ChatManager.shared().goOnline();
     ChatManager.shared().setup(user);
   }
   // --------------------------------------------------

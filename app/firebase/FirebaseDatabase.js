@@ -11,8 +11,10 @@ import Thread from '../models/Thread';
 import Utils from '../utils/Utils';
 
 const DATABASE = firebase.database();
+const CONNECTED_REF = DATABASE.ref('.info/connected');
 const CHAT_REF = DATABASE.ref('chat');
 const USERS_REF = CHAT_REF.child('users');
+const USERS_PRESENCE_REF = CHAT_REF.child('users_presence');
 const THREADS_REF = CHAT_REF.child('threads');
 const THREADS_MESSAGES_REF = CHAT_REF.child('threads_messages');
 
@@ -37,6 +39,19 @@ class FirebaseDatabase {
   // -> caller must responsible to do appropriate logic check if needed
   // -> for instance: if add user to thread, caller need to check whether thread exists or not
   // --------------------------------------------------
+
+  static mUpdateUser(userID, metaData) {
+    return new Promise((resolve) => {
+      const fbUserID = FirebaseDatabase.firebaseUserID(userID);
+      const userRef = USERS_REF.child(fbUserID);
+      userRef.update(metaData, (err) => {
+        if (!err) {
+          resolve(true);
+        }
+        resolve(false);
+      });
+    });
+  }
 
   /**
    * Create a single conversation
@@ -273,25 +288,19 @@ class FirebaseDatabase {
   // Methods - Public API
   // --------------------------------------------------
 
-  static getDatabase() {
-    return DATABASE;
-  }
+  static getDatabase() { return DATABASE; }
 
-  static getChatRef() {
-    return CHAT_REF;
-  }
+  static getConnectedRef() { return CONNECTED_REF; }
 
-  static getUsersRef() {
-    return USERS_REF;
-  }
+  static getChatRef() { return CHAT_REF; }
 
-  static getThreadsRef() {
-    return THREADS_REF;
-  }
+  static getUsersRef() { return USERS_REF; }
 
-  static getThreadsMessagesRef() {
-    return THREADS_MESSAGES_REF;
-  }
+  static getUsersPresenceRef() { return USERS_PRESENCE_REF; }
+
+  static getThreadsRef() { return THREADS_REF; }
+
+  static getThreadsMessagesRef() { return THREADS_MESSAGES_REF; }
 
   /**
    * UserID use in firebase to make sure firebase always threat users as object/dict, not array
@@ -316,7 +325,8 @@ class FirebaseDatabase {
   // --------------------------------------------------
 
   static async updateUser(userID, metaData) {
-
+    const result = FirebaseDatabase.mUpdateUser(userID, metaData);
+    return result;
   }
 
   // CHAT

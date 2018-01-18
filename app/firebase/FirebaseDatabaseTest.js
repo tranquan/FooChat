@@ -46,40 +46,8 @@ class FirebaseDatabaseTest {
       const asyncTask = async () => {
         try {
 
-          // const thread = await FirebaseDatabase.createGroupThread(
-          //   [USER_1, USER_2], 
-          //   { title: 'hello', photoURL: 'https://google.com' },
-          // );
-          // FirebaseDatabase.addUsersToGroupThread('-L2-krkIhG5Fuwb4YbFA', [USER_1, USER_2]);
-          // FirebaseDatabase.addUsersToGroupThread('-L2B2jhNA0ZzMN1CL3rl', [USER_1, USER_2, USER_3]);
-          // FirebaseDatabase.removeUsersFromGroupThread('-L2-krkIhG5Fuwb4YbFA', ['1', '2']);
-          // FirebaseDatabaseTest.testReadManyRecords();
-          // FirebaseDatabase.mAddMessageToThread(MESSAGE_1, 'single_1_2');
-          // FirebaseDatabase.mAddMessageToThread(MESSAGE_2, 'single_1_2');
-          
-          // await FirebaseDatabaseTest.testCreateGroupThread();
-          // await FirebaseDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
-          // await FirebaseDatabaseTest.testSendMessage(MESSAGE_2, '-L2dC-Dpc3BSjG7ieTbS');
-          // await FirebaseDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
-
-          // await FirebaseDatabaseTest.testGetGroupThread('-L2BRVGsZIQK2eEBkb36');
-
-          // await FirebaseDatabaseTest.testAddUserToGroupThread('-L2BRVGsZIQK2eEBkb36', [USER_1]);
-
-          // await FirebaseDatabaseTest.testRemoveUserFromGroupThread('-L2BRVGsZIQK2eEBkb36', ['2']);
-
-          // await FirebaseDatabaseTest.testSendManyMessages('-L2BRVGsZIQK2eEBkb36');
-
-          // await FirebaseDatabaseTest.testGetMessagesOrderDescending('-L2BRVGsZIQK2eEBkb36');
-
-          // await FirebaseDatabaseTest.testGetMessages('-L2BRVGsZIQK2eEBkb36');
-
-          // await FirebaseDatabase.updateGroupThreadMetadata('-L2de8KBI3P38dSatXgy', {
-          //   title: 'title 1',
-          // });
-
-          // const threads = await FirebaseDatabase.getThreadsOfUser('1', null);
-          // Utils.log(`getThreadsOfUser: ${threads.length}`, threads);
+          // FirebaseDatabaseTest.testUpdateUser();
+          // FirebaseDatabase.setupPresence('1');
 
         } catch (err) {
           Utils.log(`test exception: ${err}`);
@@ -87,6 +55,23 @@ class FirebaseDatabaseTest {
       };
       asyncTask();
     }, 1000);
+  }
+
+  // CONTACTS TEST
+  // --------------------------------------------------
+
+  static testUpdateUser() {
+    const asyncTask = async () => {
+      try {
+        const contacts = Utils.getTestContacts();
+        const me = contacts[0];
+        const result = await FirebaseDatabase.updateUser(me.uid, me);
+        Utils.log(`testUpdateUser PASSED: ${result}`);
+      } catch (err) {
+        Utils.log(`testUpdateUser FAILED: ${err}`);
+      }
+    };
+    asyncTask();
   }
 
   // THREAD TEST

@@ -10,14 +10,15 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import Styles from '../../constants/styles';
-
 import {
   switchToLogin,
   switchToLoading,
   switchToMain,
   myUser,
 } from '../../redux/actions';
+
+import Styles from '../../constants/styles';
+import ChatManager from '../../manager/ChatManager';
 
 // --------------------------------------------------
 
@@ -34,11 +35,10 @@ class ProfileScreen extends Component {
   onLogoutPress = () => {
     // loading
     this.props.switchToLoading();
+    // de-init chat
+    ChatManager.shared().goOffline();
     // clear user info
-    const user = {
-      uid: '',
-      name: '',
-    };
+    const user = {};
     // set user
     this.props.setMyUser({});
     // clear from storage
