@@ -4,7 +4,7 @@
  * - Thread, Message objects return from this class are already set with Thread, Message prototype
  */
 
-import RealtimeDatabase from '../firebase/RealtimeDatabase';
+import FirebaseDatabase from '../firebase/FirebaseDatabase';
 import Utils from '../utils/Utils';
 import Message from '../models/Message';
 import Thread from '../models/Thread';
@@ -29,7 +29,7 @@ function initChatManager() {
    * listen for /users/<my_user_id> -> `value`
    */
   // function mSubscribeMyUserChange() {
-  //   const usersRef = RealtimeDatabase.getUsersRef();
+  //   const usersRef = FirebaseDatabase.getUsersRef();
   //   usersRef.child(`${mMyUser.uid}`)
   //     .limitToLast(1)
   //     .on('value', (snapshot) => {
@@ -45,7 +45,7 @@ function initChatManager() {
   // function mSubscribeMyThreadsChange() {
   //   const asyncTask = async () => {
   //     try {
-  //       const threads = await RealtimeDatabase.getThreadsOfUser(mMyUser.uid);
+  //       const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
   //       for (let i = 0; i < threads.length; i += 1) {
   //         const thread = threads[i];
   //         mSubscribeMyThreadsChangeForThread(thread.uid);
@@ -58,7 +58,7 @@ function initChatManager() {
   // }
 
   function mSubscribeMyThreadsChangeForThread(threadID) {
-    const threadRef = RealtimeDatabase.getThreadsRef();
+    const threadRef = FirebaseDatabase.getThreadsRef();
     threadRef.child(threadID)
       .on('value', (snapshot) => {
         const thread = snapshot.val();
@@ -70,8 +70,8 @@ function initChatManager() {
    * listen for /users/<my_user_id>/threads -> `child_added`
    */
   function mSubscribeNewThread() {
-    const usersRef = RealtimeDatabase.getUsersRef();
-    const fbUserID = RealtimeDatabase.firebaseUserID(mMyUser.uid);
+    const usersRef = FirebaseDatabase.getUsersRef();
+    const fbUserID = FirebaseDatabase.firebaseUserID(mMyUser.uid);
     usersRef.child(`${fbUserID}/threads`)
       .limitToLast(1)
       .on('child_added', (snapshot) => {
@@ -80,7 +80,7 @@ function initChatManager() {
         if (threadID) {
           const asyncTask = async () => {
             try {
-              const threadJSON = await RealtimeDatabase.getThread(threadID);
+              const threadJSON = await FirebaseDatabase.getThread(threadID);
               const thread = Object.assign(new Thread(), threadJSON);
               mNotifyObservers(CHAT_EVENTS.NEW_THREAD, thread);
               mSubscribeMyThreadsChangeForThread(thread.uid);
@@ -100,8 +100,8 @@ function initChatManager() {
   function mSubscribeNewMessage() {
     const asyncTask = async () => {
       try {
-        const threadsMessagesRef = RealtimeDatabase.getThreadsMessagesRef();
-        const threads = await RealtimeDatabase.getThreadsOfUser(mMyUser.uid);
+        const threadsMessagesRef = FirebaseDatabase.getThreadsMessagesRef();
+        const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
         for (let i = 0; i < threads.length; i += 1) {
           const thread = threads[i];
           threadsMessagesRef.child(`${thread.uid}/messages`)
@@ -127,8 +127,8 @@ function initChatManager() {
   // function mSubscribeThreadUsersChange() {
   //   const asyncTask = async () => {
   //     try {
-  //       const threadsMessagesRef = RealtimeDatabase.getThreadsMessagesRef();
-  //       const threads = await RealtimeDatabase.getThreadsOfUser(mMyUser.uid);
+  //       const threadsMessagesRef = FirebaseDatabase.getThreadsMessagesRef();
+  //       const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
   //       for (let i = 0; i < threads.length; i += 1) {
   //         const thread = threads[i];
   //         threadsMessagesRef.child(`${thread.uid}/users`)
@@ -215,24 +215,24 @@ function initChatManager() {
     },
     // --------------------------------------------------
     async getThread(threadID) {
-      const thread = await RealtimeDatabase.getThread(threadID);
+      const thread = await FirebaseDatabase.getThread(threadID);
       return thread;
     },
     async getMyThreads(fromUpdateTime) {
-      const threads = await RealtimeDatabase.getThreadsOfUser('1', fromUpdateTime);
+      const threads = await FirebaseDatabase.getThreadsOfUser('1', fromUpdateTime);
       return threads.map(thread => {
         return Object.assign(new Thread(), thread);
       });
     },
     async createSingleThreadWithTarget(target) {
-      const thread = await RealtimeDatabase.createSingleThread(mMyUser, target);
+      const thread = await FirebaseDatabase.createSingleThread(mMyUser, target);
       if (!thread) { 
         return null;
       }
       return Object.assign(new Thread(), thread);
     },
     async createGroupThread(users, metaData) {
-      const thread = await RealtimeDatabase.createGroupThread(users, metaData);
+      const thread = await FirebaseDatabase.createGroupThread(users, metaData);
       if (!thread) {
         return null;
       }
@@ -240,7 +240,7 @@ function initChatManager() {
     },
     async sendMessage(message, threadID) {
       const myMessage = { ...message, authorID: mMyUser.uid };
-      const newMessage = await RealtimeDatabase.sendMessage(myMessage, threadID);
+      const newMessage = await FirebaseDatabase.sendMessage(myMessage, threadID);
       if (!newMessage) {
         return null;
       }
@@ -248,7 +248,7 @@ function initChatManager() {
     },
     async getMessagesInThread(threadID, fromMessage = null, maxMessages = 44) {
       const messages = 
-        await RealtimeDatabase.getMessagesInThread(threadID, fromMessage, maxMessages);
+        await FirebaseDatabase.getMessagesInThread(threadID, fromMessage, maxMessages);
       return messages.map(message => {
         return Object.assign(new Message(), message);
       });

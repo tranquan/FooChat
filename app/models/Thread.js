@@ -18,6 +18,7 @@ export default class Thread {
   // props
   uid = '';
   type = '';
+  admiID = '';
   users = [];
   messages = [];
   createTime = 0;

@@ -18,6 +18,7 @@ import {
 } from '../../redux/actions';
 
 import ChatManager from '../../manager/ChatManager';
+import ContactRow from './ContactRow';
 
 // --------------------------------------------------
 
@@ -39,23 +40,34 @@ class LoginScreen extends Component {
       user_name: 'user 1',
     };
   }
+  componentWillMount() {
+    const allContacts = Utils.getTestContacts();
+    this.setState({
+      contacts: allContacts,
+    });
+  }
   onUserIdChangeText = (text) => {
     this.setState({ user_id: text });
   }
   onUserNameChangeText = (text) => {
     this.setState({ user_name: text });
   }
+  onContactPress = (user) => {
+    this.loginWithUser(user);
+  }
   onLoginPress = () => {
-    // loading
-    this.props.switchToLoading();
-    // save user info
     const user = {
       uid: this.state.user_id,
-      name: this.state.user_name,
+      fullName: this.state.user_name,
     };
-    // set user
+    this.loginWithUser(user);
+  }
+  // --------------------------------------------------
+  loginWithUser(user) {
+    // loading
+    this.props.switchToLoading();
+    // save user
     this.props.setMyUser(user);
-    // save to storage
     const asyncTask = async () => {
       const result = await saveMyUser(user);
       // go to main or login
@@ -70,9 +82,31 @@ class LoginScreen extends Component {
     ChatManager.shared().setup(user);
   }
   // --------------------------------------------------
-  render() {
+  renderContacts() {
+    const contacts = this.state.contacts;
     return (
-      <View style={styles.container}>
+      <View style={styles.contactsContainer}>
+        <Text style={styles.contactsTitle}>
+          {'Choose a user to login'}
+        </Text>
+        <View style={{ height: 12 }} />
+        {
+          contacts.map((contact) => {
+            return (
+              <ContactRow
+                key={contact.uid}
+                user={contact}
+                onPress={() => this.onContactPress(contact)}
+              />
+            );
+          })
+        }
+      </View>
+    );
+  }
+  renderInputs() {
+    return (
+      <View style={styles.inputContainer}>
         <TextInput
           style={styles.textInput}
           placeholder={'user_id'}
@@ -91,11 +125,19 @@ class LoginScreen extends Component {
             {'Login'}
           </Text>
         </TouchableOpacity>
-        <View 
+        <View
           style={{
             height: 44,
           }}
         />
+      </View>
+    );
+  }
+  render() {
+    return (
+      <View style={styles.container}>
+        { this.renderContacts() }
+        {/* { this.renderInputs() } */}
       </View>
     );
   }
@@ -130,6 +172,14 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#aaa',
+  },
+  inputContainer: {
+    flex: 0,
+    paddingTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'stretch',
     backgroundColor: '#fff',
   },
   textInput: {
@@ -152,5 +202,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ff0',
     height: 44,
+  },
+  contactsContainer: {
+    flex: 0,
+    paddingTop: 20,
+    paddingBottom: 12,
+    paddingLeft: 12,
+    paddingRight: 12,
+    justifyContent: 'center',
+    alignItems: 'stretch',
+    alignSelf: 'stretch',
+    backgroundColor: '#fff',
+  },
+  contactsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
   },
 });

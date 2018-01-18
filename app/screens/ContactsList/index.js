@@ -34,7 +34,7 @@ class ContactsListScreen extends Component {
   }
   componentWillMount() {
     // filter me out
-    const allContacts = Utils.getFakeContacts();
+    const allContacts = Utils.getTestContacts();
     const contacts = allContacts.filter((contact) => {
       return contact.uid !== this.props.myUser.uid;
     });

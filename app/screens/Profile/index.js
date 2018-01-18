@@ -61,7 +61,7 @@ class ProfileScreen extends Component {
           {`User ID: ${me.uid}`}
         </Text>
         <Text style={styles.userNameText}>
-          {`User Name: ${me.name}`}
+          {`User Name: ${me.fullName}`}
         </Text>
         <TouchableOpacity
           style={styles.logoutButton}

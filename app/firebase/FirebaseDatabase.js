@@ -29,7 +29,7 @@ const ERRORS = {
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
 };
 
-class RealtimeDatabase {
+class FirebaseDatabase {
 
   // --------------------------------------------------
   // Helpers - Private API
@@ -49,14 +49,14 @@ class RealtimeDatabase {
    */
   static mAddSingleThread(user1, user2) {
     return new Promise((resolve, reject) => {
-      const threadID = RealtimeDatabase.generateSingleThreadID(user1.uid, user2.uid);
+      const threadID = FirebaseDatabase.generateSingleThreadID(user1.uid, user2.uid);
       if (!threadID) {
         reject(new Error(ERRORS.SINGLE_THREAD_INVALID_ID));
         return;
       }
       const members = {};
-      const fbUserID1 = RealtimeDatabase.firebaseUserID(user1.uid);
-      const fbUserID2 = RealtimeDatabase.firebaseUserID(user2.uid);
+      const fbUserID1 = FirebaseDatabase.firebaseUserID(user1.uid);
+      const fbUserID2 = FirebaseDatabase.firebaseUserID(user2.uid);
       members[fbUserID1] = { ...user1 };
       members[fbUserID2] = { ...user2 };
       THREADS_REF.child(threadID).set({
@@ -89,7 +89,7 @@ class RealtimeDatabase {
     const members = {};
     for (let i = 0; i < users.length; i += 1) {
       const user = users[i];
-      const fbUserID = RealtimeDatabase.firebaseUserID(user.uid);
+      const fbUserID = FirebaseDatabase.firebaseUserID(user.uid);
       members[fbUserID] = { ...user };
     }
     // add thread
@@ -126,7 +126,7 @@ class RealtimeDatabase {
    * @returns Promise when all of threads is added to user
    */
   static mAddThreadIDsToUser(userID, threadIDs) {
-    const fbUserID = RealtimeDatabase.firebaseUserID(userID);
+    const fbUserID = FirebaseDatabase.firebaseUserID(userID);
     const userThreadsRef = USERS_REF.child(fbUserID).child('threads');
     const tasks = [];
     for (let i = 0; i < threadIDs.length; i += 1) {
@@ -145,7 +145,7 @@ class RealtimeDatabase {
    * @param {array of string} threadIDs 
    */
   static mRemoveThreadIDsFromUser(userID, threadIDs) {
-    const fbUserID = RealtimeDatabase.firebaseUserID(userID);
+    const fbUserID = FirebaseDatabase.firebaseUserID(userID);
     const userThreadsRef = USERS_REF.child(fbUserID).child('threads');
     const tasks = [];
     for (let i = 0; i < threadIDs.length; i += 1) {
@@ -181,7 +181,7 @@ class RealtimeDatabase {
     const tasks = [];
     for (let i = 0; i < userIDs.length; i += 1) {
       const userID = userIDs[i];
-      const fbUserID = RealtimeDatabase.firebaseUserID(userID);
+      const fbUserID = FirebaseDatabase.firebaseUserID(userID);
       tasks.push(threadUsersRef.child(fbUserID).remove());
     }
     return Promise.all(tasks);
@@ -312,6 +312,16 @@ class RealtimeDatabase {
     return fbUserID;
   }
 
+  // CONTACTS
+  // --------------------------------------------------
+
+  static async updateUser(userID, metaData) {
+
+  }
+
+  // CHAT
+  // --------------------------------------------------
+
   /**
    * For single thread, threadID has format: `single_user1UID_user2UID`
    * where user1UID < user2UID
@@ -373,7 +383,7 @@ class RealtimeDatabase {
    */
   static async getThreadsOfUser(userID, fromUpdateTime) {
     try {
-      const fbUserID = RealtimeDatabase.firebaseUserID(userID);
+      const fbUserID = FirebaseDatabase.firebaseUserID(userID);
       let threadsQuery = USERS_REF.child(fbUserID).child('threads').orderByChild('updateTime');
       if (fromUpdateTime) {
         threadsQuery = threadsQuery.startAt(fromUpdateTime);
@@ -387,7 +397,7 @@ class RealtimeDatabase {
         const threadsArray = [];
         for (let i = 0; i < keys.length; i += 1) {
           const threadID = keys[i];
-          const thread = await RealtimeDatabase.getThread(threadID); // eslint-disable-line
+          const thread = await FirebaseDatabase.getThread(threadID); // eslint-disable-line
           if (thread) {
             threadsArray.push(thread);
           }
@@ -479,25 +489,25 @@ class RealtimeDatabase {
   static async createSingleThread(user1, user2) {
     try {
       // get threadID
-      const threadID = RealtimeDatabase.generateSingleThreadID(user1.uid, user2.uid);
+      const threadID = FirebaseDatabase.generateSingleThreadID(user1.uid, user2.uid);
       if (!threadID) {
         return null;
       }
       // return thread if it's already exists
-      const thread = await RealtimeDatabase.getThread(threadID);
+      const thread = await FirebaseDatabase.getThread(threadID);
       if (thread) {
         return thread;
       }
       // create new thread
-      const result = await RealtimeDatabase.mAddSingleThread(user1, user2);
+      const result = await FirebaseDatabase.mAddSingleThread(user1, user2);
       if (!result) {
         return null;
       }
       // add thread to user1 & user2
-      await RealtimeDatabase.mAddThreadIDsToUser(user1.uid, [threadID]);
-      await RealtimeDatabase.mAddThreadIDsToUser(user2.uid, [threadID]);
+      await FirebaseDatabase.mAddThreadIDsToUser(user1.uid, [threadID]);
+      await FirebaseDatabase.mAddThreadIDsToUser(user2.uid, [threadID]);
       // return new thread
-      const newThread = await RealtimeDatabase.getThread(threadID);
+      const newThread = await FirebaseDatabase.getThread(threadID);
       return newThread;
     } catch (err) {
       Utils.warn(`createSingleThread error: ${err}`, err);
@@ -515,16 +525,16 @@ class RealtimeDatabase {
   static async createGroupThread(users, metaData) {
     try {
       // create new thread
-      const threadID = await RealtimeDatabase.mAddGroupThread(users, metaData);
+      const threadID = await FirebaseDatabase.mAddGroupThread(users, metaData);
       // add thread to users
       const tasks = [];
       for (let i = 0; i < users.length; i += 1) {
         const user = users[i];
-        tasks.push(RealtimeDatabase.mAddThreadIDsToUser(user.uid, [threadID]));
+        tasks.push(FirebaseDatabase.mAddThreadIDsToUser(user.uid, [threadID]));
       }
       await Promise.all(tasks);
       // return new thread
-      const newThread = await RealtimeDatabase.getThread(threadID);
+      const newThread = await FirebaseDatabase.getThread(threadID);
       return newThread;
     } catch (err) {
       Utils.warn(`createGroupThread: ${err}`, err);
@@ -541,7 +551,7 @@ class RealtimeDatabase {
   static async addUsersToGroupThread(threadID, users) {
     try {
       // is thread exist
-      const thread = await RealtimeDatabase.getThread(threadID);
+      const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {
         Utils.warn(`addUsersToGroupThread: thread is not found: ${threadID}`);
         return false;
@@ -552,12 +562,12 @@ class RealtimeDatabase {
         return false;
       }
       // add users to thread
-      await RealtimeDatabase.mAddUsersToThread(threadID, users);
+      await FirebaseDatabase.mAddUsersToThread(threadID, users);
       // add threadID to each user
       const tasks = [];
       for (let i = 0; i < users.length; i += 1) {
         const user = users[i];
-        tasks.push(RealtimeDatabase.mAddThreadIDsToUser(user.uid, [threadID]));
+        tasks.push(FirebaseDatabase.mAddThreadIDsToUser(user.uid, [threadID]));
       }
       await Promise.all(tasks);
       return true;
@@ -575,7 +585,7 @@ class RealtimeDatabase {
   static async removeUsersFromGroupThread(threadID, userIDs) {
     try {
       // is thread exist
-      const thread = await RealtimeDatabase.getThread(threadID);
+      const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {
         Utils.warn(`removeUsersFromGroupThread: thread is not found: ${threadID}`);
         return false;
@@ -586,12 +596,12 @@ class RealtimeDatabase {
         return false;
       }
       // remove users from thread
-      await RealtimeDatabase.mRemoveUsersFromThread(threadID, userIDs);
+      await FirebaseDatabase.mRemoveUsersFromThread(threadID, userIDs);
       // remove threadID from user
       const tasks = [];
       for (let i = 0; i < userIDs.length; i += 1) {
         const userID = userIDs[i];
-        tasks.push(RealtimeDatabase.mRemoveThreadIDsFromUser(userID, [threadID]));
+        tasks.push(FirebaseDatabase.mRemoveThreadIDsFromUser(userID, [threadID]));
       }
       await Promise.all(tasks);
       return true;
@@ -610,7 +620,7 @@ class RealtimeDatabase {
   static async updateGroupThreadMetadata(threadID, metaData) {
     try {
       // is thread exist
-      const thread = await RealtimeDatabase.getThread(threadID);
+      const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {
         Utils.warn(`updateGroupThreadMetadata: thread is not found: ${threadID}`);
         return false;
@@ -621,7 +631,7 @@ class RealtimeDatabase {
         return false;
       }
       // update
-      await RealtimeDatabase.mUpdateThreadMetaData(threadID, metaData);
+      await FirebaseDatabase.mUpdateThreadMetaData(threadID, metaData);
       return true;
     } catch (err) {
       Utils.warn(`updateGroupThreadMetadata: ${err}`, err);
@@ -639,19 +649,19 @@ class RealtimeDatabase {
   static async sendMessage(message, threadID) {
     try {
       // is thread exist
-      const thread = await RealtimeDatabase.getThread(threadID);
+      const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {
         Utils.log(`sendMessage: error: not found thread: ${threadID}`);
         return null;
       }
       // add message to thread
-      const messageID = await RealtimeDatabase.mAddMessageToThread(threadID, message);
+      const messageID = await FirebaseDatabase.mAddMessageToThread(threadID, message);
       if (!messageID) {
         Utils.log(`sendMessage: error: add message to thread error: ${threadID}`, message);
         return null;
       }
       // fetch message & return
-      const newMessage = await RealtimeDatabase.getMessageInThread(threadID, messageID);
+      const newMessage = await FirebaseDatabase.getMessageInThread(threadID, messageID);
       return newMessage;
     } catch (err) {
       Utils.warn(`sendMessage error: ${err}`, err);
@@ -660,4 +670,4 @@ class RealtimeDatabase {
   }
 }
 
-export default RealtimeDatabase;
+export default FirebaseDatabase;

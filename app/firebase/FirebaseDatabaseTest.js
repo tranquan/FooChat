@@ -1,10 +1,11 @@
-import RealtimeDatabase from './RealtimeDatabase';
+import FirebaseDatabase from './FirebaseDatabase';
 import User from '../models/User';
 import Thread from '../models/Thread';
 import Utils from '../utils/Utils';
 
 // TEST DATA
 // --------------------------------------------------
+
 const USER_1 = {
   uid: '1',
   name: 'User 1',
@@ -38,46 +39,46 @@ const MESSAGE_2 = {
 
 // --------------------------------------------------
 
-class RealtimeDatabaseTest {
+class FirebaseDatabaseTest {
 
   static test() {
     setTimeout(() => {
       const asyncTask = async () => {
         try {
 
-          // const thread = await RealtimeDatabase.createGroupThread(
+          // const thread = await FirebaseDatabase.createGroupThread(
           //   [USER_1, USER_2], 
           //   { title: 'hello', photoURL: 'https://google.com' },
           // );
-          // RealtimeDatabase.addUsersToGroupThread('-L2-krkIhG5Fuwb4YbFA', [USER_1, USER_2]);
-          // RealtimeDatabase.addUsersToGroupThread('-L2B2jhNA0ZzMN1CL3rl', [USER_1, USER_2, USER_3]);
-          // RealtimeDatabase.removeUsersFromGroupThread('-L2-krkIhG5Fuwb4YbFA', ['1', '2']);
-          // RealtimeDatabaseTest.testReadManyRecords();
-          // RealtimeDatabase.mAddMessageToThread(MESSAGE_1, 'single_1_2');
-          // RealtimeDatabase.mAddMessageToThread(MESSAGE_2, 'single_1_2');
+          // FirebaseDatabase.addUsersToGroupThread('-L2-krkIhG5Fuwb4YbFA', [USER_1, USER_2]);
+          // FirebaseDatabase.addUsersToGroupThread('-L2B2jhNA0ZzMN1CL3rl', [USER_1, USER_2, USER_3]);
+          // FirebaseDatabase.removeUsersFromGroupThread('-L2-krkIhG5Fuwb4YbFA', ['1', '2']);
+          // FirebaseDatabaseTest.testReadManyRecords();
+          // FirebaseDatabase.mAddMessageToThread(MESSAGE_1, 'single_1_2');
+          // FirebaseDatabase.mAddMessageToThread(MESSAGE_2, 'single_1_2');
           
-          // await RealtimeDatabaseTest.testCreateGroupThread();
-          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
-          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_2, '-L2dC-Dpc3BSjG7ieTbS');
-          // await RealtimeDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
+          // await FirebaseDatabaseTest.testCreateGroupThread();
+          // await FirebaseDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
+          // await FirebaseDatabaseTest.testSendMessage(MESSAGE_2, '-L2dC-Dpc3BSjG7ieTbS');
+          // await FirebaseDatabaseTest.testSendMessage(MESSAGE_1, '-L2dC-Dpc3BSjG7ieTbS');
 
-          // await RealtimeDatabaseTest.testGetGroupThread('-L2BRVGsZIQK2eEBkb36');
+          // await FirebaseDatabaseTest.testGetGroupThread('-L2BRVGsZIQK2eEBkb36');
 
-          // await RealtimeDatabaseTest.testAddUserToGroupThread('-L2BRVGsZIQK2eEBkb36', [USER_1]);
+          // await FirebaseDatabaseTest.testAddUserToGroupThread('-L2BRVGsZIQK2eEBkb36', [USER_1]);
 
-          // await RealtimeDatabaseTest.testRemoveUserFromGroupThread('-L2BRVGsZIQK2eEBkb36', ['2']);
+          // await FirebaseDatabaseTest.testRemoveUserFromGroupThread('-L2BRVGsZIQK2eEBkb36', ['2']);
 
-          // await RealtimeDatabaseTest.testSendManyMessages('-L2BRVGsZIQK2eEBkb36');
+          // await FirebaseDatabaseTest.testSendManyMessages('-L2BRVGsZIQK2eEBkb36');
 
-          // await RealtimeDatabaseTest.testGetMessagesOrderDescending('-L2BRVGsZIQK2eEBkb36');
+          // await FirebaseDatabaseTest.testGetMessagesOrderDescending('-L2BRVGsZIQK2eEBkb36');
 
-          // await RealtimeDatabaseTest.testGetMessages('-L2BRVGsZIQK2eEBkb36');
+          // await FirebaseDatabaseTest.testGetMessages('-L2BRVGsZIQK2eEBkb36');
 
-          // await RealtimeDatabase.updateGroupThreadMetadata('-L2de8KBI3P38dSatXgy', {
+          // await FirebaseDatabase.updateGroupThreadMetadata('-L2de8KBI3P38dSatXgy', {
           //   title: 'title 1',
           // });
 
-          // const threads = await RealtimeDatabase.getThreadsOfUser('1', null);
+          // const threads = await FirebaseDatabase.getThreadsOfUser('1', null);
           // Utils.log(`getThreadsOfUser: ${threads.length}`, threads);
 
         } catch (err) {
@@ -98,7 +99,7 @@ class RealtimeDatabaseTest {
   static testCreateSingleThread() {
     const asyncTask = async () => {
       try {
-        const thread = await RealtimeDatabase.createSingleThread(USER_1, USER_2);
+        const thread = await FirebaseDatabase.createSingleThread(USER_1, USER_2);
         Utils.log('create single thread PASSED: ', thread);
       } catch (err) {
         Utils.log(`create single thread FAILED: ${err}`);
@@ -112,7 +113,7 @@ class RealtimeDatabaseTest {
       try {
         const users = [USER_1, USER_2];
         const metaData = { title: 'group 1', photoURL: 'http://image.png' };
-        const thread = await RealtimeDatabase.createGroupThread(users, metaData);
+        const thread = await FirebaseDatabase.createGroupThread(users, metaData);
         Utils.log('create group thread PASSED: ', thread);
       } catch (err) {
         Utils.log(`create group thread FAILED: ${err}`);
@@ -124,7 +125,7 @@ class RealtimeDatabaseTest {
   static testGetGroupThread(threadID) {
     const asyncTask = async () => {
       try {
-        const thread = await RealtimeDatabase.getThread(threadID);
+        const thread = await FirebaseDatabase.getThread(threadID);
         const users = thread.users;
         const messages = thread.messages;
         Utils.log(`testGetGroupThread users: ${Array.isArray(users)}`);
@@ -140,9 +141,9 @@ class RealtimeDatabaseTest {
     const asyncTask = async () => {
       try {
         // add user
-        await RealtimeDatabase.addUsersToGroupThread(threadID, users);
+        await FirebaseDatabase.addUsersToGroupThread(threadID, users);
         // check if users added
-        const thread = await RealtimeDatabase.getThread(threadID);
+        const thread = await FirebaseDatabase.getThread(threadID);
         const threadUsers = thread.users;
         for (let i = 0; i < users.length; i += 1) {
           const item = users[i];
@@ -164,9 +165,9 @@ class RealtimeDatabaseTest {
     const asyncTask = async () => {
       try {
         // add user
-        await RealtimeDatabase.removeUsersFromGroupThread(threadID, userIDs);
+        await FirebaseDatabase.removeUsersFromGroupThread(threadID, userIDs);
         // check if users removed
-        const thread = await RealtimeDatabase.getThread(threadID);
+        const thread = await FirebaseDatabase.getThread(threadID);
         const threadUsers = thread.users;
         for (let i = 0; i < userIDs.length; i += 1) {
           const userID = userIDs[i];
@@ -186,7 +187,7 @@ class RealtimeDatabaseTest {
   static testUpdateThreadMetaData(threadID, metaData) {
     const asyncTask = async () => {
       try {
-        await RealtimeDatabase.mUpdateThreadMetaData(threadID, metaData);
+        await FirebaseDatabase.mUpdateThreadMetaData(threadID, metaData);
       } catch (err) {
         Utils.log(`testAddUserToGroupThread FAILED: ${err}`);
       }
@@ -200,7 +201,7 @@ class RealtimeDatabaseTest {
   static testSendMessage(message, threadID) {
     const asyncTask = async () => {
       try {
-        const newMessage = await RealtimeDatabase.sendMessage(message, threadID);
+        const newMessage = await FirebaseDatabase.sendMessage(message, threadID);
         if (newMessage) {
           Utils.log('testSendMessage PASSED');
         } else {
@@ -223,7 +224,7 @@ class RealtimeDatabaseTest {
           } else {
             message = { ...MESSAGE_2, text: `${MESSAGE_2.text} [${i}]` };
           }
-          RealtimeDatabase.sendMessage(message, threadID);
+          FirebaseDatabase.sendMessage(message, threadID);
         }
         Utils.log('testSendManyMessages PASSED');
       } catch (err) {
@@ -236,7 +237,7 @@ class RealtimeDatabaseTest {
   static testGetMessagesOrderDescending(threadID) {
     const asyncTask = async () => {
       try {
-        const messages = await RealtimeDatabase.getMessagesInThread(threadID);
+        const messages = await FirebaseDatabase.getMessagesInThread(threadID);
         for (let i = 0; i < messages.length - 1; i += 1) {
           const item1 = messages[i];
           const item2 = messages[i + 1];
@@ -260,7 +261,7 @@ class RealtimeDatabaseTest {
         let fromMessage = null;
         for (let i = 0; i < 10; i += 1) {
           const messages = 
-            await RealtimeDatabase.getMessagesInThread(threadID, fromMessage, 100); // eslint-disable-line
+            await FirebaseDatabase.getMessagesInThread(threadID, fromMessage, 100); // eslint-disable-line
           if (messages && messages.length > 0) {
             const firstMessage = messages[0];
             const lastMessage = messages[messages.length - 1];
@@ -284,10 +285,10 @@ class RealtimeDatabaseTest {
     const asyncTask = async () => {
       try {
         // add
-        await RealtimeDatabase.mAddThreadIDsToUser('1', ['single_1_2']);
-        await RealtimeDatabase.mAddThreadIDsToUser('2', ['single_1_2']);
+        await FirebaseDatabase.mAddThreadIDsToUser('1', ['single_1_2']);
+        await FirebaseDatabase.mAddThreadIDsToUser('2', ['single_1_2']);
         // check
-        const ref = RealtimeDatabase.getUsersRef();
+        const ref = FirebaseDatabase.getUsersRef();
         const isUser1Has = await ref.child('1/threads/single_1_2').once('value');
         const isUser2Has = await ref.child('2/threads/single_1_3').once('value');
         if (isUser1Has.exists() && isUser2Has.exists()) {
@@ -309,7 +310,7 @@ class RealtimeDatabaseTest {
   static testReadManyRecords() {
     
     // add records
-    // const itemsRef = RealtimeDatabase.getDatabase().ref('items');
+    // const itemsRef = FirebaseDatabase.getDatabase().ref('items');
     // const item = {
     //   name: 'Hello buddy',
     //   title: 'Welcome to chat',
@@ -321,16 +322,16 @@ class RealtimeDatabaseTest {
     // }
 
     // read
-    // const readItemsRef = RealtimeDatabase.getDatabase().ref('items');
+    // const readItemsRef = FirebaseDatabase.getDatabase().ref('items');
     // readItemsRef.once('value', (snapshot) => {
     //   const allKeys = Object.keys(snapshot.val());
     //   Utils.log(`read ${allKeys.length}`, allKeys.length);
     // });
 
     // remove
-    // const itemsRef = RealtimeDatabase.getDatabase().ref('items');
+    // const itemsRef = FirebaseDatabase.getDatabase().ref('items');
     // itemsRef.remove();
   }
 }
 
-export default RealtimeDatabaseTest;
+export default FirebaseDatabaseTest;

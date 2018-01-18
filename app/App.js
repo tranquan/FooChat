@@ -16,7 +16,7 @@ import './constants/reactotron';
 
 import store from './redux/store';
 import RootScreen from './screens/Root/RootScreen';
-import RealtimeDatabaseTest from './firebase/RealtimeDatabaseTest';
+import FirebaseDatabaseTest from './firebase/FirebaseDatabaseTest';
 import ChatManager from './manager/ChatManager';
 
 /* eslint-disable */
@@ -38,7 +38,7 @@ export default class App extends Component {
 
     ChatManager.shared();
 
-    RealtimeDatabaseTest.test();
+    FirebaseDatabaseTest.test();
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this.handleAppStateChange);

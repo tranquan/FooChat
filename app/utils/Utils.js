@@ -7,27 +7,51 @@ const LOG_TAG = 'Utils.js';
 const CONTACTS = [
   {
     uid: '1',
-    name: 'Phan Thanh Vinh',
+    email: 'vinh.phan@digitel.com.vn',
+    fullName: 'Phan Thanh Vinh',
+    phoneNumber: '0909368338',
+    avatarImage: 'https://pbs.twimg.com/profile_images/831993825635745796/HnVmB0-k.jpg',
+    wallImage: '',
   },
   {
     uid: '2',
-    name: 'Trần Anh Quân',
+    email: 'long.phan@digitel.com.vn',
+    fullName: 'Phan Thanh Long',
+    phoneNumber: '0933397604',
+    avatarImage: 'https://pickaface.net/gallery/avatar/acrovin559439058dc7f.png',
+    wallImage: '',
   },
   {
     uid: '3',
-    name: 'Trần Quang Khải',
+    email: 'minh.tran@digitel.com.vn',
+    fullName: 'Trần Đức Minh',
+    phoneNumber: '0976637270',
+    avatarImage: 'https://www.seoclerk.com/pics/522569-1eWJyL1490726864.png',
+    wallImage: '',
   },
   {
     uid: '4',
-    name: 'Nguyen Hong Dao',
+    email: 'tranquan221b@gmail.com',
+    fullName: 'Trần Anh Quân',
+    phoneNumber: '0982746822',
+    avatarImage: 'https://pickaface.net/gallery/avatar/unr_sample_161118_2054_ynlrg.png',
+    wallImage: '',
   },
   {
     uid: '5',
-    name: 'Lưu Trọng Phúc',
+    email: 'kieu.anh@gmail.com',
+    fullName: 'Nguyễn Kiều Anh',
+    phoneNumber: '0838666408',
+    avatarImage: 'https://pickaface.net/gallery/avatar/unr_sample_170130_2257_9qgawp.png',
+    wallImage: '',
   },
   {
     uid: '6',
-    name: 'Trần Hùy Kiến',
+    email: 'amgus7788@gmail.com',
+    fullName: 'Võ Hoàng Nam',
+    phoneNumber: '0933397604',
+    avatarImage: 'https://caricatureking.com/images/georgemouseovers/man2.jpg',
+    wallImage: '',
   },
 ];
 
@@ -60,7 +84,7 @@ export default class Utils {
       important: true,
     });
   }
-  static getFakeContacts() {
+  static getTestContacts() {
     return CONTACTS;
   }
 }

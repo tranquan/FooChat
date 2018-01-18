@@ -29,6 +29,7 @@ class ContactRow extends PureComponent {
         <Text style={styles.title}>
           {`user: ${user.fullName}`}
         </Text>
+        <View style={styles.separator} />
         <TouchableOpacity
           style={styles.button}
           onPress={this.onPress}
@@ -57,8 +58,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
+    flex: 1,
     fontSize: 15,
     fontWeight: '300',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#a0a0a0',
   },
   button: {
     position: 'absolute',
