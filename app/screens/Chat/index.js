@@ -25,7 +25,7 @@ const LOG_TAG = '7777: ChatScreen.js';
 /* eslint-enable */
 
 const INITIAL_MESSAGES_LOAD = 256;
-const PREVIOUS_MESSAGES_LOAD = 44;
+const PREVIOUS_MESSAGES_LOAD = 128;
 
 // -------------------------------------------------- 
 // ChatScreen
@@ -43,12 +43,16 @@ class ChatScreen extends Component {
     };
 
     this.isMessagesAdded = {};
+    this.members = {};
   }
   componentWillMount() {
     // cache current thread
     const { thread } = this.props.navigation.state.params;
+    // update state
     this.setState({
       thread,
+    }, () => {
+      this.initMembers();
     });
     // add observer
     if (!thread) { return; }
@@ -87,6 +91,15 @@ class ChatScreen extends Component {
   getOldestMessage() {
     const n = this.state.giftedMessages.length;
     return n > 0 ? this.state.giftedMessages[n - 1] : null;
+  }
+  initMembers() {
+    const members = {};
+    const users = this.state.thread.arrayOfUsers();
+    for (let i = 0; i < users.length; i += 1) {
+      const user = users[i];
+      members[user.uid] = user;
+    }
+    this.members = members;
   }
   handleNewMessage(message) {
     Utils.log(`ChatScreen: handleNewMessage: ${message.uid}`, message);
@@ -130,6 +143,9 @@ class ChatScreen extends Component {
   // HELPERS
   // --------------------------------------------------
   convertMessageToGiftedMessage(message) {
+    const author = this.members[message.authorID];
+    const authorName = (author && author.fullName) ? author.fullName : 'N/A';
+    const authorAvatar = (author && author.avatarImage) ? author.avatarImage : '';
     return {
       _id: message.uid,
       uid: message.uid,
@@ -137,6 +153,8 @@ class ChatScreen extends Component {
       createdAt: moment(message.createTime, 'X').toDate(),
       user: {
         _id: message.authorID,
+        name: authorName,
+        avatar: authorAvatar,
       },
     };
   }
@@ -235,11 +253,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-// disable -> no need to add since observer will auto add
-// const newMessage = await ChatManager.shared().sendMessage(message, this.state.thread.uid);
-// const giftedMessage = this.convertMessageToGiftedMessage(newMessage);
-// this.setState(previousState => ({
-//   messages: GiftedChat.append(previousState.messages, [giftedMessage]),
-// }));
-// end

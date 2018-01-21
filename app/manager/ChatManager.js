@@ -3,10 +3,14 @@
  * - Subscribe all needed threas to update message
  * - Thread, Message objects return from this class are already set with Thread, Message prototype
  */
+/**
+ * TODO:
+ * - before subscribe a path, check if it already in mSubscribePaths
+ */
 
 import firebase from 'react-native-firebase';
 
-import FirebaseDatabase from '../firebase/FirebaseDatabase';
+import FirebaseDatabase from '../network/FirebaseDatabase';
 import Utils from '../utils/Utils';
 import Message from '../models/Message';
 import Thread from '../models/Thread';
@@ -26,7 +30,7 @@ function initChatManager() {
 
   let mMyUser = {};
   let mObservers = {};
-  // const mSubscribePaths = [];
+  const mSubscribePaths = [];
 
   /**
    * Setup user presence (aka online/offline)
@@ -68,34 +72,40 @@ function initChatManager() {
    * for each of my thread
    * listen for /threads/<my_thread_id> -> `value`
    */
-  // function mSubscribeMyThreadsChange() {
-  //   const asyncTask = async () => {
-  //     try {
-  //       const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
-  //       for (let i = 0; i < threads.length; i += 1) {
-  //         const thread = threads[i];
-  //         mSubscribeMyThreadsChangeForThread(thread.uid);
-  //       }
-  //     } catch (err) {
-  //       Utils.warn('mSubscribeMyThreadsChange: error', err);
-  //     }
-  //   };
-  //   asyncTask();
-  // }
+  function mSubscribeMyThreadsChange() {
+    const asyncTask = async () => {
+      try {
+        const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
+        for (let i = 0; i < threads.length; i += 1) {
+          const thread = threads[i];
+          mSubscribeMyThreadsChangeForThread(thread.uid);
+        }
+      } catch (err) {
+        Utils.warn('mSubscribeMyThreadsChange: error', err);
+      }
+    };
+    asyncTask();
+  }
 
   function mSubscribeMyThreadsChangeForThread(threadID) {
+    // subscribe
     const threadRef = FirebaseDatabase.getThreadsRef();
     threadRef.child(threadID)
       .on('value', (snapshot) => {
         const thread = snapshot.val();
         mNotifyObservers(CHAT_EVENTS.THREAD_CHANGE, thread);
       });
+    // keep track to remove later
+    const path = `${threadRef.key}/${threadID}`;
+    mSubscribePaths.push(path);
+    Utils.log(`mSubscribeMyThreadsChangeForThread: subscribe path: ${path}`);
   }
 
   /**
    * listen for /users/<my_user_id>/threads -> `child_added`
    */
   function mSubscribeNewThread() {
+    // subscribe
     const usersRef = FirebaseDatabase.getUsersRef();
     const fbUserID = FirebaseDatabase.firebaseUserID(mMyUser.uid);
     usersRef.child(`${fbUserID}/threads`)
@@ -117,6 +127,10 @@ function initChatManager() {
           asyncTask();
         }
       });
+    // keep track to remove later
+    const path = `${usersRef.key}/${fbUserID}/threads`;
+    mSubscribePaths.push(path);
+    Utils.log(`mSubscribeNewThread: subscribe path: ${path}`);
   }
 
   /**
@@ -129,6 +143,7 @@ function initChatManager() {
         const threadsMessagesRef = FirebaseDatabase.getThreadsMessagesRef();
         const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
         for (let i = 0; i < threads.length; i += 1) {
+          // subscribe
           const thread = threads[i];
           threadsMessagesRef.child(`${thread.uid}/messages`)
             .limitToLast(1)
@@ -138,6 +153,10 @@ function initChatManager() {
               const threadID = snapshot.ref.parent.parent.key;
               mNotifyObservers(CHAT_EVENTS.NEW_MESSAGE, message, threadID);
             });
+          // keep track to remove later
+          const path = `${threadsMessagesRef.key}/${thread.uid}/messages`;
+          mSubscribePaths.push(path);
+          Utils.log(`mSubscribeNewMessage: subscribe path: ${path}`);
         }
       } catch (err) {
         Utils.warn('mSubscribeIncomingMessage: error', err);
@@ -173,32 +192,32 @@ function initChatManager() {
   //   asyncTask();
   // }
 
-  // function mUnSubsribePath(path) {
-  //   // turn-off event
-  //   const database = FirebaseDatabase.getDatabase();
-  //   const ref = database.ref(path);
-  //   ref.off();
-  //   // remove path in cached
-  //   let removeIndex = -1;
-  //   for (let i = 0; i < mSubscribePaths.length; i += 1) {
-  //     if (mSubscribePaths[i] === path) {
-  //       removeIndex = i;
-  //       break;
-  //     }
-  //   }
-  //   if (removeIndex >= 0) {
-  //     mSubscribePaths.splice(removeIndex, 1);
-  //   }
-  // }
+  function mUnSubsribePath(path) {
+    // turn-off event
+    const database = FirebaseDatabase.getDatabase();
+    const ref = database.ref(path);
+    ref.off();
+    // remove path in cached
+    let removeIndex = -1;
+    for (let i = 0; i < mSubscribePaths.length; i += 1) {
+      if (mSubscribePaths[i] === path) {
+        removeIndex = i;
+        break;
+      }
+    }
+    if (removeIndex >= 0) {
+      mSubscribePaths.splice(removeIndex, 1);
+    }
+  }
 
-  // function mUnSubscribeAllPaths() {
-  //   const database = FirebaseDatabase.getDatabase();
-  //   while (mSubscribePaths.length > 0) {
-  //     const path = mSubscribePaths.pop();
-  //     const ref = database.ref(path);
-  //     ref.off();
-  //   }
-  // }
+  function mUnSubscribeAllPaths() {
+    const database = FirebaseDatabase.getDatabase();
+    while (mSubscribePaths.length > 0) {
+      const path = mSubscribePaths.pop();
+      const ref = database.ref(path);
+      ref.off();
+    }
+  }
 
   /**
    * notify observers
@@ -231,6 +250,7 @@ function initChatManager() {
     goOffline() {
       FirebaseDatabase.getDatabase().goOffline();
       FirebaseDatabase.getConnectedRef().off();
+      mUnSubscribeAllPaths();
     },
     setup(user) {
 
@@ -244,7 +264,7 @@ function initChatManager() {
       mSetupMyUserPresence();
 
       // mSubscribeMyUserChange();
-      // mSubscribeMyThreadsChange();
+      mSubscribeMyThreadsChange();
       mSubscribeNewThread();
       mSubscribeNewMessage();
       // mSubscribeThreadUsersChange();

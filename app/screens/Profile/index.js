@@ -88,6 +88,13 @@ ProfileScreen.navigationOptions = () => ({
   headerStyle: Styles.navigator_header_no_border,
   headerTitleStyle: Styles.navigator_header_title,
   headerTintColor: '#fff',
+  tabBarLabel: 'Profile',
+  tabBarIcon: ({ tintColor }) => (
+    <Image
+      source={require('../img/tab_home.png')}
+      style={[styles.icon, { tintColor }]}
+    />
+  ),
 });
 
 // --------------------------------------------------

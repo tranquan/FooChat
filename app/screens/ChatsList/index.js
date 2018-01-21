@@ -151,6 +151,13 @@ ChatsListScreen.navigationOptions = ({ navigation }) => ({
   headerTitleStyle: Styles.navigator_header_title,
   headerTintColor: '#fff',
   headerRight: <HeaderRightButton navigation={navigation} />,
+  tabBarLabel: 'Chat',
+  tabBarIcon: ({ tintColor }) => (
+    <Image
+      source={require('../img/tab_chat.png')}
+      style={[styles.icon, { tintColor }]}
+    />
+  ),
 });
 
 const HeaderRightButton = (props) => {

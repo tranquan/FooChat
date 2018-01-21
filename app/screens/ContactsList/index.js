@@ -100,6 +100,13 @@ ContactsListScreen.navigationOptions = () => ({
   headerStyle: Styles.navigator_header_no_border,
   headerTitleStyle: Styles.navigator_header_title,
   headerTintColor: '#fff',
+  tabBarLabel: 'Contacts',
+  tabBarIcon: ({ tintColor }) => (
+    <Image
+      source={require('../img/tab_contacts.png')}
+      style={[styles.icon, { tintColor }]}
+    />
+  ),
 });
 
 // --------------------------------------------------

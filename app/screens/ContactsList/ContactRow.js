@@ -22,6 +22,9 @@ class ContactRow extends PureComponent {
   onPress = () => {
     this.props.onPress(this.props.user);
   }
+  renderAvatar() {
+
+  }
   render() {
     const { user } = this.props;
     return (

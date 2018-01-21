@@ -16,7 +16,7 @@ import './constants/reactotron';
 
 import store from './redux/store';
 import RootScreen from './screens/Root/RootScreen';
-import FirebaseDatabaseTest from './firebase/FirebaseDatabaseTest';
+import FirebaseDatabaseTest from './network/FirebaseDatabaseTest';
 import ChatManager from './manager/ChatManager';
 
 /* eslint-disable */

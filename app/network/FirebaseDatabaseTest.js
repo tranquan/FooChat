@@ -317,6 +317,31 @@ class FirebaseDatabaseTest {
     // const itemsRef = FirebaseDatabase.getDatabase().ref('items');
     // itemsRef.remove();
   }
+
+  static testFirebaseCallback() {
+    
+    // setup callbacks
+    const itemsRef = FirebaseDatabase.getDatabase().ref('items');
+    itemsRef.on('value', (snapshot) => {
+      Utils.warn(`callback 1: ${snapshot}`, snapshot);
+    });
+    itemsRef.on('value', (snapshot) => {
+      Utils.warn(`callback 2: ${snapshot}`, snapshot);
+    });
+    itemsRef.on('child_added', (snapshot) => {
+      Utils.warn(`callback 3: ${snapshot}`, snapshot);
+    });
+    
+    // add item
+    setTimeout(() => {
+      const newItemRef = itemsRef.push({});
+      newItemRef.set({ title: 'title' });
+    }, 2000);
+    setTimeout(() => {
+      const newItemRef = itemsRef.push({});
+      newItemRef.set({ title: 'title' });
+    }, 3000);
+  }
 }
 
 export default FirebaseDatabaseTest;
