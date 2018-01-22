@@ -1,6 +1,7 @@
 import { AsyncStorage } from 'react-native';
 import Reactotron from 'reactotron-react-native';
 import Configs from '../constants/configs';
+import User from '../models/User';
 
 const LOG_TAG = 'Utils.js';
 
@@ -11,7 +12,7 @@ const CONTACTS = [
     fullName: 'Phan Thanh Vinh',
     phoneNumber: '0909368338',
     avatarImage: 'https://pbs.twimg.com/profile_images/831993825635745796/HnVmB0-k.jpg',
-    wallImage: '',
+    wallImage: null,
   },
   {
     uid: '2',
@@ -19,7 +20,7 @@ const CONTACTS = [
     fullName: 'Phan Thanh Long',
     phoneNumber: '0933397604',
     avatarImage: 'https://pickaface.net/gallery/avatar/acrovin559439058dc7f.png',
-    wallImage: '',
+    wallImage: null,
   },
   {
     uid: '3',
@@ -27,7 +28,7 @@ const CONTACTS = [
     fullName: 'Trần Đức Minh',
     phoneNumber: '0976637270',
     avatarImage: 'https://www.seoclerk.com/pics/522569-1eWJyL1490726864.png',
-    wallImage: '',
+    wallImage: null,
   },
   {
     uid: '4',
@@ -35,7 +36,7 @@ const CONTACTS = [
     fullName: 'Trần Anh Quân',
     phoneNumber: '0982746822',
     avatarImage: 'https://pickaface.net/gallery/avatar/unr_sample_161118_2054_ynlrg.png',
-    wallImage: '',
+    wallImage: null,
   },
   {
     uid: '5',
@@ -43,15 +44,15 @@ const CONTACTS = [
     fullName: 'Nguyễn Kiều Anh',
     phoneNumber: '0838666408',
     avatarImage: 'https://pickaface.net/gallery/avatar/unr_sample_170130_2257_9qgawp.png',
-    wallImage: '',
+    wallImage: null,
   },
   {
     uid: '6',
     email: 'amgus7788@gmail.com',
     fullName: 'Võ Hoàng Nam',
     phoneNumber: '0933397604',
-    avatarImage: 'https://caricatureking.com/images/georgemouseovers/man2.jpg',
-    wallImage: '',
+    avatarImage: null,
+    wallImage: null,
   },
 ];
 
@@ -85,7 +86,9 @@ export default class Utils {
     });
   }
   static getTestContacts() {
-    return CONTACTS;
+    return CONTACTS.map(item => {
+      return Object.assign(new User(), item);
+    });
   }
 }
 

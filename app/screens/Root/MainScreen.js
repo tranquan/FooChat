@@ -47,7 +47,7 @@ const MainTabNavigator = TabNavigator(
     },
   },
   {
-    initialRouteName: 'ChatsListTab',
+    initialRouteName: 'ContactsListTab',
     tabBarPosition: 'bottom',
     animationEnabled: true,
     tabBarOptions: {

@@ -28,6 +28,7 @@
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		BA5C28CF1FF6A31A00CEF037 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA5C28CB1FF6A30A00CEF037 /* libRNDeviceInfo.a */; };
 		BA5C28D21FF6A6C300CEF037 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BA5C28D11FF6A6C300CEF037 /* GoogleService-Info.plist */; };
+		BAF1F4B32015930F0050A6BC /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BAF1F4B1201592EC0050A6BC /* libRNFetchBlob.a */; };
 		DE86A541D7BC4567A39CFA19 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 79D5888F15D64D25A7053F90 /* libRNFirebase.a */; };
 		E9F7D438569C78B3D7B9DAC6 /* libPods-FooChat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 906C8AA574D0C3CAB70DF11C /* libPods-FooChat.a */; };
 /* End PBXBuildFile section */
@@ -306,6 +307,13 @@
 			remoteGlobalIDString = E72EC1401F7ABB5A0001BC90;
 			remoteInfo = "RNDeviceInfo-tvOS";
 		};
+		BAF1F4B0201592EC0050A6BC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A15C300E1CD25C330074CB35;
+			remoteInfo = RNFetchBlob;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -337,6 +345,7 @@
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		BA5C28951FF6A30A00CEF037 /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
 		BA5C28D11FF6A6C300CEF037 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "FooChat/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/react-native-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
 		C358E1EA616C43658B589263 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		E3BC833BE7EBC0E6F1B981BE /* Pods-FooChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FooChat.release.xcconfig"; path = "Pods/Target Support Files/Pods-FooChat/Pods-FooChat.release.xcconfig"; sourceTree = "<group>"; };
 		F2132818EC314443B1133A7F /* libRealmReact.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRealmReact.a; sourceTree = "<group>"; };
@@ -349,6 +358,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BAF1F4B32015930F0050A6BC /* libRNFetchBlob.a in Frameworks */,
 				BA5C28CF1FF6A31A00CEF037 /* libRNDeviceInfo.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
@@ -529,10 +539,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				BA5C28951FF6A30A00CEF037 /* RNDeviceInfo.xcodeproj */,
-				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
-				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
+				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */,
 				00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */,
 				00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */,
@@ -542,8 +550,11 @@
 				832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */,
 				00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */,
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
-				4C2BB4C6F1B24471B242637D /* RNFirebase.xcodeproj */,
+				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				7E4F2E150E894EF1A7B4E19A /* RealmReact.xcodeproj */,
+				BA5C28951FF6A30A00CEF037 /* RNDeviceInfo.xcodeproj */,
+				BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */,
+				4C2BB4C6F1B24471B242637D /* RNFirebase.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -620,6 +631,14 @@
 			children = (
 				BA5C28CB1FF6A30A00CEF037 /* libRNDeviceInfo.a */,
 				BA5C28CD1FF6A30A00CEF037 /* libRNDeviceInfo-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BAF1F487201592EB0050A6BC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BAF1F4B1201592EC0050A6BC /* libRNFetchBlob.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -730,6 +749,10 @@
 				{
 					ProductGroup = BA5C28961FF6A30A00CEF037 /* Products */;
 					ProjectRef = BA5C28951FF6A30A00CEF037 /* RNDeviceInfo.xcodeproj */;
+				},
+				{
+					ProductGroup = BAF1F487201592EB0050A6BC /* Products */;
+					ProjectRef = BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */;
 				},
 				{
 					ProductGroup = BA5C283C1FF6553700CEF037 /* Products */;
@@ -1017,6 +1040,13 @@
 			remoteRef = BA5C28CC1FF6A30A00CEF037 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		BAF1F4B1201592EC0050A6BC /* libRNFetchBlob.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNFetchBlob.a;
+			remoteRef = BAF1F4B0201592EC0050A6BC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -1133,8 +1163,10 @@
 				DEVELOPMENT_TEAM = ETHERR2CP7;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/realm/src/**",
+					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
+					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
+					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
 				);
 				INFOPLIST_FILE = FooChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1162,8 +1194,10 @@
 				DEVELOPMENT_TEAM = ETHERR2CP7;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/realm/src/**",
+					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
+					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
+					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
 				);
 				INFOPLIST_FILE = FooChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
