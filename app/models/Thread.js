@@ -28,7 +28,7 @@ export default class Thread {
   // --------------------------------------------------
   
   static mMyUser = {};
-  static setup(user) {
+  static setupMyUser(user) {
     Thread.mMyUser = user;
   }
 

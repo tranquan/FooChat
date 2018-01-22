@@ -26,7 +26,7 @@ export default class Message {
   // --------------------------------------------------
 
   static mMyUser = {};
-  static setup(user) {
+  static setupMyUser(user) {
     Message.mMyUser = user;
   }
 

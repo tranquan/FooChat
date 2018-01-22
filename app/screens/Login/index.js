@@ -18,6 +18,7 @@ import {
 } from '../../redux/actions';
 
 import ChatManager from '../../manager/ChatManager';
+import ContactsManager from '../../manager/ContactsManager';
 import ContactRow from './ContactRow';
 
 // --------------------------------------------------
@@ -81,6 +82,8 @@ class LoginScreen extends Component {
     // init chat
     ChatManager.shared().goOnline();
     ChatManager.shared().setup(user);
+    // init contacts
+    ContactsManager.shared().setup(user);
   }
   // --------------------------------------------------
   renderContacts() {

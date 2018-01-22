@@ -11,9 +11,7 @@
 import firebase from 'react-native-firebase';
 
 import FirebaseDatabase from '../network/FirebaseDatabase';
-import Utils from '../utils/Utils';
-import Message from '../models/Message';
-import Thread from '../models/Thread';
+import { User, Message, Thread } from '../models';
 
 export const CHAT_EVENTS = {
   MY_USER_CHANGE: 'MY_USER_CHANGE',
@@ -22,6 +20,11 @@ export const CHAT_EVENTS = {
   THREAD_CHANGE: 'THREAD_CHANGE',
   THREAD_USERS_CHANGE: 'THREAD_USERS_CHANGE',
 };
+
+/* eslint-disable */
+import Utils from '../utils/Utils';
+const LOG_TAG = '7777: ChatManager.js';
+/* eslint-enable */
 
 function initChatManager() {
   
@@ -32,31 +35,16 @@ function initChatManager() {
   let mObservers = {};
   const mSubscribePaths = [];
 
-  /**
-   * Setup user presence (aka online/offline)
-   */
-  function mSetupMyUserPresence(status = 'online') {
-    if (!(mMyUser && mMyUser.uid)) {
-      return;
-    }
-    FirebaseDatabase.getConnectedRef().on('value', (snapshot) => {
-      if (!snapshot.exists()) {
-        return;
-      }
-      const fbUserID = FirebaseDatabase.firebaseUserID(mMyUser.uid);
-      const userStatusRef = FirebaseDatabase.getUsersPresenceRef().child(`${fbUserID}`);
-      userStatusRef.onDisconnect().update({
-        status: 'offline',
-        lastTimeOnline: firebase.database.ServerValue.TIMESTAMP,
-      });
-      userStatusRef.update({
-        status,
-      });
-    });
-  }
+  // EVENT HANDLERs
+  // --------------------
+
+
+  // EVENT SUBSCRIBEs
+  // --------------------
 
   /**
    * listen for /users/<my_user_id> -> `value`
+   * - to support login in on multiple devices
    */
   // function mSubscribeMyUserChange() {
   //   const usersRef = FirebaseDatabase.getUsersRef();
@@ -71,6 +59,7 @@ function initChatManager() {
   /**
    * for each of my thread
    * listen for /threads/<my_thread_id> -> `value`
+   * - to support thread meta data change
    */
   function mSubscribeMyThreadsChange() {
     const asyncTask = async () => {
@@ -87,6 +76,10 @@ function initChatManager() {
     asyncTask();
   }
 
+  /**
+   * listen for /threads/<my_thread_id> -> `value`
+   * - to support thread meta data change
+   */
   function mSubscribeMyThreadsChangeForThread(threadID) {
     // subscribe
     const threadRef = FirebaseDatabase.getThreadsRef();
@@ -103,6 +96,7 @@ function initChatManager() {
 
   /**
    * listen for /users/<my_user_id>/threads -> `child_added`
+   * - to support add/remove user
    */
   function mSubscribeNewThread() {
     // subscribe
@@ -136,6 +130,7 @@ function initChatManager() {
   /**
    * for each of my thread
    * listen for /threads_messages/<my_thread_id>/messages -> `child_added`
+   * - to support new message
    */
   function mSubscribeNewMessage() {
     const asyncTask = async () => {
@@ -168,6 +163,7 @@ function initChatManager() {
   /**
    * for each of my thread
    * listen for /threads/<my_thread_id>/users -> `child_added`, `child_removed`
+   * - to support invite/remove me in a thread
    */
   // function mSubscribeThreadUsersChange() {
   //   const asyncTask = async () => {
@@ -256,13 +252,12 @@ function initChatManager() {
 
       mMyUser = user;
       mObservers = {};
+
+      // init static vars
+      User.setupMyUser(user);
+      Thread.setupMyUser(user);
+      Message.setupMyUser(user);
       
-      Thread.setup(user);
-      Message.setup(user);
-
-      // setup online status
-      mSetupMyUserPresence();
-
       // mSubscribeMyUserChange();
       mSubscribeMyThreadsChange();
       mSubscribeNewThread();
@@ -297,6 +292,9 @@ function initChatManager() {
       mObservers[name] = list;
     },
     // --------------------------------------------------
+    // async getContacts() {
+    //   return mContacts;
+    // },
     async getThread(threadID) {
       const thread = await FirebaseDatabase.getThread(threadID);
       return thread;

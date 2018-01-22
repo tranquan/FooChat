@@ -184,9 +184,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  threadsContainer: {
-
-  },
   headerRightButton: {
     width: 64,
     height: 44,

@@ -18,6 +18,7 @@ import store from './redux/store';
 import RootScreen from './screens/Root/RootScreen';
 import FirebaseDatabaseTest from './network/FirebaseDatabaseTest';
 import ChatManager from './manager/ChatManager';
+import ContactsManager from './manager/ContactsManager';
 
 /* eslint-disable */
 import Utils, { loadMyUser } from './utils/Utils';
@@ -58,8 +59,10 @@ export default class App extends Component {
     const asyncTask = async () => {
       const user = await loadMyUser();
       if (user && user.uid && user.uid.length > 0) {
-        // setup chat
+        // init chat
         ChatManager.shared().setup(user);
+        // init contacts
+        ContactsManager.shared().setup(user);
         // switch to main
         store.dispatch(myUser(user));
         store.dispatch(switchToMain());

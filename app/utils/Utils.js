@@ -13,6 +13,7 @@ const CONTACTS = [
     phoneNumber: '0909368338',
     avatarImage: 'https://pbs.twimg.com/profile_images/831993825635745796/HnVmB0-k.jpg',
     wallImage: null,
+    presenceStatus: 'online',
   },
   {
     uid: '2',
@@ -21,6 +22,7 @@ const CONTACTS = [
     phoneNumber: '0933397604',
     avatarImage: 'https://pickaface.net/gallery/avatar/acrovin559439058dc7f.png',
     wallImage: null,
+    presenceStatus: 'online',
   },
   {
     uid: '3',
@@ -29,6 +31,7 @@ const CONTACTS = [
     phoneNumber: '0976637270',
     avatarImage: 'https://www.seoclerk.com/pics/522569-1eWJyL1490726864.png',
     wallImage: null,
+    presenceStatus: null,
   },
   {
     uid: '4',

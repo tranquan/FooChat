@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Text,
-  Image,
   TouchableOpacity,
 } from 'react-native';
 
@@ -31,6 +30,7 @@ class ContactRow extends PureComponent {
   }
   renderAvatar() {
     const { user } = this.props;
+    const presenceStatusColor = user.presenceStatusColor();
     return (
       <View style={styles.avatarContainer}>
         <KJImage
@@ -39,7 +39,12 @@ class ContactRow extends PureComponent {
           defaultSource={user.avatarImagePlaceholder()}
           resizeMode="cover"
         />
-        <View style={styles.status} />
+        <View 
+          style={[
+            styles.status, 
+            { backgroundColor: presenceStatusColor },
+          ]} 
+        />
       </View>
     );
   }
@@ -140,7 +145,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    borderWidth: 1.0,
+    borderWidth: 1.5,
     borderColor: '#fff',
     backgroundColor: '#ff0',
   },
