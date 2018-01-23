@@ -41,10 +41,16 @@ class FirebaseDatabase {
   // --------------------------------------------------
 
   static mUpdateUser(userID, metaData) {
+    // filterout non-metadata props
+    const userMetaData = metaData;
+    delete userMetaData.threads;
+    delete userMetaData.presenceStatus;
+    delete userMetaData.lastTimeOnline;
+    // request
     return new Promise((resolve) => {
       const fbUserID = FirebaseDatabase.firebaseUserID(userID);
       const userRef = USERS_REF.child(fbUserID);
-      userRef.update(metaData, (err) => {
+      userRef.update(userMetaData, (err) => {
         if (!err) {
           resolve(true);
         }

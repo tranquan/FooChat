@@ -26,6 +26,7 @@ export default class User {
   avatarImage = '';
   wallImage = '';
   presenceStatus = User.PRESENCE_STATUS.UNKNOWN;
+  lastTimeOnline = 0;
 
   set phoneNumber(value) {
     this.standardPhoneNumber = User.standardizePhoneNumber(value);
