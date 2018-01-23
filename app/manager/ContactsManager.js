@@ -6,8 +6,10 @@
  * - for contact info, meta data update, using api (cloud functions), not using realtime db
  */
 import firebase from 'react-native-firebase';
+import ReactNativeContacts from 'react-native-contacts';
 
 import FirebaseDatabase from '../network/FirebaseDatabase';
+import { User } from '../models';
 
 export const CONTACTS_EVENTS = {
   CONTACT_PRESENCE_CHANGE: 'CONTACT_PRESENCE_CHANGE',
@@ -27,7 +29,7 @@ function initContactsManager() {
 
   let mMyUser = {}; // my user
   let mObservers = {}; // key is event name
-  let mPhoneContacts = []; // contacts from device
+  let mPhoneContacts = {}; // contacts from device, keep phoneNumber only
   let mContacts = {}; // appay contacts, key is userID
 
   /**
@@ -143,6 +145,8 @@ function initContactsManager() {
       mContacts = {};
 
       mSetupMyUserPresence();
+
+      // this.reloadPhoneContacts();
     },
     getPhoneContacts() {
       return mPhoneContacts;
@@ -189,12 +193,45 @@ function initContactsManager() {
       mObservers[name] = list;
     },
     // --------------------------------------------------
+    /**
+     * Reload contacts from device (phone contacts)
+     * @returns dictionary of Contact (not user)
+     */
     reloadPhoneContacts() {
-
+      return new Promise((resolve) => {
+        ReactNativeContacts.getAll((err, contacts) => {
+          // Utils.log(`${LOG_TAG}: reloadPhoneContacts: contacts: `, contacts);
+          // error
+          if (err) {
+            Utils.warn(`${LOG_TAG}: reloadPhoneContacts: error: `, err);
+            resolve({});
+            return;
+          }
+          // get all phone number
+          mPhoneContacts = {};
+          for (let i = 0; i < contacts.length; i += 1) {
+            const contact = contacts[i];
+            const givenName = contact.givenName;
+            const familyName = contact.familyName;
+            const phoneNumbers = contact.phoneNumbers;
+            if (phoneNumbers && Array.isArray(phoneNumbers)) {
+              for (let j = 0; j < phoneNumbers.length; j += 1) {
+                const phoneNumber = phoneNumbers[j].number;
+                const standardPhoneNumber = User.standardizePhoneNumber(phoneNumber);
+                mPhoneContacts[standardPhoneNumber] = { 
+                  familyName, givenName, phoneNumber, standardPhoneNumber,
+                };
+              }
+            }
+          }
+          // Utils.warn(`${LOG_TAG}: reloadPhoneContacts: phones: `, mPhoneContacts);
+          resolve(mPhoneContacts);
+        });
+      });
     },
     /**
      * reload appay contacts from firebase
-     * @returns array of User
+     * @returns dictionary of User
      */
     async reloadContacts() {
       // un-subscribe old contacts before update

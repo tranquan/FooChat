@@ -24,7 +24,7 @@ if (Configs.enableLog) {
     // device
     Reactotron.configure({ 
       name: 'Appay',
-      host: '192.168.1.107',
+      host: '192.168.1.103',
     })
     .use(reactotronRedux())
     .connect();

@@ -106,15 +106,11 @@ TARGET_SDK_VERSION = 20
 
 # 3. choose modules
 MODULES = [
-	'react-native-device-info',
-  'react-native-fabric',
+  'realm',
+	'react-native-contacts',
+  'react-native-device-info',
 	'react-native-fetch-blob',
-	'react-native-linear-gradient',
-	'react-native-firebase',
-  'react-native-image-picker',
-  'react-native-image-resizer',
-  'react-native-svg',
-  'realm'
+	'react-native-firebase'
 ]
 
 # loop through node_modules and override

@@ -114,7 +114,7 @@ export async function loadMyUser() {
     const json = await AsyncStorage.getItem('MY_USER');
     if (!json) { return null; }
     const user = JSON.parse(json);
-    return user;
+    return Object.assign(new User(), user);
   } catch (error) {
     Utils.warn(`${LOG_TAG}: loadSavedAccount error: `, error);
     return null;

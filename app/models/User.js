@@ -4,6 +4,7 @@
 
 import moment from 'moment/min/moment-with-locales';
 
+import Utils from '../utils/Utils';
 import { getAvatarPlaceholder, getWallPlaceholder } from '../utils/UIUtils';
 
 export default class User {
@@ -19,19 +20,48 @@ export default class User {
   uid = '';
   email = '';
   phoneNumber = '';
+  standardPhoneNumber = '';
   fullName = '';
   phoneNumber = '';
   avatarImage = '';
   wallImage = '';
   presenceStatus = User.PRESENCE_STATUS.UNKNOWN;
 
-  // UI Logic
+  set phoneNumber(value) {
+    this.standardPhoneNumber = User.standardizePhoneNumber(value);
+  }
+
+  // Static Methods
   // --------------------------------------------------
 
+  /**
+   * Setup my user
+   */
   static mMyUser = {};
   static setupMyUser(user) {
     User.mMyUser = user;
   }
+
+  /**
+   * Standardize phoneNumber in order to filter appay contacts from device contacts
+   * - user will have a props: `standardPhoneNumber` which is exactly `maxDigits` digits
+   * - if the phoneNumber longer than `maxDigits` digits, the firsts one will be trimmed
+   * - if the phoneNumber shorter thant `maxDigits` digits, 0 will be prepend
+   */
+  static standardizePhoneNumber(phoneNumber = '', maxDigits = 8) {
+    // remove non-digits
+    let standardPhoneNumber = phoneNumber.replace(/\D/g, '');
+    // prepend zero if phone number too short
+    while (standardPhoneNumber.length < maxDigits) {
+      standardPhoneNumber = '0'.concat(standardPhoneNumber);
+    }
+    // trim
+    const index = standardPhoneNumber.length - maxDigits;
+    return standardPhoneNumber.slice(index);
+  }
+
+  // UI Logics
+  // --------------------------------------------------
 
   avatarImageURI() {
     if (!this.avatarImage || this.avatarImage.length === 0) {

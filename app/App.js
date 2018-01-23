@@ -19,6 +19,7 @@ import RootScreen from './screens/Root/RootScreen';
 import FirebaseDatabaseTest from './network/FirebaseDatabaseTest';
 import ChatManager from './manager/ChatManager';
 import ContactsManager from './manager/ContactsManager';
+import FirebaseFunctions from './network/FirebaseFunctions';
 
 /* eslint-disable */
 import Utils, { loadMyUser } from './utils/Utils';

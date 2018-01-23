@@ -35,6 +35,10 @@ function initChatManager() {
   let mObservers = {};
   const mSubscribePaths = [];
 
+  function mUpdateMyUser() {
+    FirebaseDatabase.updateUser(mMyUser.uid, mMyUser);
+  }
+
   // EVENT HANDLERs
   // --------------------
 
@@ -257,6 +261,9 @@ function initChatManager() {
       User.setupMyUser(user);
       Thread.setupMyUser(user);
       Message.setupMyUser(user);
+
+      // update my user
+      mUpdateMyUser();
       
       // mSubscribeMyUserChange();
       mSubscribeMyThreadsChange();

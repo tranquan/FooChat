@@ -26,6 +26,7 @@
 		92DF4D1FA7294AF3BB9EEE62 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C358E1EA616C43658B589263 /* libz.tbd */; };
 		A87CD18F8424422AAF873FCE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F45B38554BC94076BBD3EA63 /* libc++.tbd */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
+		BA15B5CB201645DB0034F0BA /* libRCTContacts.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA15B5CA201645780034F0BA /* libRCTContacts.a */; };
 		BA5C28CF1FF6A31A00CEF037 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA5C28CB1FF6A30A00CEF037 /* libRNDeviceInfo.a */; };
 		BA5C28D21FF6A6C300CEF037 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BA5C28D11FF6A6C300CEF037 /* GoogleService-Info.plist */; };
 		BAF1F4B32015930F0050A6BC /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BAF1F4B1201592EC0050A6BC /* libRNFetchBlob.a */; };
@@ -216,6 +217,13 @@
 			remoteGlobalIDString = 358F4ED71D1E81A9004DF814;
 			remoteInfo = RCTBlob;
 		};
+		BA15B5C9201645780034F0BA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BA15B5C5201645780034F0BA /* RCTContacts.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1441618E1BD0A79300FA4F59;
+			remoteInfo = RCTContacts;
+		};
 		BA5C28261FF6553600CEF037 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */;
@@ -343,6 +351,7 @@
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		906C8AA574D0C3CAB70DF11C /* libPods-FooChat.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FooChat.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
+		BA15B5C5201645780034F0BA /* RCTContacts.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTContacts.xcodeproj; path = "../node_modules/react-native-contacts/ios/RCTContacts.xcodeproj"; sourceTree = "<group>"; };
 		BA5C28951FF6A30A00CEF037 /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
 		BA5C28D11FF6A6C300CEF037 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "FooChat/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/react-native-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
@@ -358,6 +367,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA15B5CB201645DB0034F0BA /* libRCTContacts.a in Frameworks */,
 				BAF1F4B32015930F0050A6BC /* libRNFetchBlob.a in Frameworks */,
 				BA5C28CF1FF6A31A00CEF037 /* libRNDeviceInfo.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
@@ -542,6 +552,7 @@
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */,
+				BA15B5C5201645780034F0BA /* RCTContacts.xcodeproj */,
 				00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */,
 				00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */,
 				78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */,
@@ -597,6 +608,14 @@
 			children = (
 				ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */,
 				BA5C28271FF6553600CEF037 /* libRCTBlob-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BA15B5C6201645780034F0BA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BA15B5CA201645780034F0BA /* libRCTContacts.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -705,6 +724,10 @@
 				{
 					ProductGroup = ADBDB9201DFEBF0600ED6528 /* Products */;
 					ProjectRef = ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */;
+				},
+				{
+					ProductGroup = BA15B5C6201645780034F0BA /* Products */;
+					ProjectRef = BA15B5C5201645780034F0BA /* RCTContacts.xcodeproj */;
 				},
 				{
 					ProductGroup = 00C302B61ABCB90400DB3ED1 /* Products */;
@@ -949,6 +972,13 @@
 			remoteRef = ADBDB9261DFEBF0700ED6528 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		BA15B5CA201645780034F0BA /* libRCTContacts.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTContacts.a;
+			remoteRef = BA15B5C9201645780034F0BA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		BA5C28271FF6553600CEF037 /* libRCTBlob-tvOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1165,8 +1195,9 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/realm/src/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
-					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
 					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
+					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
+					"$(SRCROOT)/../node_modules/react-native-contacts/ios",
 				);
 				INFOPLIST_FILE = FooChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1196,8 +1227,9 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/realm/src/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
-					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
 					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
+					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
+					"$(SRCROOT)/../node_modules/react-native-contacts/ios",
 				);
 				INFOPLIST_FILE = FooChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
