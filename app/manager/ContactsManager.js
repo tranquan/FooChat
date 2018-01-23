@@ -9,6 +9,7 @@ import firebase from 'react-native-firebase';
 import ReactNativeContacts from 'react-native-contacts';
 
 import FirebaseDatabase from '../network/FirebaseDatabase';
+import FirebaseFunctions from '../network/FirebaseFunctions';
 import { User } from '../models';
 
 export const CONTACTS_EVENTS = {
@@ -51,6 +52,25 @@ function initContactsManager() {
       });
       userStatusRef.update({
         presenceStatus: status,
+      });
+    });
+  }
+
+  /**
+   * Get contacts from device
+   */
+  function mGetPhoneContactsFromDevice() {
+    return new Promise((resolve) => {
+      ReactNativeContacts.getAll((err, contacts) => {
+        // Utils.log(`${LOG_TAG}: mGetAllPhoneContacts: contacts: `, contacts);
+        // error
+        if (err) {
+          Utils.warn(`${LOG_TAG}: mGetAllPhoneContacts: error: `, err);
+          resolve([]);
+          return;
+        }
+        // Utils.warn(`${LOG_TAG}: mGetAllPhoneContacts: phones: `, mPhoneContacts);
+        resolve(contacts);
       });
     });
   }
@@ -145,14 +165,18 @@ function initContactsManager() {
       mContacts = {};
 
       mSetupMyUserPresence();
-
-      // this.reloadPhoneContacts();
     },
     getPhoneContacts() {
       return mPhoneContacts;
     },
-    getPhoneContactsPhoneNumbers() {
-      return mPhoneContacts.map(contact => contact.phoneNumber);
+    getPhoneContactsStandardPhoneNumbers() {
+      const phoneNumbers = [];
+      const keys = Object.keys(mPhoneContacts);
+      for (let i = 0; i < keys.length; i += 1) {
+        const contact = mPhoneContacts[keys[i]];
+        phoneNumbers.push(contact.standardPhoneNumber);
+      }
+      return phoneNumbers;
     },
     getContacts() {
       return mContacts;
@@ -197,55 +221,63 @@ function initContactsManager() {
      * Reload contacts from device (phone contacts)
      * @returns dictionary of Contact (not user)
      */
-    reloadPhoneContacts() {
-      return new Promise((resolve) => {
-        ReactNativeContacts.getAll((err, contacts) => {
-          // Utils.log(`${LOG_TAG}: reloadPhoneContacts: contacts: `, contacts);
-          // error
-          if (err) {
-            Utils.warn(`${LOG_TAG}: reloadPhoneContacts: error: `, err);
-            resolve({});
-            return;
+    async reloadPhoneContacts() {
+      // get all contacts from device
+      const contacts = await mGetPhoneContactsFromDevice(); 
+      // filter out phone number
+      mPhoneContacts = {};
+      for (let i = 0; i < contacts.length; i += 1) {
+        const contact = contacts[i];
+        const givenName = contact.givenName;
+        const familyName = contact.familyName;
+        const phoneNumbers = contact.phoneNumbers;
+        if (phoneNumbers && Array.isArray(phoneNumbers)) {
+          for (let j = 0; j < phoneNumbers.length; j += 1) {
+            const phoneNumber = phoneNumbers[j].number;
+            const standardPhoneNumber = User.standardizePhoneNumber(phoneNumber);
+            mPhoneContacts[standardPhoneNumber] = {
+              familyName, givenName, phoneNumber, standardPhoneNumber,
+            };
           }
-          // get all phone number
-          mPhoneContacts = {};
-          for (let i = 0; i < contacts.length; i += 1) {
-            const contact = contacts[i];
-            const givenName = contact.givenName;
-            const familyName = contact.familyName;
-            const phoneNumbers = contact.phoneNumbers;
-            if (phoneNumbers && Array.isArray(phoneNumbers)) {
-              for (let j = 0; j < phoneNumbers.length; j += 1) {
-                const phoneNumber = phoneNumbers[j].number;
-                const standardPhoneNumber = User.standardizePhoneNumber(phoneNumber);
-                mPhoneContacts[standardPhoneNumber] = { 
-                  familyName, givenName, phoneNumber, standardPhoneNumber,
-                };
-              }
-            }
-          }
-          // Utils.warn(`${LOG_TAG}: reloadPhoneContacts: phones: `, mPhoneContacts);
-          resolve(mPhoneContacts);
-        });
-      });
+        }
+      }
+      return mPhoneContacts;
     },
     /**
      * reload appay contacts from firebase
      * @returns dictionary of User
      */
     async reloadContacts() {
+      // load phone contacts
+      await this.reloadPhoneContacts();
+      
       // un-subscribe old contacts before update
       mUnSubscribeContactsPresence();
-      // test
-      mContacts = {};
-      const contactsArray = Utils.getTestContacts();
+      
+      // test: get test contacts
+      // mContacts = {};
+      // const contactsArray = Utils.getTestContacts();
+      // for (let i = 0; i < contactsArray.length; i += 1) {
+      //   const contact = contactsArray[i];
+      //   if (contact.uid !== mMyUser.uid) {
+      //     mContacts[contact.uid] = contact;
+      //   }
+      // }
+      // end
+      
+      // get phoneNumbers from phoneContacts
+      const standardPhoneNumbers = this.getPhoneContactsStandardPhoneNumbers();
+      const phoneNumbersList = standardPhoneNumbers.join(',');
+      const contactsArray = await FirebaseFunctions.getContacts(phoneNumbersList);
       for (let i = 0; i < contactsArray.length; i += 1) {
         const contact = contactsArray[i];
+        // filter me out
         if (contact.uid !== mMyUser.uid) {
-          mContacts[contact.uid] = contact;
+          const user = Object.assign(new User(), contact);
+          mContacts[contact.uid] = user;
         }
       }
-      // end
+      
       // re-subscribe
       mSubscribeContactsPresence();
       return mContacts;

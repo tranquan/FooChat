@@ -2,7 +2,7 @@
  * FirebaseFunctions
  */
 
-import Configs from '../constants/configs';
+import { Configs } from '../constants/configs';
 
 /* eslint-disable */
 import Utils from '../utils/Utils';
@@ -33,12 +33,15 @@ const AxiosClient = axios.create({
 
 class FirebaseFunctions {
 
-  static userID = '';
-
-  static setup(userID) {
-    FirebaseFunctions.userID = userID;
+  /**
+   * Setup my user
+   */
+  static mMyUser = {};
+  static setupMyUser(user) {
+    FirebaseFunctions.mMyUser = user;
+    FirebaseFunctions.myUserID = user.uid;
   }
-
+  
   /**
    * Help to log axios error
    */
@@ -86,7 +89,10 @@ class FirebaseFunctions {
     const api = 'getContacts';
     return AxiosClient.get('getContacts', { params: { standardPhoneNumbers } })
       .then(response => {
-        return response.data.data;
+        if (response.data.data) {
+          return response.data.data;
+        }
+        return [];
       })
       .catch(error => FirebaseFunctions.handleAxiosError(error, api));
   }

@@ -1,6 +1,6 @@
 import { AsyncStorage } from 'react-native';
 import Reactotron from 'reactotron-react-native';
-import Configs from '../constants/configs';
+import { Configs } from '../constants/configs';
 import User from '../models/User';
 
 const LOG_TAG = 'Utils.js';

@@ -2,7 +2,7 @@ import Reactotron from 'reactotron-react-native';
 import { reactotronRedux } from 'reactotron-redux';
 import DeviceInfo from 'react-native-device-info';
 
-import Configs from './configs';
+import { Configs } from './configs';
 
 // default config
 // Reactotron

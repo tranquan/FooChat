@@ -32,7 +32,7 @@ class ContactsListScreen extends Component {
     super(props);
 
     this.state = {
-      contacts: {},
+      contacts: [],
       contactsExtraData: false,
       isRefreshing: false,
     };

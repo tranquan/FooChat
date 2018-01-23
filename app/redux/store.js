@@ -2,7 +2,7 @@ import { createStore, applyMiddleware, compose } from 'redux'; // eslint-disable
 import Reactotron from 'reactotron-react-native'; // eslint-disable-line
 import thunk from 'redux-thunk';
 
-import Configs from '../constants/configs';
+import { Configs } from '../constants/configs';
 
 import rootReducer from './reducers';
 
