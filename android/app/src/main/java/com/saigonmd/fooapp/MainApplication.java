@@ -3,6 +3,7 @@ package com.saigonmd.fooapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.oblador.vectoricons.VectorIconsPackage;
 import com.rt2zz.reactnativecontacts.ReactNativeContacts;
 import com.RNFetchBlob.RNFetchBlobPackage;
 import com.google.firebase.database.FirebaseDatabase;
@@ -32,6 +33,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new VectorIconsPackage(),
           new ReactNativeContacts(),
           new RNFetchBlobPackage(),
           new RNDeviceInfo(),
