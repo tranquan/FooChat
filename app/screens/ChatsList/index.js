@@ -54,9 +54,9 @@ class ChatsListScreen extends Component {
     // load initial messages
     this.loadPreviousThreads(INITIAL_THREADS_LOAD);
     // test
-    setTimeout(() => {
-      this.onHeaderRightButtonPress();
-    }, 1000);
+    // setTimeout(() => {
+    //   this.onHeaderRightButtonPress();
+    // }, 2000);
     // end
   }
   componentWillUnmount() {

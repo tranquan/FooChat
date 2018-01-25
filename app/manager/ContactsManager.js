@@ -153,6 +153,18 @@ function initContactsManager() {
     }
   }
 
+  // HELPERs
+  // --------------------
+  
+  function mConvertDictToArray(dict) {
+    const array = [];
+    const keys = Object.keys(dict);
+    for (let i = 0; i < keys.length; i += 1) {
+      array.push(dict[keys[i]]);
+    }
+    return array;
+  }
+
   // PUBLIC
   // --------------------------------------------------
 
@@ -169,6 +181,9 @@ function initContactsManager() {
     getPhoneContacts() {
       return mPhoneContacts;
     },
+    getPhoneContactsArray() {
+      return mConvertDictToArray(mPhoneContacts);
+    },
     getPhoneContactsStandardPhoneNumbers() {
       const phoneNumbers = [];
       const keys = Object.keys(mPhoneContacts);
@@ -182,12 +197,7 @@ function initContactsManager() {
       return mContacts;
     },
     getContactsArray() {
-      const contactsArray = [];
-      const keys = Object.keys(mContacts);
-      for (let i = 0; i < keys.length; i += 1) {
-        contactsArray.push(mContacts[keys[i]]);
-      }
-      return contactsArray;
+      return mConvertDictToArray(mContacts);
     },
     addObserver(name, target, callback) {
       // Utils.log(`${LOG_TAG}: addObserver: ${name}, callback: ${callback}`);

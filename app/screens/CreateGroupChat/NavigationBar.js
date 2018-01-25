@@ -20,11 +20,11 @@ const LOG_TAG = '7777: CreateGroupChat/NavigationBar.js';
 // --------------------------------------------------
 
 class NavigationBar extends PureComponent {
-  onCancel = () => {
-    this.props.onCancel();
+  onCancelPress = () => {
+    this.props.onCancelPress();
   }
-  onDone = () => {
-    this.props.onDone();
+  onDonePress = () => {
+    this.props.onDonePress();
   }
   // --------------------------------------------------
   renderLeftButton() {
@@ -33,7 +33,7 @@ class NavigationBar extends PureComponent {
         containerStyle={styles.leftButton}
         leftIconSource={require('./img/close.png')}
         leftIconStyle={{ marginLeft: -12 }}
-        onPress={this.onCancel}
+        onPress={this.onCancelPress}
       />
     );
   }
@@ -43,7 +43,7 @@ class NavigationBar extends PureComponent {
         containerStyle={styles.rightButton}
         title={'Tạo'}
         titleStyle={{ color: '#007BFA' }}
-        onPress={this.onCancel}
+        onPress={this.onDonePress}
       />
     );
   }
@@ -77,8 +77,8 @@ NavigationBar.propTypes = {
 };
 
 NavigationBar.defaultProps = {
-  onCancel: () => {},
-  onDone: () => { },
+  onCancelPress: () => {},
+  onDonePress: () => { },
 };
 
 export default NavigationBar;

@@ -2,17 +2,26 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Image,
   StatusBar,
+  FlatList,
+  Alert,
 } from 'react-native';
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import { SearchBar } from 'react-native-elements';
+import Spinner from 'react-native-loading-spinner-overlay';
+
 import Styles from '../../constants/styles';
+import Strings from '../../constants/strings';
+import ContactsManager from '../../manager/ContactsManager';
+import ChatManager from '../../manager/ChatManager';
 
 import NavigationBar from './NavigationBar';
+import ContactRow from './ContactRow';
+import MemberCell from './MemberCell';
 
 // --------------------------------------------------
 
@@ -26,38 +35,232 @@ const LOG_TAG = '7777: CreateGroupChat.js';
 // --------------------------------------------------
 
 class CreateGroupChat extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isSpinnerVisible: false,
+      spinnerText: 'Đang xử lý',
+      isMembersSelected: {},
+      contacts: [],
+      contactsExtraData: false,
+      members: [],
+      membersExtraData: false,
+    };
+  }
+  componentWillMount() {
+    const contacts = ContactsManager.shared().getContactsArray();
+    this.setState({
+      contacts,
+    });
+  }
+  componentDidMount() {
+    StatusBar.setBarStyle('dark-content', true);
+  }
+  componentWillUnmount() {
+    StatusBar.setBarStyle('light-content', true);
+  }
   // --------------------------------------------------
-  onCancel = () => {
+  onCancelPress = () => {
     this.props.navigation.goBack();
   }
-  onDone = () => {
-    // get members
-    // gen default title
-    // create
+  onDonePress = () => {
+    if (this.state.members.length > 0) {
+      this.createGroupChat();
+    }
+  }
+  onSearchBarChangeText = (text) => {
+    Utils.log(`${LOG_TAG} onSearchBarChangeText: ${text}`);
+  }
+  onSearchBarClearText = (text) => {
+    Utils.log(`${LOG_TAG} onSearchBarClearText: ${text}`);
+  }
+  onContactPress = (user) => {
+    // check user
+    if (this.state.isMembersSelected[user.uid]) {
+      return;
+    }
+    // add to member
+    this.state.isMembersSelected[user.uid] = true;
+    this.state.members.push(user);
+    // update ui
+    this.setState((prevState) => ({
+      contactsExtraData: !prevState.contactsExtraData,
+      membersExtraData: !prevState.membersExtraData,
+    }));
+  }
+  onMemberPress = (user) => {
+    Utils.log(`${LOG_TAG} onMemberPress: ${user.uid}`);
+    // check user
+    if (!this.state.isMembersSelected[user.uid]) {
+      return;
+    }
+    // remove from member
+    this.state.isMembersSelected[user.uid] = null;
+    const removeUser = this.state.members.filter(item => item.uid === user.uid)[0];
+    if (removeUser) {
+      const removeIndex = this.state.members.indexOf(removeUser);
+      this.state.members.splice(removeIndex, 1);
+    }
+    // update ui
+    this.setState((prevState) => ({
+      contactsExtraData: !prevState.contactsExtraData,
+      membersExtraData: !prevState.membersExtraData,
+    }));
+  }
+  // --------------------------------------------------
+  createGroupChat() {
+    // add me to memebers as well
+    const members = this.state.members.map(item => Object.assign({}, item));
+    members.push(this.props.myUser);
+    // request
+    this.showSpinner();
+    const asyncTask = async () => {
+      try {
+        const newThread = await ChatManager.shared().createGroupThread(members, {});
+        this.hideSpinner();
+        // wait for spinner hide & check
+        setTimeout(() => {
+          if (newThread) {
+            this.props.navigation.goBack();
+          } else {
+            this.showAlert(Strings.create_thread_error);
+          }
+        }, 500);
+      } catch (err) {
+        // error
+        this.showAlert(Strings.unknown_error);
+      }
+    };
+    asyncTask();
+  }
+  showSpinner(text = 'Đang xử lý') {
+    this.setState({
+      isSpinnerVisible: true,
+      spinnerText: text,
+    });
+  }
+  hideSpinner() {
+    this.setState({
+      isSpinnerVisible: false,
+    });
+  }
+  showAlert(message) {
+    Alert.alert(
+      Strings.alert_title,
+      message,
+      [{ text: 'Đóng' }],
+      { cancelable: false },
+    );
   }
   // --------------------------------------------------
   renderNavigationBar() {
     return (
       <NavigationBar
-        onCancel={this.onCancel}
-        onDone={this.onDone}
+        onCancelPress={this.onCancelPress}
+        onDonePress={this.onDonePress}
       />
     );
   }
-  renderSearch() {
-
+  renderSearchBar() {
+    return (
+      <View
+        style={{
+          flex: 0,
+          backgroundColor: '#fff',
+        }}
+      >
+        <SearchBar
+          lightTheme
+          containerStyle={{ backgroundColor: '#fff' }}
+          inputStyle={{ backgroundColor: '#f5f5f5', fontSize: 15, textAlign: 'center' }}
+          onChangeText={this.onSearchBarChangeText}
+          onClearText={this.onSearchBarClearText}
+          placeholder={'Tìm kiếm mọi người'}
+        />
+        {
+          // <View style={styles.topLine} />
+          // <View style={styles.bottomLine} />
+        }
+      </View>
+    );
   }
-  renderMemberList() {
-
+  renderMembersList() {
+    if (this.state.members.length === 0) {
+      return null;
+    }
+    return (
+      <View style={{ flex: 0 }}>
+        <FlatList
+          style={{
+            paddingTop: 16,
+            paddingBottom: 18,
+            paddingLeft: 12,
+            paddingRight: 12,
+            backgroundColor: '#f5f5f5',
+          }}
+          horizontal
+          data={this.state.members}
+          extraData={this.state.membersExtraData}
+          keyExtractor={item => item.uid}
+          renderItem={this.renderMemeberCell}
+        />
+      </View>
+    );
+  }
+  renderMemeberCell = (row) => {
+    const user = row.item;
+    return (
+      <MemberCell
+        key={user.uid}
+        user={user}
+        userPresenceStatus={user.presenceStatus}
+        onPress={this.onMemberPress}
+      />
+    );
+  }
+  renderContactsList() {
+    return (
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={this.state.contacts}
+          extraData={this.state.contactsExtraData}
+          keyExtractor={item => item.uid}
+          renderItem={this.renderContactRow}
+        />
+      </View>
+    );
+  }
+  renderContactRow = (row) => {
+    const user = row.item;
+    const isSelected = this.state.isMembersSelected[user.uid] || false;
+    return (
+      <ContactRow
+        key={user.uid}
+        user={user}
+        userPresenceStatus={user.presenceStatus}
+        isSelected={isSelected}
+        onPress={this.onContactPress}
+      />
+    );
   }
   render() {
-    StatusBar.setBarStyle('dark-content', true);
+    const {
+      isSpinnerVisible,
+      spinnerText,
+    } = this.state;
     return (
       <View style={styles.container}>
         {this.renderNavigationBar()}
-        <Text style={{ marginTop: 20 }}>
-          CreateGroupChat
-        </Text>
+        {this.renderMembersList()}
+        {this.renderSearchBar()}
+        {this.renderContactsList()}
+        <Spinner
+          visible={isSpinnerVisible}
+          textContent={spinnerText}
+          textStyle={{ marginTop: 4, color: '#fff' }}
+          overlayColor="#00000080"
+        />
       </View>
     );
   }
@@ -91,7 +294,7 @@ const mapStateToProps = (state) => ({
   myUser: state.myUser,
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = () => ({
 
 });
 
@@ -102,6 +305,24 @@ export default connect(mapStateToProps, mapDispatchToProps)(CreateGroupChat);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
     backgroundColor: '#eee',
+  },
+  topLine: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#fff',
+  },
+  bottomLine: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#fff',
   },
 });
