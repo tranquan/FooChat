@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { DrawerNavigator, StackNavigator, TabNavigator } from 'react-navigation';
+import { DrawerNavigator, StackNavigator, TabNavigator, NavigationActions } from 'react-navigation';
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -10,11 +10,12 @@ import {
   switchToMain,
 } from '../../redux/actions';
 
-import SlideMenuScreen from '../SlideMenu';
-import ContactsListScreen from '../ContactsList';
-import ChatsListScreen from '../ChatsList';
-import ChatScreen from '../Chat';
-import ProfileScreen from '../Profile';
+import SlideMenu from '../SlideMenu';
+import ContactsList from '../ContactsList';
+import ChatsList from '../ChatsList';
+import Chat from '../Chat';
+import CreateGroupChat from '../CreateGroupChat';
+import Profile from '../Profile';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
@@ -24,30 +25,24 @@ const LOG_TAG = '7777: MainScreen.js';
 // --------------------------------------------------
 
 const ContactsListStackNavigator = StackNavigator({
-  ContactsList: { screen: ContactsListScreen },
-  Chat: { screen: ChatScreen },
+  ContactsList: { screen: ContactsList },
+  Chat: { screen: Chat },
 });
 
 const ChatsListStackNavigator = StackNavigator({
-  ChatsList: { screen: ChatsListScreen },
-  Chat: { screen: ChatScreen },
+  ChatsList: { screen: ChatsList },
+  Chat: { screen: Chat },
 });
 
 // each tab is a stack navigator
 const MainTabNavigator = TabNavigator(
   {
-    ContactsListTab: {
-      screen: ContactsListStackNavigator,
-    },
-    ChatsListTab: {
-      screen: ChatsListStackNavigator,
-    },
-    ProfileTab: {
-      screen: ProfileScreen,
-    },
+    ChatsListTab: { screen: ChatsListStackNavigator },
+    ContactsListTab: { screen: ContactsListStackNavigator },
+    ProfileTab: { screen: Profile },
   },
   {
-    initialRouteName: 'ContactsListTab',
+    initialRouteName: 'ChatsListTab',
     tabBarPosition: 'bottom',
     animationEnabled: true,
     tabBarOptions: {
@@ -56,18 +51,30 @@ const MainTabNavigator = TabNavigator(
   },
 );
 
+const MainModalNavigator = StackNavigator(
+  {
+    MainTabNavigator: { screen: MainTabNavigator },
+    CreateGroupChat: { screen: CreateGroupChat },
+  },
+  {
+    mode: 'modal',
+    headerMode: 'none',
+    style: {
+      backgroundColor: '#fff',
+    },
+  },
+);
+
 // add main tab into a drawer
 const MainDrawerNavigator = DrawerNavigator(
   {
-    TabNavigator: {
-      screen: MainTabNavigator,
-    },
+    MainModalNavigator: { screen: MainModalNavigator },
   },
   {
     drawerOpenRoute: 'DrawerOpen',
     drawerCloseRoute: 'DrawerClose',
     drawerToggleRoute: 'DrawerToggle',
-    contentComponent: SlideMenuScreen,
+    contentComponent: SlideMenu,
   },
 );
 
@@ -76,6 +83,17 @@ const MainDrawerNavigator = DrawerNavigator(
 // --------------------------------------------------
 
 class MainScreen extends Component {
+  componentDidMount() {
+    setTimeout(() => {
+      // const resetAction = NavigationActions.reset({
+      //   index: 0,
+      //   actions: [
+      //     NavigationActions.navigate({ routeName: 'ChatsListTab' }),
+      //   ],
+      // });
+      // this.props.navigation.dispatch(resetAction);
+    }, 2000);
+  }
   render() {
     return (
       <MainDrawerNavigator />

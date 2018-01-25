@@ -69,7 +69,7 @@ export default class App extends Component {
         store.dispatch(switchToMain());
       } else {
         store.dispatch(switchToLogin());
-      } 
+      }
     };
     asyncTask();
   }

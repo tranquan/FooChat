@@ -53,6 +53,11 @@ class ChatsListScreen extends Component {
     }
     // load initial messages
     this.loadPreviousThreads(INITIAL_THREADS_LOAD);
+    // test
+    setTimeout(() => {
+      this.onHeaderRightButtonPress();
+    }, 1000);
+    // end
   }
   componentWillUnmount() {
     // remove observer
@@ -61,15 +66,16 @@ class ChatsListScreen extends Component {
   // --------------------------------------------------
   onHeaderRightButtonPress = () => {
     // test create threads
-    const allContacts = Utils.getTestContacts();
-    const user1 = allContacts[0];
-    const user2 = allContacts[1];
-    const user3 = allContacts[2];
-    ChatManager.shared().createGroupThread([user1, user2, user3], {
-      title: '',
-      photoURL: '',
-    });
+    // const allContacts = Utils.getTestContacts();
+    // const user1 = allContacts[0];
+    // const user2 = allContacts[1];
+    // const user3 = allContacts[2];
+    // ChatManager.shared().createGroupThread([user1, user2, user3], {
+    //   title: '',
+    //   photoURL: '',
+    // });
     // end
+    this.props.navigation.navigate('CreateGroupChat');
   };
   onThreadPress = (thread) => {
     this.openChatWithThread(thread);

@@ -1,4 +1,10 @@
 /**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
+/**
   An Image that support background color, border color
   A View will be used to wrap a round the image and has the same style of image
 */
