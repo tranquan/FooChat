@@ -88,6 +88,13 @@ export default class Utils {
       important: true,
     });
   }
+  static timeout(miliseconds) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(true);
+      }, miliseconds);
+    });
+  }
   static getTestContacts() {
     return CONTACTS.map(item => {
       return Object.assign(new User(), item);

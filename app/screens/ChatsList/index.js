@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import Spinner from 'react-native-loading-spinner-overlay';
+
 import Styles from '../../constants/styles';
 import ChatManager, { CHAT_EVENTS } from '../../manager/ChatManager';
 import ThreadRow from './ThreadRow';
@@ -35,6 +37,8 @@ class ChatsListScreen extends Component {
       isRefreshing: false,
       threads: [],
       threadsExtraData: false,
+      isSpinnerVisible: false,
+      spinnerText: '',
     };
 
     this.isThreadsAdded = {};
@@ -45,7 +49,6 @@ class ChatsListScreen extends Component {
       // Utils.warn(`ChatsListScreen: observer: ${thread.uid}`, thread);
       this.handleNewThread(thread);
     });
-    
   }
   componentDidMount() {
     // navigation bar right button
@@ -142,35 +145,66 @@ class ChatsListScreen extends Component {
     // };
     // asyncTask();
   }
+  showSpinner(text = 'Đang xử lý') {
+    this.setState({
+      isSpinnerVisible: true,
+      spinnerText: text,
+    });
+  }
+  hideSpinner() {
+    this.setState({
+      isSpinnerVisible: false,
+    });
+  }
   // --------------------------------------------------
-  renderItem(item) {
+  renderThreadsList() {
+    const { threads, threadsExtraData } = this.state;
+    return (
+      <FlatList
+        refreshControl={
+          <RefreshControl
+            style={{ backgroundColor: '#f5f5f5' }}
+            refreshing={this.state.isRefreshing}
+            onRefresh={() => {
+              this.reloadData();
+            }}
+          />
+        }
+        data={threads}
+        extraData={threadsExtraData}
+        keyExtractor={item => item.uid}
+        renderItem={this.renderThreadRow}
+      />
+    );
+  }
+  renderThreadRow = (row) => {
+    const thread = row.item;
     return (
       <ThreadRow
-        thread={item}
+        thread={thread}
         onPress={this.onThreadPress}
+      />
+    );
+  }
+  renderSpinner() {
+    const {
+      isSpinnerVisible,
+      spinnerText,
+    } = this.state;
+    return (
+      <Spinner
+        visible={isSpinnerVisible}
+        textContent={spinnerText}
+        textStyle={{ marginTop: 4, color: '#fff' }}
+        overlayColor="#00000080"
       />
     );
   }
   render() {
     return (
       <View style={styles.container}>
-        <FlatList
-          refreshControl={
-            <RefreshControl
-              style={{ backgroundColor: '#f5f5f5' }}
-              refreshing={this.state.isRefreshing}
-              onRefresh={() => {
-                this.reloadData();
-              }}
-            />
-          }
-          data={this.state.threads}
-          extraData={this.state.threads.length}
-          keyExtractor={item => item.uid}
-          renderItem={(row) => {
-            return this.renderItem(row.item);
-          }}
-        />
+        {this.renderThreadsList()}
+        {this.renderSpinner()}
       </View>
     );
   }

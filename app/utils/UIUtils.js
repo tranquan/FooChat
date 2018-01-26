@@ -1,9 +1,12 @@
 import {
+  Alert,
 } from 'react-native';
+
+import Strings from '../constants/strings';
 
 // --------------------------------------------------
 
-export default class Utils {
+export default class UIUtils {
 
 }
 
@@ -30,3 +33,11 @@ export function hidePhoneNumber(phoneNumber) {
   }).join('');
 }
 
+export function showAlert(message) {
+  Alert.alert(
+    Strings.alert_title,
+    message,
+    [{ text: 'Đóng' }],
+    { cancelable: false },
+  );
+}

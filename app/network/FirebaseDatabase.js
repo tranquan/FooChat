@@ -479,7 +479,27 @@ class FirebaseDatabase {
       }
       return null;
     } catch (err) {
-      Utils.warn(`createSingleThread error: ${err}`, err);
+      Utils.warn(`getMessageInThread error: ${err}`, err);
+      return null;
+    }
+  }
+  
+  /**
+   * Get last Message object in a Thread
+   * @param {string} threadID
+   * @returns nullable Message object
+   */
+  static async getLastMessageInThread(threadID) {
+    try {
+      const message = await THREADS_MESSAGES_REF
+        .child(`${threadID}/messages`).orderByChild('createTime').limitToLast(1)
+        .once('value');
+      if (message && message.exists()) {
+        return message.val();
+      }
+      return null;
+    } catch (err) {
+      Utils.warn(`getLastMessageInThread error: ${err}`, err);
       return null;
     }
   }

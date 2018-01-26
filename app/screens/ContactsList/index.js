@@ -11,6 +11,8 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import Spinner from 'react-native-loading-spinner-overlay';
+
 import Styles from '../../constants/styles';
 import ChatManager from '../../manager/ChatManager';
 import ContactsManager, { CONTACTS_EVENTS } from '../../manager/ContactsManager';
@@ -35,6 +37,8 @@ class ContactsListScreen extends Component {
       contacts: [],
       contactsExtraData: false,
       isRefreshing: false,
+      isSpinnerVisible: false,
+      spinnerText: '',
     };
   }
   componentWillMount() {
@@ -87,21 +91,39 @@ class ContactsListScreen extends Component {
     const presenceEvent = CONTACTS_EVENTS.CONTACT_PRESENCE_CHANGE;
     ContactsManager.shared().removeObserver(presenceEvent, this);
   }  
+  showSpinner(text = 'Đang xử lý') {
+    this.setState({
+      isSpinnerVisible: true,
+      spinnerText: text,
+    });
+  }
+  hideSpinner() {
+    this.setState({
+      isSpinnerVisible: false,
+    });
+  }
   // --------------------------------------------------
   mOpenChatWithUser(user) {
     // Utils.log('openChatWithUser: ', userID);
+    this.showSpinner('');
     const asyncTask = async () => {
       try {
+        await Utils.timeout(500);
         const thread = await ChatManager.shared().createSingleThreadWithTarget(user);
-        if (!thread) { return; }
-        this.props.navigation.navigate('Chat', { thread });
+        this.hideSpinner();
+        setTimeout(() => {
+          if (!thread) { return; }
+          this.props.navigation.navigate('Chat', { thread });
+        }, 250);
       } catch (err) {
         Utils.warn('openChatWithUser: error', err);
+        this.hideSpinner();
       }
     };
     asyncTask();
   }
   mReplaceContact(contact) {
+    // Utils.log('mReplaceContact: ', contact);
     let index = -1;
     const contacts = this.state.contacts;
     for (let i = 0; i < contacts.length; i += 1) {
@@ -120,6 +142,26 @@ class ContactsListScreen extends Component {
     });
   }
   // --------------------------------------------------
+  renderContactsList() {
+    const { contacts, contactsExtraData } = this.state;
+    return (
+      <FlatList
+        refreshControl={
+          <RefreshControl
+            style={{ backgroundColor: '#f5f5f5' }}
+            refreshing={this.state.isRefreshing}
+            onRefresh={() => {
+              this.reloadData();
+            }}
+          />
+        }
+        data={contacts}
+        extraData={contactsExtraData}
+        keyExtractor={item => item.uid}
+        renderItem={this.renderContactRow}
+      />
+    );
+  }
   renderContactRow = (row) => {
     const contact = row.item;
     return (
@@ -131,24 +173,25 @@ class ContactsListScreen extends Component {
       />
     );
   }
+  renderSpinner() {
+    const {
+      isSpinnerVisible,
+      spinnerText,
+    } = this.state;
+    return (
+      <Spinner
+        visible={isSpinnerVisible}
+        textContent={spinnerText}
+        textStyle={{ marginTop: 4, color: '#fff' }}
+        overlayColor="#00000080"
+      />
+    );
+  }
   render() {
     return (
       <View style={styles.container}>
-        <FlatList
-          refreshControl={
-            <RefreshControl
-              style={{ backgroundColor: '#f5f5f5' }}
-              refreshing={this.state.isRefreshing}
-              onRefresh={() => {
-                this.reloadData();
-              }}
-            />
-          }
-          data={this.state.contacts}
-          extraData={this.state.contactsExtraData}
-          keyExtractor={item => item.uid}
-          renderItem={this.renderContactRow}
-        />
+        {this.renderContactsList()}
+        {this.renderSpinner()}
       </View>
     );
   }

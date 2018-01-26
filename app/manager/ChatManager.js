@@ -34,6 +34,7 @@ function initChatManager() {
   let mMyUser = {};
   let mObservers = {};
   const mSubscribePaths = [];
+  const mThreadLastMessages = {};
 
   function mUpdateMyUser() {
     FirebaseDatabase.updateUser(mMyUser.uid, mMyUser);
