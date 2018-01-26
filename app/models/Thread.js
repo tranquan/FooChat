@@ -4,6 +4,8 @@
 
 import moment from 'moment/min/moment-with-locales';
 
+import User from './User';
+
 export const THREAD_TYPES = {
   SINGLE: 'single',
   GROUP: 'group',
@@ -13,7 +15,7 @@ export default class Thread {
 
   // meta data
   title = '';
-  photoURL = '';
+  photoImage = '';
   
   // props
   uid = '';
@@ -32,26 +34,13 @@ export default class Thread {
     Thread.mMyUser = user;
   }
 
-  static photoPlaceholder() {
-    return null;
-  }
-
   mGetDefaultSingleThreadTitle() {
-    let title = 'Chat';
-    const users = this.arrayOfUsers();
-    if (users.length >= 2) {
-      if (users[0].uid !== Thread.mMyUser.uid) {
-        title = users[0].fullName;
-      }
-      else if (users[1].uid !== Thread.mMyUser.uid) {
-        title = users[1].fullName;
-      }
-    }
-    return title;
+    const targetUser = this.getSingleThreadTargetUser();
+    return targetUser ? targetUser.fullName : 'Chat';
   }
 
   mGetDefaultGroupThreadTitle() {
-    const users = this.arrayOfUsers();
+    const users = this.getUsersArray();
     const names = users.map((user) => {
       const words = user.fullName.trim().split(' ');
       return words.length > 0 ? words[words.length - 1] : user.fullName.trim();
@@ -60,24 +49,41 @@ export default class Thread {
     return title;
   }
 
+  // UI Logic
   // --------------------------------------------------
 
-  arrayOfUsers() {
+  isSingleThread() {
+    return this.type === THREAD_TYPES.SINGLE;
+  }
+
+  isGroupThread() {
+    return this.type === THREAD_TYPES.GROUP;
+  }
+
+  getUsersArray() {
     // get keys
     const usersObj = this.users;
     const keys = Object.keys(usersObj);
-    // create array if needed
-    if (!this.mArrayOfUsers || this.mArrayOfUsers.length !== keys.length) {
+    // re-create array of users if needed
+    if (!this.mUsersArray || this.mUsersArray.length !== keys.length) {
       const usersArray = [];
       for (let i = 0; i < keys.length; i += 1) {
-        const user = usersObj[keys[i]];
-        if (user) {
+        const userJSON = usersObj[keys[i]];
+        // convert to User object
+        if (userJSON) {
+          const user = Object.assign(new User(), userJSON);
           usersArray.push(user);
         }
       }
-      this.mArrayOfUsers = usersArray;
+      this.mUsersArray = usersArray;
     }
-    return this.mArrayOfUsers;
+    return this.mUsersArray;
+  }
+
+  getSingleThreadTargetUser() {
+    const users = this.getUsersArray();
+    const myUserID = Thread.mMyUser.uid;
+    return users[0].uid === myUserID ? users[1] : users[0];
   }
 
   createTimeMoment() {
@@ -123,11 +129,29 @@ export default class Thread {
     return this.title;
   }
 
-  photoURI() {
-    if (!this.photoURL || this.photoURL.length === 0) {
-      return Thread.photoPlaceholder();
+  photoImageURI() {
+    // single
+    if (this.isSingleThread()) {
+      const targetUser = this.getSingleThreadTargetUser();
+      return targetUser.avatarImageURI();
     }
-    return { uri: this.photoURL };
+    // group
+    if (!this.photoImage || this.photoImage.length === 0) {
+      return this.photoImagePlaceholder();
+    }
+    return { uri: this.photoImage };
+  }
+
+  photoImagePlaceholder() {
+    return require('./img/thread.png');
+  }
+
+  totalUnReadMessages() {
+    return 0;
+  }
+
+  lastMessage() {
+    return 'this is the last message';
   }
 
 }

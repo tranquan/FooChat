@@ -94,7 +94,7 @@ class ChatScreen extends Component {
   }
   initMembers() {
     const members = {};
-    const users = this.state.thread.arrayOfUsers();
+    const users = this.state.thread.getUsersArray();
     for (let i = 0; i < users.length; i += 1) {
       const user = users[i];
       members[user.uid] = user;

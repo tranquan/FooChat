@@ -135,7 +135,6 @@ class ContactsListScreen extends Component {
     return (
       <View style={styles.container}>
         <FlatList
-          ref={o => { this.flatList = o; }}
           refreshControl={
             <RefreshControl
               style={{ backgroundColor: '#f5f5f5' }}

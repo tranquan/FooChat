@@ -5,6 +5,7 @@ import {
   Text,
   Image,
   FlatList,
+  RefreshControl,
   TouchableOpacity,
 } from 'react-native';
 
@@ -31,7 +32,9 @@ class ChatsListScreen extends Component {
     super(props);
 
     this.state = {
+      isRefreshing: false,
       threads: [],
+      threadsExtraData: false,
     };
 
     this.isThreadsAdded = {};
@@ -91,6 +94,23 @@ class ChatsListScreen extends Component {
       threads: [thread].concat(prevState.threads),
     }));
   }
+  reloadData = () => {
+    // const asyncTask = async () => {
+    //   try {
+    //     await ContactsManager.shared().reloadContacts();
+    //     const contacts = ContactsManager.shared().getContactsArray();
+    //     this.setState({
+    //       contacts,
+    //       isRefreshing: false,
+    //     });
+    //   } catch (err) {
+    //     this.setState({
+    //       isRefreshing: false,
+    //     });
+    //   }
+    // };
+    // asyncTask();
+  }
   loadPreviousThreads() {
     const oldestThread = this.getOldestThread();
     const fromUpdateTime = oldestThread ? oldestThread.updateTime : null;
@@ -135,6 +155,15 @@ class ChatsListScreen extends Component {
     return (
       <View style={styles.container}>
         <FlatList
+          refreshControl={
+            <RefreshControl
+              style={{ backgroundColor: '#f5f5f5' }}
+              refreshing={this.state.isRefreshing}
+              onRefresh={() => {
+                this.reloadData();
+              }}
+            />
+          }
           data={this.state.threads}
           extraData={this.state.threads.length}
           keyExtractor={item => item.uid}

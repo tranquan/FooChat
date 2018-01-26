@@ -23,6 +23,11 @@ const THREAD_TYPES = {
   GROUP: 'group',
 };
 
+const MESSAGE_TYPES = {
+  TEXT: 'text',
+  IMAGE: 'image',
+};
+
 const ERRORS = {
   THREAD_NOT_FOUND: 'THREAD_NOT_FOUND',
   USER_NOT_FOUND: 'THREAD_NOT_FOUND',
@@ -290,6 +295,29 @@ class FirebaseDatabase {
     });
   }
 
+  /**
+   * Check whether thread object is valid
+   * @param {Thread} thread 
+   */
+  static mIsThreadValid(thread) {
+    // thread is null, false
+    if (!thread || !thread.users) { 
+      return false; 
+    }
+    // get total users
+    const totalUsers = Object.keys(thread.users).length;
+    // single thread must have 2 users
+    if (thread.type === THREAD_TYPES.SINGLE && totalUsers === 2) {
+      return true;
+    }
+    // group threads must have more than 1 user
+    if (thread.type === THREAD_TYPES.GROUP && totalUsers > 0) {
+      return true;
+    }
+    // others is false
+    return false;
+  }
+
   // --------------------------------------------------
   // Methods - Public API
   // --------------------------------------------------
@@ -414,7 +442,7 @@ class FirebaseDatabase {
         for (let i = 0; i < keys.length; i += 1) {
           const threadID = keys[i];
           const thread = await FirebaseDatabase.getThread(threadID); // eslint-disable-line
-          if (thread) {
+          if (FirebaseDatabase.mIsThreadValid(thread)) {
             threadsArray.push(thread);
           }
         }
