@@ -1,6 +1,13 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import React, { Component } from 'react';
 import { 
-  StyleSheet, 
+  StyleSheet,
+  StatusBar,
   View, 
   Text,
   Image,
@@ -16,6 +23,8 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import Styles from '../../constants/styles';
 import ChatManager from '../../manager/ChatManager';
 import ContactsManager, { CONTACTS_EVENTS } from '../../manager/ContactsManager';
+
+import NavigationBar from './NavigationBar';
 import ContactRow from './ContactRow';
 
 // --------------------------------------------------
@@ -42,24 +51,31 @@ class ContactsListScreen extends Component {
     };
   }
   componentWillMount() {
-
+    StatusBar.setBarStyle('dark-content', true);
   }
   componentDidMount() {
     this.reloadData();
     this.addObservers();
     // test
-    // setTimeout(() => {
-    //   const target = this.state.contacts[0];
-    //   this.openChatWithUser(target)
-    // }, 1000);
+    setTimeout(() => {
+      const target = this.state.contacts[0];
+      this.openChatWithUser(target);
+    }, 1000);
     // end
   }
   componentWillUnmount() {
+    StatusBar.setBarStyle('light-content', true);
     this.removeObservers();
   }
   // --------------------------------------------------
+  onNavBarInboxPress = () => {
+
+  }
+  onNavBarAddPress = () => {
+    
+  }
   onContactPress = (user) => {
-    this.mOpenChatWithUser(user);
+    this.openChatWithUser(user);
   }
   // --------------------------------------------------
   reloadData = () => {
@@ -83,8 +99,8 @@ class ContactsListScreen extends Component {
     const presenceEvent = CONTACTS_EVENTS.CONTACT_PRESENCE_CHANGE;
     ContactsManager.shared().addObserver(presenceEvent, this, (contact) => {
       // Utils.log(`${LOG_TAG}: presence change: `, contact);
-      this.mReplaceContact(contact);
-      this.mRefreshFlatList();
+      this.replaceContact(contact);
+      this.refreshFlatList();
     });
   }
   removeObservers() {
@@ -103,7 +119,7 @@ class ContactsListScreen extends Component {
     });
   }
   // --------------------------------------------------
-  mOpenChatWithUser(user) {
+  openChatWithUser(user) {
     // Utils.log('openChatWithUser: ', userID);
     this.showSpinner('');
     const asyncTask = async () => {
@@ -111,8 +127,8 @@ class ContactsListScreen extends Component {
         await Utils.timeout(500);
         const thread = await ChatManager.shared().createSingleThreadWithTarget(user);
         this.hideSpinner();
+        if (!thread) { return; }
         setTimeout(() => {
-          if (!thread) { return; }
           this.props.navigation.navigate('Chat', { thread });
         }, 250);
       } catch (err) {
@@ -122,8 +138,8 @@ class ContactsListScreen extends Component {
     };
     asyncTask();
   }
-  mReplaceContact(contact) {
-    // Utils.log('mReplaceContact: ', contact);
+  replaceContact(contact) {
+    // Utils.log('replaceContact: ', contact);
     let index = -1;
     const contacts = this.state.contacts;
     for (let i = 0; i < contacts.length; i += 1) {
@@ -136,12 +152,20 @@ class ContactsListScreen extends Component {
       contacts[index] = contact;
     }
   }
-  mRefreshFlatList() {
+  refreshFlatList() {
     this.setState({
       contactsExtraData: !this.state.contactsExtraData,
     });
   }
   // --------------------------------------------------
+  renderNavigationBar() {
+    return (
+      <NavigationBar
+        onInboxPress={this.onNavBarInboxPress}
+        onAddPress={this.onNavBarAddPress}
+      />
+    );
+  }
   renderContactsList() {
     const { contacts, contactsExtraData } = this.state;
     return (
@@ -190,6 +214,7 @@ class ContactsListScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
+        {this.renderNavigationBar()}
         {this.renderContactsList()}
         {this.renderSpinner()}
       </View>
@@ -201,6 +226,7 @@ class ContactsListScreen extends Component {
 
 ContactsListScreen.navigationOptions = () => ({
   title: 'Contacts List', // must have a space or navigation will crash
+  header: null,
   headerStyle: Styles.navigator_header_no_border,
   headerTitleStyle: Styles.navigator_header_title,
   headerTintColor: '#fff',
@@ -225,7 +251,7 @@ const mapStateToProps = (state) => ({
   myUser: state.myUser,
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = () => ({
 
 });
 

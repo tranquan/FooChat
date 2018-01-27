@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import React, { PureComponent } from 'react';
 import {
   StyleSheet,
@@ -11,7 +17,7 @@ import KJButton from '../../components/common/KJButton';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: CreateGroupChat/NavigationBar.js';
+const LOG_TAG = '7777: ContactsList/NavigationBar.js';
 /* eslint-enable */
 
 // --------------------------------------------------
@@ -19,29 +25,29 @@ const LOG_TAG = '7777: CreateGroupChat/NavigationBar.js';
 // --------------------------------------------------
 
 class NavigationBar extends PureComponent {
-  onCancelPress = () => {
-    this.props.onCancelPress();
+  onInboxPress = () => {
+    this.props.onInboxPress();
   }
-  onDonePress = () => {
-    this.props.onDonePress();
+  onAddPress = () => {
+    this.props.onAddPress();
   }
   // --------------------------------------------------
-  renderLeftButton() {
+  renderInboxButton() {
     return (
       <KJButton
-        containerStyle={styles.leftButton}
-        leftIconSource={require('./img/close.png')}
-        leftIconStyle={{ marginLeft: -12 }}
+        containerStyle={styles.barButton}
+        leftIconSource={require('./img/bell.png')}
+        leftIconStyle={{ marginLeft: 12 }}
         onPress={this.onCancelPress}
       />
     );
   }
-  renderRightButton() {
+  renderAddButton() {
     return (
       <KJButton
-        containerStyle={styles.rightButton}
-        title={'Tạo'}
-        titleStyle={{ color: '#007BFA' }}
+        containerStyle={styles.barButton}
+        leftIconSource={require('./img/add.png')}
+        leftIconStyle={{ marginLeft: -12 }}
         onPress={this.onDonePress}
       />
     );
@@ -52,7 +58,7 @@ class NavigationBar extends PureComponent {
         <Text
           style={styles.titleText}
         >
-          {'Cuộc trò chuyện mới'}
+          {'Danh bạ'}
         </Text>
       </View>
     );
@@ -60,9 +66,12 @@ class NavigationBar extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
-        {this.renderLeftButton()}
-        {this.renderTitle()}
-        {this.renderRightButton()}
+        <View style={styles.rowContainer}>
+          {this.renderInboxButton()}
+          {this.renderTitle()}
+          {this.renderAddButton()}
+        </View>
+        <View style={styles.separator} />
       </View>
     );
   }
@@ -71,13 +80,13 @@ class NavigationBar extends PureComponent {
 // --------------------------------------------------
 
 NavigationBar.propTypes = {
-  onCancelPress: PropTypes.func,
-  onDonePress: PropTypes.func,
+  onInboxPress: PropTypes.func,
+  onAddPress: PropTypes.func,
 };
 
 NavigationBar.defaultProps = {
-  onCancelPress: () => {},
-  onDonePress: () => { },
+  onInboxPress: () => { },
+  onAddPress: () => { },
 };
 
 export default NavigationBar;
@@ -87,7 +96,6 @@ export default NavigationBar;
 const styles = StyleSheet.create({
   container: {
     flex: 0,
-    flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
     alignSelf: 'stretch',
@@ -96,15 +104,17 @@ const styles = StyleSheet.create({
     height: 64,
     backgroundColor: '#fff',
   },
-  leftButton: {
-    marginTop: 0,
-    width: 64,
-    height: 44,
-    backgroundColor: '#f000',
+  rowContainer: {
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    backgroundColor: '#fff',
   },
-  rightButton: {
+  barButton: {
     marginTop: 0,
-    width: 64,
+    width: 44,
     height: 44,
     backgroundColor: '#f000',
   },
@@ -127,5 +137,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     textAlign: 'center',
+  },
+  separator: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginLeft: 0,
+    marginRight: 0,
   },
 });

@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -164,12 +170,7 @@ class CreateGroupChat extends Component {
   }
   renderSearchBar() {
     return (
-      <View
-        style={{
-          flex: 0,
-          backgroundColor: '#fff',
-        }}
-      >
+      <View style={styles.searchBarContainer}>
         <SearchBar
           lightTheme
           containerStyle={{ backgroundColor: '#fff' }}
@@ -178,10 +179,8 @@ class CreateGroupChat extends Component {
           onClearText={this.onSearchBarClearText}
           placeholder={'Tìm kiếm mọi người'}
         />
-        {
-          // <View style={styles.topLine} />
-          // <View style={styles.bottomLine} />
-        }
+        <View style={styles.topLine} />
+        <View style={styles.bottomLine} />
       </View>
     );
   }
@@ -190,15 +189,8 @@ class CreateGroupChat extends Component {
       return null;
     }
     return (
-      <View style={{ flex: 0 }}>
+      <View style={styles.membersListContainer}>
         <FlatList
-          style={{
-            paddingTop: 16,
-            paddingBottom: 18,
-            paddingLeft: 12,
-            paddingRight: 12,
-            backgroundColor: '#f5f5f5',
-          }}
           horizontal
           data={this.state.members}
           extraData={this.state.membersExtraData}
@@ -221,7 +213,7 @@ class CreateGroupChat extends Component {
   }
   renderContactsList() {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={styles.contactsListContainer}>
         <FlatList
           data={this.state.contacts}
           extraData={this.state.contactsExtraData}
@@ -309,20 +301,37 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     backgroundColor: '#eee',
   },
+  searchBarContainer: {
+    flex: 0,
+    paddingTop: 12,
+    paddingBottom: 12,
+    backgroundColor: '#f5f5f5',
+  },
+  membersListContainer: {
+    flex: 0,
+    paddingTop: 12,
+    paddingBottom: 4,
+    paddingLeft: 12,
+    paddingRight: 12,
+    backgroundColor: '#f5f5f5',
+  },
+  contactsListContainer: {
+    flex: 1,
+  },
   topLine: {
     position: 'absolute',
     left: 0,
-    top: 0,
+    top: 12,
     right: 0,
     height: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   bottomLine: {
     position: 'absolute',
     left: 0,
-    bottom: 0,
+    bottom: 12,
     right: 0,
     height: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
 });

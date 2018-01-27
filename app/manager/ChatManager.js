@@ -307,8 +307,9 @@ function initChatManager() {
       const thread = await FirebaseDatabase.getThread(threadID);
       return thread;
     },
-    async getMyThreads(fromUpdateTime) {
-      const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid, fromUpdateTime);
+    async getMyThreads(fromUpdateTime = null, maxThreadsFetch = 44) {
+      const threads = 
+        await FirebaseDatabase.getThreadsOfUser(mMyUser.uid, fromUpdateTime, maxThreadsFetch);
       return threads.map(thread => {
         return Object.assign(new Thread(), thread);
       });

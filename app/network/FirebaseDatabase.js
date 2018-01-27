@@ -14,6 +14,7 @@ const DATABASE = firebase.database();
 const CONNECTED_REF = DATABASE.ref('.info/connected');
 const CHAT_REF = DATABASE.ref('chat');
 const USERS_REF = CHAT_REF.child('users');
+// const USERS_THREADS_REF = CHAT_REF.child('users_threads');
 const USERS_PRESENCE_REF = CHAT_REF.child('users_presence');
 const THREADS_REF = CHAT_REF.child('threads');
 const THREADS_MESSAGES_REF = CHAT_REF.child('threads_messages');
@@ -45,6 +46,14 @@ class FirebaseDatabase {
   // -> for instance: if add user to thread, caller need to check whether thread exists or not
   // --------------------------------------------------
 
+  static mRemoveUserNonMetaData(user) {
+    const userMetaData = user;
+    delete userMetaData.threads;
+    delete userMetaData.presenceStatus;
+    delete userMetaData.lastTimeOnline;
+    return userMetaData;
+  }
+
   static mUpdateUser(userID, metaData) {
     // filterout non-metadata props
     const userMetaData = metaData;
@@ -56,10 +65,7 @@ class FirebaseDatabase {
       const fbUserID = FirebaseDatabase.firebaseUserID(userID);
       const userRef = USERS_REF.child(fbUserID);
       userRef.update(userMetaData, (err) => {
-        if (!err) {
-          resolve(true);
-        }
-        resolve(false);
+        resolve(err === null);
       });
     });
   }
@@ -74,6 +80,7 @@ class FirebaseDatabase {
    * @returns Promise contain true if success, or exception
    */
   static mAddSingleThread(user1, user2) {
+    // request
     return new Promise((resolve, reject) => {
       const threadID = FirebaseDatabase.generateSingleThreadID(user1.uid, user2.uid);
       if (!threadID) {
@@ -83,8 +90,10 @@ class FirebaseDatabase {
       const members = {};
       const fbUserID1 = FirebaseDatabase.firebaseUserID(user1.uid);
       const fbUserID2 = FirebaseDatabase.firebaseUserID(user2.uid);
-      members[fbUserID1] = { ...user1 };
-      members[fbUserID2] = { ...user2 };
+      const user1MetaData = FirebaseDatabase.mRemoveUserNonMetaData(user1);
+      const user2MetaData = FirebaseDatabase.mRemoveUserNonMetaData(user2);
+      members[fbUserID1] = user1MetaData;
+      members[fbUserID2] = user2MetaData;
       THREADS_REF.child(threadID).set({
         uid: threadID,
         type: THREAD_TYPES.SINGLE,
@@ -363,6 +372,31 @@ class FirebaseDatabase {
     return result;
   }
 
+  static async toggleContactFavorite(userID, contactID, isFavorite) {
+    const fbUserID = FirebaseDatabase.firebaseUserID(userID);
+    const fbContactID = FirebaseDatabase.firebaseUserID(contactID);
+    const threadRef = USERS_REF.child(`${fbUserID}/contacts/${fbContactID}`);
+    return new Promise((resolve) => {
+      threadRef.update({
+        isFavorite,
+      }, (err) => {
+        resolve(err === null);
+      });
+    });
+  }
+
+  static async toggleFavoriteThread(userID, threadID, isFavorite) {
+    const fbUserID = FirebaseDatabase.firebaseUserID(userID);
+    const threadRef = USERS_REF.child(`${fbUserID}/threads/${threadID}`);
+    return new Promise((resolve) => {
+      threadRef.update({
+        isFavorite,
+      }, (err) => {
+        resolve(err === null);
+      });
+    });
+  }
+
   // CHAT
   // --------------------------------------------------
 
@@ -423,16 +457,16 @@ class FirebaseDatabase {
    * Get user's threads base on userID
    * @param {string} userID
    * @param {timestamp} fromUpdateTime
-   * @returns array of Thread, order by updateTime, 1st one is the newest
+   * @returns array of Thread, order desc by updateTime, 1st one is the newest
    */
-  static async getThreadsOfUser(userID, fromUpdateTime) {
+  static async getThreadsOfUser(userID, fromUpdateTime = null, maxThreadsFetch = 44) {
     try {
       const fbUserID = FirebaseDatabase.firebaseUserID(userID);
       let threadsQuery = USERS_REF.child(fbUserID).child('threads').orderByChild('updateTime');
       if (fromUpdateTime) {
         threadsQuery = threadsQuery.startAt(fromUpdateTime);
       }
-      const threads = await threadsQuery.once('value');
+      const threads = await threadsQuery.limitToLast(maxThreadsFetch).once('value');
       if (threads && threads.exists()) {
         // convert object to array
         const threadsObj = threads.val();

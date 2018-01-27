@@ -37,8 +37,8 @@ const ChatsListStackNavigator = StackNavigator({
 // each tab is a stack navigator
 const MainTabNavigator = TabNavigator(
   {
-    ChatsListTab: { screen: ChatsListStackNavigator },
     ContactsListTab: { screen: ContactsListStackNavigator },
+    ChatsListTab: { screen: ChatsListStackNavigator },
     ProfileTab: { screen: Profile },
   },
   {

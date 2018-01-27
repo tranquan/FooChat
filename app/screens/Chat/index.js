@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { 
-  StyleSheet, 
+  StyleSheet,
+  StatusBar,
   View, 
   Text, 
   Image 
@@ -16,6 +17,8 @@ import Styles from '../../constants/styles';
 import ChatManager, { CHAT_EVENTS } from '../../manager/ChatManager';
 import Thread from '../../models/Thread';
 import Message from '../../models/Message';
+
+import NavigationBar from './NavigationBar';
 
 // --------------------------------------------------
 
@@ -46,6 +49,7 @@ class ChatScreen extends Component {
     this.members = {};
   }
   componentWillMount() {
+    StatusBar.setBarStyle('dark-content', true);
     // cache current thread
     const { thread } = this.props.navigation.state.params;
     // update state
@@ -68,12 +72,19 @@ class ChatScreen extends Component {
     this.loadPreviousMessages(INITIAL_MESSAGES_LOAD);
   }
   componentWillUnmount() {
+    StatusBar.setBarStyle('light-content', true);
     // remove observer
     const thread = this.state.thread;
     if (!thread) { return; }
     ChatManager.shared().removeObserver(CHAT_EVENTS.NEW_MESSAGE, this);
   }
   // --------------------------------------------------
+  onNavBarBackPress = () => {
+    this.props.navigation.goBack();
+  }
+  onNavBarTitlePress = () => {
+
+  }
   onSend = (messages = []) => {
     // Utils.log(`ChatScreen: onSend: messages: ${messages.length}`, messages);
     if (messages.length === 0) { return; }
@@ -195,22 +206,38 @@ class ChatScreen extends Component {
     }));
   }
   // --------------------------------------------------
+  renderNavigationBar() {
+    const { thread } = this.state.thread;
+    return (
+      <NavigationBar
+        thread={thread}
+        onBackPress={this.onNavBarBackPress}
+        onTitlePress={this.onNavBarTitlePress}
+      />
+    );
+  }
+  renderMessagesList() {
+    return (
+      <GiftedChat
+        user={{
+          _id: this.props.myUser.uid,
+        }}
+        placeholder={'Type a message ...'}
+
+        messages={this.state.giftedMessages}
+        onSend={this.onSend}
+
+        loadEarlier={this.state.loadEarlier}
+        isLoadingEarlier={this.state.isLoadingEarlier}
+        onLoadEarlier={this.onLoadEarlier}
+      />
+    );
+  }
   render() {
     return (
       <View style={styles.container}>
-        <GiftedChat
-          user={{
-            _id: this.props.myUser.uid,
-          }}
-          placeholder={'Type a message ...'}
-          
-          messages={this.state.giftedMessages}
-          onSend={this.onSend}
-
-          loadEarlier={this.state.loadEarlier}
-          isLoadingEarlier={this.state.isLoadingEarlier}
-          onLoadEarlier={this.onLoadEarlier}
-        />
+        {this.renderNavigationBar()}
+        {this.renderMessagesList()}
       </View>
     );
   }
@@ -220,6 +247,7 @@ class ChatScreen extends Component {
 
 ChatScreen.navigationOptions = () => ({
   title: 'Chat',
+  header: null,
   headerBackTitle: ' ',
   headerStyle: Styles.navigator_header_no_border,
   headerTitleStyle: Styles.navigator_header_title,

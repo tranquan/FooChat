@@ -19,16 +19,20 @@ export default class User {
   
   uid = '';
   email = '';
-  phoneNumber = '';
+  mPhoneNumber = '';
   standardPhoneNumber = '';
   fullName = '';
-  phoneNumber = '';
   avatarImage = '';
   wallImage = '';
   presenceStatus = User.PRESENCE_STATUS.UNKNOWN;
   lastTimeOnline = 0;
+  
+  get phoneNumber() {
+    return this.mPhoneNumber;
+  }
 
   set phoneNumber(value) {
+    this.mPhoneNumber = value;
     this.standardPhoneNumber = User.standardizePhoneNumber(value);
   }
 
