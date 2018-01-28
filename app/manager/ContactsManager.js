@@ -18,7 +18,7 @@ export const CONTACTS_EVENTS = {
 
 /* eslint-disable */
 import Utils from '../utils/Utils';
-const LOG_TAG = '7777: ContactsManager.js';
+const LOG_TAG = 'ContactsManager.js';
 /* eslint-enable */
 
 // --------------------------------------------------

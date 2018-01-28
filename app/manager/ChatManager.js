@@ -23,8 +23,11 @@ export const CHAT_EVENTS = {
 
 /* eslint-disable */
 import Utils from '../utils/Utils';
-const LOG_TAG = '7777: ChatManager.js';
+const LOG_TAG = 'ChatManager.js';
 /* eslint-enable */
+
+const INITIAL_THREADS_LOAD = 255; // initial threads will be loaded on the beginning
+const INITIAL_MESSAGES_LOAD = 255; // initial messages will be loaded on the beginning
 
 function initChatManager() {
   
@@ -33,8 +36,8 @@ function initChatManager() {
 
   let mMyUser = {};
   let mObservers = {};
-  const mSubscribePaths = [];
-  const mThreadLastMessages = {};
+  const mSubscribePaths = {};
+  // const mThreadLastMessages = {};
 
   function mUpdateMyUser() {
     FirebaseDatabase.updateUser(mMyUser.uid, mMyUser);
@@ -43,6 +46,37 @@ function initChatManager() {
   // EVENT HANDLERs
   // --------------------
 
+  const onNewThread = (snapshot) => {
+    // Utils.log(`${LOG_TAG}: onNewThread: ${snapshot.key}`, snapshot.val());
+    // check thread
+    const threadID = snapshot.key;
+    if (!threadID) { return; }
+    // fetch thread
+    const asyncTask = async () => {
+      try {
+        const threadJSON = await FirebaseDatabase.getThread(threadID);
+        const thread = Object.assign(new Thread(), threadJSON);
+        mNotifyObservers(CHAT_EVENTS.NEW_THREAD, thread);
+        // mSubscribeMyThreadsChangeForThread(thread.uid);
+        // mSubscribeNewMessageInThread(thread.uid);
+      } catch (err) {
+        Utils.warn(`onNewThread: exception: ${err}`, err);
+      }
+    };
+    asyncTask();
+  };
+
+  // onThreadChange() = (snapshot) => {
+
+  // };
+
+  const onNewMessage = (snapshot) => {
+    // Utils.log(`${LOG_TAG}: onNewMessage: ${snapshot.key}`, snapshot.val());
+    const messageJSON = snapshot.val();
+    const message = Object.assign(new Message(), messageJSON);
+    const threadID = snapshot.ref.parent.parent.key;
+    mNotifyObservers(CHAT_EVENTS.NEW_MESSAGE, message, threadID);
+  };
 
   // EVENT SUBSCRIBEs
   // --------------------
@@ -94,9 +128,9 @@ function initChatManager() {
         mNotifyObservers(CHAT_EVENTS.THREAD_CHANGE, thread);
       });
     // keep track to remove later
-    const path = `${threadRef.key}/${threadID}`;
-    mSubscribePaths.push(path);
-    Utils.log(`mSubscribeMyThreadsChangeForThread: subscribe path: ${path}`);
+    // const path = `${threadRef.key}/${threadID}`;
+    // mSubscribePaths.push(path);
+    // Utils.log(`mSubscribeMyThreadsChangeForThread: subscribe path: ${path}`);
   }
 
   /**
@@ -104,33 +138,53 @@ function initChatManager() {
    * - to support add/remove user
    */
   function mSubscribeNewThread() {
-    // subscribe
-    const usersRef = FirebaseDatabase.getUsersRef();
+    // Utils.log(`${LOG_TAG}: mSubscribeNewThread:`);
+    const usersThreadsRef = FirebaseDatabase.getUsersThreadsRef();
     const fbUserID = FirebaseDatabase.firebaseUserID(mMyUser.uid);
-    usersRef.child(`${fbUserID}/threads`)
-      .limitToLast(1)
-      .on('child_added', (snapshot) => {
-        // fetch thread
-        const threadID = snapshot.key;
-        if (threadID) {
-          const asyncTask = async () => {
-            try {
-              const threadJSON = await FirebaseDatabase.getThread(threadID);
-              const thread = Object.assign(new Thread(), threadJSON);
-              mNotifyObservers(CHAT_EVENTS.NEW_THREAD, thread);
-              mSubscribeMyThreadsChangeForThread(thread.uid);
-            } catch (err) {
-              Utils.warn(`mSubscribeNewThread: fetch thread error: ${err}`, err);
-            }
-          };
-          asyncTask();
-        }
-      });
-    // keep track to remove later
-    const path = `${usersRef.key}/${fbUserID}/threads`;
-    mSubscribePaths.push(path);
-    Utils.log(`mSubscribeNewThread: subscribe path: ${path}`);
+    // un-subscribe old path
+    const path = `${usersThreadsRef.key}/${fbUserID}/threads`;
+    mUnSubScribeChatPath(path);
+    // subscribe
+    usersThreadsRef.child(`${fbUserID}/threads`)
+      .orderByChild('updateTime')
+      .limitToLast(INITIAL_THREADS_LOAD)
+      .on('child_added', onNewThread);
+    // track to un-subscribe later
+    mSubscribePaths[path] = true;
   }
+
+  /**
+   * for each of my thread
+   * listen for /threads_messages/<my_thread_id>/messages -> `child_added`
+   * - to support new message
+   */
+  // function mSubscribeNewMessage() {
+  //   const asyncTask = async () => {
+  //     try {
+  //       const threadsMessagesRef = FirebaseDatabase.getThreadsMessagesRef();
+  //       const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
+  //       for (let i = 0; i < threads.length; i += 1) {
+  //         // subscribe
+  //         const thread = threads[i];
+  //         threadsMessagesRef.child(`${thread.uid}/messages`)
+  //           .limitToLast(1)
+  //           .on('child_added', (snapshot) => {
+  //             const messageJSON = snapshot.val();
+  //             const message = Object.assign(new Message(), messageJSON);
+  //             const threadID = snapshot.ref.parent.parent.key;
+  //             mNotifyObservers(CHAT_EVENTS.NEW_MESSAGE, message, threadID);
+  //           });
+  //         // keep track to remove later
+  //         // const path = `${threadsMessagesRef.key}/${thread.uid}/messages`;
+  //         // mSubscribePaths.push(path);
+  //         // Utils.log(`mSubscribeNewMessage: subscribe path: ${path}`);
+  //       }
+  //     } catch (err) {
+  //       Utils.warn('mSubscribeIncomingMessage: error', err);
+  //     }
+  //   };
+  //   asyncTask();
+  // }
 
   /**
    * for each of my thread
@@ -140,29 +194,35 @@ function initChatManager() {
   function mSubscribeNewMessage() {
     const asyncTask = async () => {
       try {
-        const threadsMessagesRef = FirebaseDatabase.getThreadsMessagesRef();
         const threads = await FirebaseDatabase.getThreadsOfUser(mMyUser.uid);
+        if (!threads) { 
+          Utils.warn(`${LOG_TAG}: mSubscribeNewMessage: threads is null:`);
+          return;
+        }
         for (let i = 0; i < threads.length; i += 1) {
-          // subscribe
           const thread = threads[i];
-          threadsMessagesRef.child(`${thread.uid}/messages`)
-            .limitToLast(1)
-            .on('child_added', (snapshot) => {
-              const messageJSON = snapshot.val();
-              const message = Object.assign(new Message(), messageJSON);
-              const threadID = snapshot.ref.parent.parent.key;
-              mNotifyObservers(CHAT_EVENTS.NEW_MESSAGE, message, threadID);
-            });
-          // keep track to remove later
-          const path = `${threadsMessagesRef.key}/${thread.uid}/messages`;
-          mSubscribePaths.push(path);
-          Utils.log(`mSubscribeNewMessage: subscribe path: ${path}`);
+          mSubscribeNewMessageInThread(thread.uid);
         }
       } catch (err) {
-        Utils.warn('mSubscribeIncomingMessage: error', err);
+        Utils.warn(`${LOG_TAG}: mSubscribeNewMessage: exc:`, err);
       }
     };
     asyncTask();
+  }
+
+  function mSubscribeNewMessageInThread(threadID) {
+    Utils.log(`${LOG_TAG}: subscribeNewMessageInThread: ${threadID}`);
+    const threadsMessagesRef = FirebaseDatabase.getThreadsMessagesRef();
+    // un-subscribe old path
+    const path = `${threadsMessagesRef.key}/${threadID}/messages`;
+    mUnSubScribeChatPath(path);
+    // subscribe
+    threadsMessagesRef.child(`${threadID}/messages`)
+      .orderByChild('updateTime')
+      .limitToLast(INITIAL_MESSAGES_LOAD)
+      .on('child_added', onNewMessage);
+    // track to un-subscribe later
+    mSubscribePaths[path] = true;
   }
 
   /**
@@ -193,30 +253,32 @@ function initChatManager() {
   //   asyncTask();
   // }
 
-  function mUnSubsribePath(path) {
-    // turn-off event
-    const database = FirebaseDatabase.getDatabase();
-    const ref = database.ref(path);
-    ref.off();
-    // remove path in cached
-    let removeIndex = -1;
-    for (let i = 0; i < mSubscribePaths.length; i += 1) {
-      if (mSubscribePaths[i] === path) {
-        removeIndex = i;
-        break;
-      }
+  /**
+   * Un-Subscribe event at full path /chat/<path>
+   */
+  function mUnSubScribeChatPath(path) {
+    // Utils.log(`${LOG_TAG}: mUnSubScribePath: ${path}`);
+    // is subscribe before
+    if (!mSubscribePaths[path]) {
+      return;
     }
-    if (removeIndex >= 0) {
-      mSubscribePaths.splice(removeIndex, 1);
-    }
+    // un-subscribe
+    mSubscribePaths[path] = null;
+    const chatRef = FirebaseDatabase.getChatRef();
+    chatRef.child(path).off();
   }
 
-  function mUnSubscribeAllPaths() {
-    const database = FirebaseDatabase.getDatabase();
-    while (mSubscribePaths.length > 0) {
-      const path = mSubscribePaths.pop();
-      const ref = database.ref(path);
-      ref.off();
+  /**
+   * Un-Subscribe event at all paths in mSubscribePaths
+   */
+  function mUnSubscribeAllChatPaths() {
+    // Utils.log(`${LOG_TAG}: mUnSubscribeAllChatPaths:`);
+    const chatRef = FirebaseDatabase.getChatRef();
+    const paths = Object.keys(mSubscribePaths);
+    for (let i = 0; i < paths.length; i += 1) {
+      const path = paths[i];
+      mSubscribePaths[path] = null;
+      chatRef.child(path).off();
     }
   }
 
@@ -251,7 +313,7 @@ function initChatManager() {
     goOffline() {
       FirebaseDatabase.getDatabase().goOffline();
       FirebaseDatabase.getConnectedRef().off();
-      mUnSubscribeAllPaths();
+      mUnSubscribeAllChatPaths();
     },
     setup(user) {
 
@@ -267,9 +329,10 @@ function initChatManager() {
       mUpdateMyUser();
       
       // mSubscribeMyUserChange();
-      mSubscribeMyThreadsChange();
+      // mSubscribeMyThreadsChange();
       mSubscribeNewThread();
       mSubscribeNewMessage();
+      // mSubscribeNewMessage();
       // mSubscribeThreadUsersChange();
     },
     addObserver(name, target, callback) {
@@ -336,9 +399,9 @@ function initChatManager() {
       }
       return Object.assign(new Message(), newMessage);
     },
-    async getMessagesInThread(threadID, fromMessage = null, maxMessages = 44) {
+    async getMessagesInThread(threadID, fromCreateTime = null, maxMessages = 65) {
       const messages = 
-        await FirebaseDatabase.getMessagesInThread(threadID, fromMessage, maxMessages);
+        await FirebaseDatabase.getMessagesInThread(threadID, fromCreateTime, maxMessages);
       return messages.map(message => {
         return Object.assign(new Message(), message);
       });

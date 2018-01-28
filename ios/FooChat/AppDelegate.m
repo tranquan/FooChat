@@ -21,7 +21,7 @@
   // config firebase
   [FIRApp configure];
   // enable offline capabilities
-  [FIRDatabase database].persistenceEnabled = YES;
+  // [FIRDatabase database].persistenceEnabled = YES;
   
   NSURL *jsCodeLocation;
 

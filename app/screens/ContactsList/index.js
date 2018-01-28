@@ -57,10 +57,10 @@ class ContactsListScreen extends Component {
     this.reloadData();
     this.addObservers();
     // test
-    setTimeout(() => {
-      const target = this.state.contacts[0];
-      this.openChatWithUser(target);
-    }, 1000);
+    // setTimeout(() => {
+    //   const target = this.state.contacts[0];
+    //   this.openChatWithUser(target);
+    // }, 1000);
     // end
   }
   componentWillUnmount() {
@@ -129,6 +129,7 @@ class ContactsListScreen extends Component {
         this.hideSpinner();
         if (!thread) { return; }
         setTimeout(() => {
+          Utils.log(`${LOG_TAG}: openChatWithUser: thread: `, thread);
           this.props.navigation.navigate('Chat', { thread });
         }, 250);
       } catch (err) {

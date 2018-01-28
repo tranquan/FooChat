@@ -8,13 +8,12 @@ import firebase from 'react-native-firebase';
 
 import User from '../models/User';
 import Thread from '../models/Thread';
-import Utils from '../utils/Utils';
 
 const DATABASE = firebase.database();
 const CONNECTED_REF = DATABASE.ref('.info/connected');
 const CHAT_REF = DATABASE.ref('chat');
 const USERS_REF = CHAT_REF.child('users');
-// const USERS_THREADS_REF = CHAT_REF.child('users_threads');
+const USERS_THREADS_REF = CHAT_REF.child('users_threads');
 const USERS_PRESENCE_REF = CHAT_REF.child('users_presence');
 const THREADS_REF = CHAT_REF.child('threads');
 const THREADS_MESSAGES_REF = CHAT_REF.child('threads_messages');
@@ -37,6 +36,16 @@ const ERRORS = {
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
 };
 
+// --------------------------------------------------
+
+/* eslint-disable */
+import Utils from '../utils/Utils';
+const LOG_TAG = 'FirebaseDatabase.js';
+/* eslint-enable */
+
+// --------------------------------------------------
+// FirebaseDatabase
+// --------------------------------------------------
 class FirebaseDatabase {
 
   // --------------------------------------------------
@@ -47,19 +56,16 @@ class FirebaseDatabase {
   // --------------------------------------------------
 
   static mRemoveUserNonMetaData(user) {
-    const userMetaData = user;
+    const userMetaData = Object.assign({}, user);
     delete userMetaData.threads;
     delete userMetaData.presenceStatus;
     delete userMetaData.lastTimeOnline;
     return userMetaData;
   }
 
-  static mUpdateUser(userID, metaData) {
-    // filterout non-metadata props
-    const userMetaData = metaData;
-    delete userMetaData.threads;
-    delete userMetaData.presenceStatus;
-    delete userMetaData.lastTimeOnline;
+  static mUpdateUser(userID, user) {
+    // filter out non-metadata props
+    const userMetaData = FirebaseDatabase.mRemoveUserNonMetaData(user);
     // request
     return new Promise((resolve) => {
       const fbUserID = FirebaseDatabase.firebaseUserID(userID);
@@ -124,8 +130,9 @@ class FirebaseDatabase {
     const members = {};
     for (let i = 0; i < users.length; i += 1) {
       const user = users[i];
+      const userMetaData = FirebaseDatabase.mRemoveUserNonMetaData(user);
       const fbUserID = FirebaseDatabase.firebaseUserID(user.uid);
-      members[fbUserID] = { ...user };
+      members[fbUserID] = { ...userMetaData };
     }
     // add thread
     return new Promise((resolve, reject) => {
@@ -162,16 +169,20 @@ class FirebaseDatabase {
    */
   static mAddThreadIDsToUser(userID, threadIDs) {
     const fbUserID = FirebaseDatabase.firebaseUserID(userID);
-    const userThreadsRef = USERS_REF.child(fbUserID).child('threads');
-    const tasks = [];
+    const userThreadsRef = USERS_THREADS_REF.child(`${fbUserID}/threads`);
+    const newThreads = {};
     for (let i = 0; i < threadIDs.length; i += 1) {
       const threadID = threadIDs[i];
-      tasks.push(userThreadsRef.child(threadID).set({
+      newThreads[threadID] = {
         createTime: firebase.database.ServerValue.TIMESTAMP,
         updateTime: firebase.database.ServerValue.TIMESTAMP,
-      }));
+      };
     }
-    return Promise.all(tasks);
+    return new Promise((resolve) => {
+      userThreadsRef.update({ ...newThreads }, err => {
+        resolve(err === null);
+      });
+    });
   }
 
   /**
@@ -181,13 +192,17 @@ class FirebaseDatabase {
    */
   static mRemoveThreadIDsFromUser(userID, threadIDs) {
     const fbUserID = FirebaseDatabase.firebaseUserID(userID);
-    const userThreadsRef = USERS_REF.child(fbUserID).child('threads');
-    const tasks = [];
+    const userThreadsRef = USERS_THREADS_REF.child(fbUserID).child('threads');
+    const threads = {};
     for (let i = 0; i < threadIDs.length; i += 1) {
       const threadID = threadIDs[i];
-      tasks.push(userThreadsRef.child(threadID).remove());
+      threads[threadID] = null;
     }
-    return Promise.all(tasks);
+    return new Promise((resolve) => {
+      userThreadsRef.update({ ...threads }, err => {
+        resolve(err === null);
+      });
+    });
   }
 
   /**
@@ -256,12 +271,14 @@ class FirebaseDatabase {
    */
   static mAddMessageToThread(threadID, message) {
     return new Promise((resolve, reject) => {
-      const threadMessagesRef = THREADS_MESSAGES_REF.child(threadID).child('messages');
+      // push new item
+      const threadMessagesRef = THREADS_MESSAGES_REF.child(`${threadID}/messages`);
       const messageRef = threadMessagesRef.push({});
       if (!messageRef) {
         resolve(null);
         return;
       }
+      // set message
       const messageID = messageRef.key;
       messageRef.set({
         ...message,
@@ -339,6 +356,8 @@ class FirebaseDatabase {
 
   static getUsersRef() { return USERS_REF; }
 
+  static getUsersThreadsRef() { return USERS_THREADS_REF; }
+
   static getUsersPresenceRef() { return USERS_PRESENCE_REF; }
 
   static getThreadsRef() { return THREADS_REF; }
@@ -367,35 +386,46 @@ class FirebaseDatabase {
   // CONTACTS
   // --------------------------------------------------
 
-  static async updateUser(userID, metaData) {
-    const result = FirebaseDatabase.mUpdateUser(userID, metaData);
-    return result;
+  /**
+   * Update user metadata
+   * @param {string} userID 
+   * @param {User} user 
+   * @returns true/false
+   */
+  static async updateUser(userID, user) {
+    try {
+      const result = await FirebaseDatabase.mUpdateUser(userID, user);
+      return result;
+    } catch (err) {
+      Utils.warn(`${LOG_TAG}: updateUser exc: ${err}`, err);
+      return false;
+    }
   }
 
-  static async toggleContactFavorite(userID, contactID, isFavorite) {
-    const fbUserID = FirebaseDatabase.firebaseUserID(userID);
-    const fbContactID = FirebaseDatabase.firebaseUserID(contactID);
-    const threadRef = USERS_REF.child(`${fbUserID}/contacts/${fbContactID}`);
-    return new Promise((resolve) => {
-      threadRef.update({
-        isFavorite,
-      }, (err) => {
-        resolve(err === null);
-      });
-    });
-  }
+  // static async toggleContactFavorite(userID, contactID, isFavorite) {
+  //   const fbUserID = FirebaseDatabase.firebaseUserID(userID);
+  //   const fbContactID = FirebaseDatabase.firebaseUserID(contactID);
+  //   const threadRef = USERS_REF.child(`${fbUserID}/contacts/${fbContactID}`);
+  //   return new Promise((resolve) => {
+  //     threadRef.update({
+  //       isFavorite,
+  //     }, (err) => {
+  //       resolve(err === null);
+  //     });
+  //   });
+  // }
 
-  static async toggleFavoriteThread(userID, threadID, isFavorite) {
-    const fbUserID = FirebaseDatabase.firebaseUserID(userID);
-    const threadRef = USERS_REF.child(`${fbUserID}/threads/${threadID}`);
-    return new Promise((resolve) => {
-      threadRef.update({
-        isFavorite,
-      }, (err) => {
-        resolve(err === null);
-      });
-    });
-  }
+  // static async toggleFavoriteThread(userID, threadID, isFavorite) {
+  //   const fbUserID = FirebaseDatabase.firebaseUserID(userID);
+  //   const threadRef = USERS_REF.child(`${fbUserID}/threads/${threadID}`);
+  //   return new Promise((resolve) => {
+  //     threadRef.update({
+  //       isFavorite,
+  //     }, (err) => {
+  //       resolve(err === null);
+  //     });
+  //   });
+  // }
 
   // CHAT
   // --------------------------------------------------
@@ -448,7 +478,7 @@ class FirebaseDatabase {
       }
       return null;
     } catch (err) {
-      Utils.warn(`getThread error: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: getThread exc: ${err}`, err);
       return null;
     }
   }
@@ -459,11 +489,14 @@ class FirebaseDatabase {
    * @param {timestamp} fromUpdateTime
    * @returns array of Thread, order desc by updateTime, 1st one is the newest
    */
-  static async getThreadsOfUser(userID, fromUpdateTime = null, maxThreadsFetch = 44) {
+  static async getThreadsOfUser(userID, fromUpdateTime = null, maxThreads = 65) {
+    // Utils.log(`${LOG_TAG}: getThreadsOfUser: ${userID}, ${fromUpdateTime}, ${maxThreads}`);
     try {
       const fbUserID = FirebaseDatabase.firebaseUserID(userID);
-      let threadsQuery = USERS_REF.child(fbUserID).child('threads').orderByChild('updateTime');
+      let maxThreadsFetch = maxThreads + 8;
+      let threadsQuery = USERS_THREADS_REF.child(`${fbUserID}/threads`).orderByChild('updateTime');
       if (fromUpdateTime) {
+        maxThreadsFetch += 1;
         threadsQuery = threadsQuery.startAt(fromUpdateTime);
       }
       const threads = await threadsQuery.limitToLast(maxThreadsFetch).once('value');
@@ -471,6 +504,10 @@ class FirebaseDatabase {
         // convert object to array
         const threadsObj = threads.val();
         const keys = Object.keys(threadsObj);
+        // remove the first one if fetch from a message
+        if (keys.length > 0 && fromUpdateTime) {
+          keys.shift();
+        }
         // fetch threads
         const threadsArray = [];
         for (let i = 0; i < keys.length; i += 1) {
@@ -492,7 +529,7 @@ class FirebaseDatabase {
       }
       return [];
     } catch (err) {
-      Utils.warn(`getThreadsOfUser error: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: getThreadsOfUser exc: ${err}`, err);
       return [];
     }
   }
@@ -513,7 +550,7 @@ class FirebaseDatabase {
       }
       return null;
     } catch (err) {
-      Utils.warn(`getMessageInThread error: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: getMessageInThread exc: ${err}`, err);
       return null;
     }
   }
@@ -533,7 +570,7 @@ class FirebaseDatabase {
       }
       return null;
     } catch (err) {
-      Utils.warn(`getLastMessageInThread error: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: getLastMessageInThread exc: ${err}`, err);
       return null;
     }
   }
@@ -543,25 +580,28 @@ class FirebaseDatabase {
    * @param {string} threadID 
    * @param {string} fromMessage: message key / uid
    * @param {number} maxMessages
-   * @returns array of Message, order by createTime, 1st message is the newest
+   * @returns array of Message, order desc by createTime, 1st message is the newest
    */
-  static async getMessagesInThread(threadID, fromMessage = null, maxMessages = 44) {
+  static async getMessagesInThread(threadID, fromCreateTime = null, maxMessages = 65) {
+    // Utils.log(`${LOG_TAG}: getMessagesInThread: ${threadID}, ${fromCreateTime}, ${maxMessages}`);
     try {
-      let maxMessagesFetch = maxMessages;
-      let messagesQuery = THREADS_MESSAGES_REF.child(threadID).child('messages').orderByKey();
+      let maxMessagesFetch = maxMessages + 8;
+      // let messagesQuery = THREADS_MESSAGES_REF.child(`${threadID}/messages`);
+      let messagesQuery = THREADS_MESSAGES_REF.child(`${threadID}/messages`).orderByChild('createTime');
       // need to fetch one additional message if fetch from a message
-      if (fromMessage) {
+      if (fromCreateTime) {
         maxMessagesFetch += 1;
-        messagesQuery = messagesQuery.endAt(fromMessage);
+        messagesQuery = messagesQuery.startAt(fromCreateTime);
       }
       const messages = await messagesQuery.limitToLast(maxMessagesFetch).once('value');
+      // const messages = await messagesQuery.once('value');
       if (messages && messages.exists()) {
         // convert object to array & sort by time desceding
         // since key is already sort by create time ascending, we only need to reverse
         const messagesObj = messages.val();
         const keys = Object.keys(messagesObj).sort().reverse();
         // remove the first one if fetch from a message
-        if (keys.length > 0 && fromMessage) {
+        if (keys.length > 0 && fromCreateTime) {
           keys.shift();
         }
         // map to array
@@ -572,7 +612,7 @@ class FirebaseDatabase {
       }
       return [];
     } catch (err) {
-      Utils.warn(`getMessagesInThread error: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: getMessagesInThread exc: ${err}`, err);
       return [];
     }
   }
@@ -589,6 +629,7 @@ class FirebaseDatabase {
       // get threadID
       const threadID = FirebaseDatabase.generateSingleThreadID(user1.uid, user2.uid);
       if (!threadID) {
+        Utils.warn(`${LOG_TAG}: createSingleThread: invalid threadID ${threadID}`);
         return null;
       }
       // return thread if it's already exists
@@ -599,6 +640,7 @@ class FirebaseDatabase {
       // create new thread
       const result = await FirebaseDatabase.mAddSingleThread(user1, user2);
       if (!result) {
+        Utils.warn(`${LOG_TAG}: createSingleThread: mAddSingleThread -> null`);
         return null;
       }
       // add thread to user1 & user2
@@ -608,7 +650,7 @@ class FirebaseDatabase {
       const newThread = await FirebaseDatabase.getThread(threadID);
       return newThread;
     } catch (err) {
-      Utils.warn(`createSingleThread error: ${err}`, err);
+      Utils.warn(`createSingleThread exc: ${err}`, err);
       return null;
     }
   }
@@ -635,7 +677,7 @@ class FirebaseDatabase {
       const newThread = await FirebaseDatabase.getThread(threadID);
       return newThread;
     } catch (err) {
-      Utils.warn(`createGroupThread: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: createGroupThread exc: ${err}`, err);
       return null;
     }
   }
@@ -670,7 +712,7 @@ class FirebaseDatabase {
       await Promise.all(tasks);
       return true;
     } catch (err) {
-      Utils.warn(`addUsersToGroupThread: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: addUsersToGroupThread exc: ${err}`, err);
       return false;
     }
   }
@@ -704,7 +746,7 @@ class FirebaseDatabase {
       await Promise.all(tasks);
       return true;
     } catch (err) {
-      Utils.warn(`removeUsersFromGroupThread: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: removeUsersFromGroupThread exc: ${err}`, err);
       return false;
     }
   }
@@ -720,19 +762,19 @@ class FirebaseDatabase {
       // is thread exist
       const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {
-        Utils.warn(`updateGroupThreadMetadata: thread is not found: ${threadID}`);
+        Utils.warn(`${LOG_TAG}: updateGroupThreadMetadata: thread is not found: ${threadID}`);
         return false;
       }
       // is thread a group
       if (thread.type !== THREAD_TYPES.GROUP) {
-        Utils.warn(`updateGroupThreadMetadata: thread is not a group: ${thread.type}`);
+        Utils.warn(`${LOG_TAG}: updateGroupThreadMetadata: thread is not a group: ${thread.type}`);
         return false;
       }
       // update
       await FirebaseDatabase.mUpdateThreadMetaData(threadID, metaData);
       return true;
     } catch (err) {
-      Utils.warn(`updateGroupThreadMetadata: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: updateGroupThreadMetadata exc: ${err}`, err);
       return false;
     }
   }
@@ -747,22 +789,22 @@ class FirebaseDatabase {
   static async sendMessage(message, threadID) {
     try {
       // is thread exist
-      const thread = await FirebaseDatabase.getThread(threadID);
-      if (!thread) {
-        Utils.log(`sendMessage: error: not found thread: ${threadID}`);
-        return null;
-      }
+      // const thread = await FirebaseDatabase.getThread(threadID);
+      // if (!thread) {
+      //   Utils.log(`${LOG_TAG}: sendMessage: error: not found thread: ${threadID}`);
+      //   return null;
+      // }
       // add message to thread
       const messageID = await FirebaseDatabase.mAddMessageToThread(threadID, message);
       if (!messageID) {
-        Utils.log(`sendMessage: error: add message to thread error: ${threadID}`, message);
+        Utils.log(`${LOG_TAG}: sendMessage err: cannot add message to thread: ${threadID}`, message);
         return null;
       }
       // fetch message & return
       const newMessage = await FirebaseDatabase.getMessageInThread(threadID, messageID);
       return newMessage;
     } catch (err) {
-      Utils.warn(`sendMessage error: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: sendMessage exc: ${err}`, err);
       return false;
     }
   }

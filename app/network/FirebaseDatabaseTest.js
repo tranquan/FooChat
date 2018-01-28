@@ -49,12 +49,15 @@ class FirebaseDatabaseTest {
           // FirebaseDatabaseTest.testUpdateUser();
           // FirebaseDatabase.setupPresence('1');
 
+          // const threads = await FirebaseDatabase.getThreadsOfUser('1');
+          // Utils.warn(`9999: ${threads.length}`, threads);
+
         } catch (err) {
           Utils.log(`test exception: ${err}`);
         }
       };
       asyncTask();
-    }, 1000);
+    }, 2000);
   }
 
   // CONTACTS TEST

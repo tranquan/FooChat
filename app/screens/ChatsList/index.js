@@ -34,7 +34,7 @@ import ThreadRow from './ThreadRow';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: ChatsListScreen.js';
+const LOG_TAG = 'ChatsListScreen.js';
 /* eslint-enable */
 
 const INITIAL_THREADS_LOAD = 256;
@@ -56,7 +56,7 @@ class ChatsListScreen extends Component {
       spinnerText: '',
     };
 
-    this.isThreadsAdded = {};
+    this.isThreadsExists = {};
   }
   componentWillMount() {
     StatusBar.setBarStyle('dark-content', true);
@@ -94,6 +94,12 @@ class ChatsListScreen extends Component {
   }
   handleNewThread(thread) {
     // Utils.log(`${LOG_TAG}: handleNewThread: ${thread.uid}`, thread);
+    // thread already added
+    if (this.isThreadsExists[thread.uid]) {
+      return;
+    }
+    // add thread to top
+    this.isThreadsExists[thread.uid] = true;
     this.setState((prevState) => ({
       threads: [thread].concat(prevState.threads),
     }));
@@ -109,13 +115,28 @@ class ChatsListScreen extends Component {
         const threads = await ChatManager.shared().getMyThreads(fromUpdateTime, maxThreadsFetch);
         Utils.log(`${LOG_TAG}: loadMoreData: ${threads.length}`, threads);
         if (isReload) {
+          // mark exists threads
+          this.isThreadsExists = {};
+          for (let i = 0; i < threads.length; i += 1) {
+            const thread = threads[i];
+            this.isThreadsExists[thread.uid] = true;
+          }
+          // update state
           this.setState({
             threads,
             isRefreshing: false,
           });
         } else {
+          // mark exists threads
+          const newThreads = threads.filter(thread => this.isThreadsExists[thread.uid] === null);
+          this.isThreadsExists = {};
+          for (let i = 0; i < newThreads.length; i += 1) {
+            const thread = threads[i];
+            this.isThreadsExists[thread.uid] = true;
+          }
+          // update state
           this.setState({
-            threads: this.state.threads.concat(threads),
+            threads: this.state.threads.concat(newThreads),
             isRefreshing: false,
           });
         }

@@ -1,10 +1,16 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import React, { Component } from 'react';
 import { 
   StyleSheet,
   StatusBar,
   View, 
   Text, 
-  Image 
+  Image,
 } from 'react-native';
 
 import PropTypes from 'prop-types';
@@ -24,11 +30,11 @@ import NavigationBar from './NavigationBar';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: ChatScreen.js';
+const LOG_TAG = 'ChatScreen.js';
 /* eslint-enable */
 
-const INITIAL_MESSAGES_LOAD = 256;
-const PREVIOUS_MESSAGES_LOAD = 128;
+const INITIAL_MESSAGES_LOAD = 255;
+const PREVIOUS_MESSAGES_LOAD = 65;
 
 // -------------------------------------------------- 
 // ChatScreen
@@ -121,13 +127,13 @@ class ChatScreen extends Component {
     // load from the oldest message if having
     const threadID = this.state.thread.uid;
     const oldestMessage = this.getOldestMessage();
-    const fromMessageRef = oldestMessage ? oldestMessage.uid : null;
+    const fromCreateTime = oldestMessage ? oldestMessage.createTime : null;
     const asyncTask = async () => {
       try {
         // get messages
         const messages = await 
-          ChatManager.shared().getMessagesInThread(threadID, fromMessageRef, maxMessages);
-        // unable to load more if messages.length is zero
+          ChatManager.shared().getMessagesInThread(threadID, fromCreateTime, maxMessages);
+        // hide load earlier if messages.length = 0
         this.setState({
           loadEarlier: messages.length > 0,
           isLoadingEarlier: false,
@@ -135,7 +141,7 @@ class ChatScreen extends Component {
           this.prependMessages(messages);
         });
       } catch (err) {
-        Utils.warn(`ChatScreen: componentDidMount err: ${err}`, err);
+        Utils.warn(`${LOG_TAG}: loadPreviousMessages exc: ${err}`, err);
       }
     };
     asyncTask();
