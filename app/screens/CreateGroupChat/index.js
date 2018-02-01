@@ -60,12 +60,6 @@ class CreateGroupChat extends Component {
       contacts,
     });
   }
-  componentDidMount() {
-    StatusBar.setBarStyle('dark-content', true);
-  }
-  componentWillUnmount() {
-    StatusBar.setBarStyle('light-content', true);
-  }
   // --------------------------------------------------
   onCancelPress = () => {
     this.props.navigation.goBack();

@@ -16,26 +16,26 @@ import {
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = 'AddChatMember.js';
+const LOG_TAG = 'AddNewContact.js';
 /* eslint-enable */
 
 // --------------------------------------------------
-// AddChatMember
+// AddNewContact
 // --------------------------------------------------
 
-class AddChatMember extends Component {
+class AddNewContact extends Component {
   render() {
     return (
       <View style={styles.container}>
         <Text style={{ marginTop: 20 }}>
-          AddChatMember
+          AddNewContact
         </Text>
       </View>
     );
   }
 }
 
-export default AddChatMember;
+export default AddNewContact;
 
 // --------------------------------------------------
 

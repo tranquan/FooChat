@@ -50,21 +50,18 @@ class ContactsListScreen extends Component {
       spinnerText: '',
     };
   }
-  componentWillMount() {
-    StatusBar.setBarStyle('dark-content', true);
-  }
   componentDidMount() {
     this.reloadData();
     this.addObservers();
     // test
-    // setTimeout(() => {
-    //   const target = this.state.contacts[0];
-    //   this.openChatWithUser(target);
-    // }, 1000);
+    setTimeout(() => {
+      // const target = this.state.contacts[0];
+      // this.openChatWithUser(target);
+      // this.props.navigation.navigate('AddNewContact');
+    }, 1000);
     // end
   }
   componentWillUnmount() {
-    StatusBar.setBarStyle('light-content', true);
     this.removeObservers();
   }
   // --------------------------------------------------

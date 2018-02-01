@@ -3,16 +3,13 @@ import {
   StyleSheet,
   View,
   Text,
-  StatusBar,
 } from 'react-native';
 
 import PropTypes from 'prop-types';
 
-import KJButton from '../../components/common/KJButton';
-
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: CreateGroupChat/NavigationBar.js';
+const LOG_TAG = 'NavigationBar.js';
 /* eslint-enable */
 
 // --------------------------------------------------
@@ -27,47 +24,42 @@ class NavigationBar extends PureComponent {
     this.props.onDonePress();
   }
   // --------------------------------------------------
-  renderLeftButton() {
+  renderLeftButtons() {
     return (
-      <KJButton
-        containerStyle={styles.leftButton}
-        leftIconSource={require('./img/close.png')}
-        leftIconStyle={{ marginLeft: -12 }}
-        onPress={this.onCancelPress}
-      />
+      <View style={styles.leftButtonsContainer}>
+        { ...this.props.leftButtons }
+      </View>
     );
   }
-  renderRightButton() {
-    const { isDoneButtonEnable } = this.props;
-    const doneButtonColor = isDoneButtonEnable ? '#007BFA' : '#808080';
+  renderRightButtons() {
     return (
-      <KJButton
-        containerStyle={styles.rightButton}
-        title={'Tạo'}
-        titleStyle={{ color: doneButtonColor }}
-        onPress={this.onDonePress}
-      />
+      <View style={styles.leftButtonsContainer}>
+        {...this.props.rightButtons}
+      </View>
     );
   }
   renderTitle() {
+    const { leftButtons, rightButtons } = this.props;
+    const marginLeft = leftButtons.length * 44;
+    const marginRight = rightButtons.length * 44;
+    const { title, titleStyle } = this.props;
     return (
-      <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>
-          {'Cuộc trò chuyện mới'}
-        </Text>
+      <View style={[styles.titleContainer, { marginLeft, marginRight }]}>
+        {
+          this.props.renderTitle ? this.props.renderTitle :
+            <Text style={[styles.titleText, titleStyle]}>
+              {title}
+            </Text>
+        }
       </View>
     );
   }
   render() {
     return (
       <View style={styles.container}>
-        <StatusBar
-          backgroundColor="#fff"
-          barStyle="dark-content"
-        />
-        {this.renderLeftButton()}
+        {this.renderLeftButtons()}
         {this.renderTitle()}
-        {this.renderRightButton()}
+        {this.renderRightButtons()}
       </View>
     );
   }
@@ -76,13 +68,17 @@ class NavigationBar extends PureComponent {
 // --------------------------------------------------
 
 NavigationBar.propTypes = {
+  renderTitle: PropTypes.func,
   onCancelPress: PropTypes.func,
   onDonePress: PropTypes.func,
 };
 
 NavigationBar.defaultProps = {
+  renderTitle: null,
+  leftButtons: [],
+  rightButtons: [],
   onCancelPress: () => {},
-  onDonePress: () => { },
+  onDonePress: () => {},
 };
 
 export default NavigationBar;
@@ -101,25 +97,13 @@ const styles = StyleSheet.create({
     height: 64,
     backgroundColor: '#fff',
   },
-  leftButton: {
-    marginTop: 0,
-    width: 64,
-    height: 44,
-    backgroundColor: '#f000',
-  },
-  rightButton: {
-    marginTop: 0,
-    width: 64,
-    height: 44,
-    backgroundColor: '#f000',
-  },
   titleContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'stretch',
-    marginLeft: 0,
-    marginRight: 0,
+    marginLeft: 20,
+    marginRight: 20,
     backgroundColor: '#0000',
   },
   titleText: {

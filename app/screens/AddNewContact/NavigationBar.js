@@ -1,9 +1,14 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import React, { PureComponent } from 'react';
 import {
   StyleSheet,
   View,
   Text,
-  StatusBar,
 } from 'react-native';
 
 import PropTypes from 'prop-types';
@@ -27,7 +32,7 @@ class NavigationBar extends PureComponent {
     this.props.onDonePress();
   }
   // --------------------------------------------------
-  renderLeftButton() {
+  renderCloseButton() {
     return (
       <KJButton
         containerStyle={styles.leftButton}
@@ -61,10 +66,6 @@ class NavigationBar extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
-        <StatusBar
-          backgroundColor="#fff"
-          barStyle="dark-content"
-        />
         {this.renderLeftButton()}
         {this.renderTitle()}
         {this.renderRightButton()}
@@ -81,7 +82,7 @@ NavigationBar.propTypes = {
 };
 
 NavigationBar.defaultProps = {
-  onCancelPress: () => {},
+  onCancelPress: () => { },
   onDonePress: () => { },
 };
 

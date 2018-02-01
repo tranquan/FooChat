@@ -17,6 +17,7 @@ import {
 } from '../../redux/actions';
 
 import SlideMenu from '../SlideMenu';
+import AddNewContact from '../AddNewContact';
 import ContactsList from '../ContactsList';
 import ChatsList from '../ChatsList';
 import Chat from '../Chat';
@@ -49,7 +50,7 @@ const MainTabNavigator = TabNavigator(
     ProfileTab: { screen: Profile },
   },
   {
-    initialRouteName: 'ChatsListTab',
+    initialRouteName: 'ContactsListTab',
     tabBarPosition: 'bottom',
     animationEnabled: true,
     tabBarOptions: {
@@ -61,6 +62,7 @@ const MainTabNavigator = TabNavigator(
 const MainModalNavigator = StackNavigator(
   {
     MainTabNavigator: { screen: MainTabNavigator },
+    AddNewContact: { screen: AddNewContact },
     CreateGroupChat: { screen: CreateGroupChat },
     ChatSettings: { screen: ChatSettings },
   },

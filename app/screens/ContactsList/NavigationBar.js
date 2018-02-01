@@ -7,6 +7,7 @@
 import React, { PureComponent } from 'react';
 import {
   StyleSheet,
+  StatusBar,
   View,
   Text,
 } from 'react-native';
@@ -66,6 +67,10 @@ class NavigationBar extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
+        <StatusBar
+          backgroundColor="#fff"
+          barStyle="dark-content"
+        />
         <View style={styles.rowContainer}>
           {this.renderInboxButton()}
           {this.renderTitle()}
