@@ -29,6 +29,14 @@ export default StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+  button_overlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: '#f000',
+  },
   link_button: {
     alignItems: 'center',
     backgroundColor: '#0000',

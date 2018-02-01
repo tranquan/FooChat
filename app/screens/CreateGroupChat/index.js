@@ -161,10 +161,12 @@ class CreateGroupChat extends Component {
   }
   // --------------------------------------------------
   renderNavigationBar() {
+    const isDoneButtonEnable = this.state.members.length > 0;
     return (
       <NavigationBar
         onCancelPress={this.onCancelPress}
         onDonePress={this.onDonePress}
+        isDoneButtonEnable={isDoneButtonEnable}
       />
     );
   }

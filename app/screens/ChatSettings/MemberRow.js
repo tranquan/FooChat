@@ -13,13 +13,14 @@ import {
 } from 'react-native';
 
 import Styles from '../../constants/styles';
+import KJButton from '../../components/common/KJButton';
 import KJImage from '../../components/common/KJImage';
 
 // --------------------------------------------------
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: ContactRow.js';
+const LOG_TAG = 'ContactRow.js';
 /* eslint-enable */
 
 const ROW_PADDING_LEFT = 20;
@@ -28,13 +29,20 @@ const AVATAR_SIZE = 46;
 const AVATAR_CONTENT_SPACING = 10;
 
 // --------------------------------------------------
-// ContactRow
+// MemberRow
 // --------------------------------------------------
 
-class ContactRow extends PureComponent {
+class MemberRow extends PureComponent {
   onPress = () => {
     this.props.onPress(this.props.user);
   }
+  onAddPress = () => {
+
+  }
+  onDeletePress = () => {
+    this.props.onDeletePress(this.props.user);
+  }
+  // --------------------------------------------------
   renderAvatar() {
     const { user } = this.props;
     const presenceStatusColor = user.presenceStatusColor();
@@ -46,11 +54,11 @@ class ContactRow extends PureComponent {
           defaultSource={user.avatarImagePlaceholder()}
           resizeMode="cover"
         />
-        <View 
+        <View
           style={[
-            styles.status, 
+            styles.status,
             { backgroundColor: presenceStatusColor },
-          ]} 
+          ]}
         />
       </View>
     );
@@ -63,17 +71,30 @@ class ContactRow extends PureComponent {
       </Text>
     );
   }
+  renderDeleteButton() {
+    const { isDeleteButtonHidden } = this.props;
+    if (isDeleteButtonHidden) { return null; }
+    return (
+      <KJButton
+        containerStyle={styles.deleteButton}
+        title={'Xóa'}
+        titleStyle={styles.deleteButtonTitle}
+        onPress={this.onDeletePress}
+      />
+    );
+  }
   render() {
     return (
       <View style={styles.container}>
-        
+
         <View style={styles.rowContainer}>
           {this.renderAvatar()}
           {this.renderContent()}
+          {this.renderDeleteButton()}
         </View>
-        
+
         <View style={styles.separator} />
-        
+
         <TouchableOpacity
           style={Styles.button_overlay}
           onPress={this.onPress}
@@ -83,11 +104,14 @@ class ContactRow extends PureComponent {
   }
 }
 
-ContactRow.defaultProps = {
+MemberRow.defaultProps = {
+  isDeleteButtonHidden: false,
   onPress: () => {},
+  onAddPress: () => {},
+  onDeletePress: () => {},
 };
 
-export default ContactRow;
+export default MemberRow;
 
 // --------------------------------------------------
 
@@ -132,8 +156,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   titleText: {
+    flex: 1,
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '300',
   },
   status: {
     position: 'absolute',
@@ -145,6 +170,18 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#fff',
     backgroundColor: '#ff0',
+  },
+  deleteButton: {
+    flex: 0,
+    width: 48,
+    height: 26,
+    borderColor: '#d0021b',
+    borderWidth: 1.0,
+    borderRadius: 4.0,
+  },
+  deleteButtonTitle: {
+    fontSize: 14,
+    color: '#d0021b',
   },
   separator: {
     height: 1,

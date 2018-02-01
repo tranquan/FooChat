@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import Styles from '../../constants/styles';
 import Thread from '../../models/Thread';
 import KJImage from '../../components/common/KJImage';
 
@@ -27,6 +28,7 @@ const ROW_PADDING_LEFT = 20;
 const ROW_PADDING_RIGHT = 20;
 const PHOTO_SIZE = 46;
 const PHOTO_CONTENT_SPACING = 10;
+const TITLE_MAX_LINES = 3;
 
 // --------------------------------------------------
 // ThreadRow
@@ -54,7 +56,6 @@ class ThreadRow extends PureComponent {
               {`${totalUnReadMessages}`}
             </Text>
         }
-
       </View>
     );
   }
@@ -62,7 +63,10 @@ class ThreadRow extends PureComponent {
     const { thread } = this.props;
     return (
       <View style={styles.contentContainer} >
-        <Text style={styles.titleText}>
+        <Text 
+          style={styles.titleText}
+          numberOfLines={TITLE_MAX_LINES}
+        >
           {`${thread.titleString()}`}
         </Text>
         <Text style={styles.lastMessageText}>
@@ -79,20 +83,20 @@ class ThreadRow extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
-        
+
         <View style={styles.rowContainer}>
           {this.renderPhoto()}
           {this.renderContent()}
           {this.renderExtraInfo()}
         </View>
-        
+
         <View style={styles.separator} />
         
         <TouchableOpacity
-          style={styles.button}
+          style={Styles.button_overlay}
           onPress={this.onPress}
         />
-
+        
       </View>
     );
   }
@@ -104,7 +108,7 @@ export default ThreadRow;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 0,
+    flex: 1,
     paddingTop: 0,
     paddingBottom: 0,
     paddingLeft: 0,
@@ -114,12 +118,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   rowContainer: {
-    flex: 0,
+    flex: 1,
     flexDirection: 'row',
     paddingTop: 8,
     paddingBottom: 8,
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingLeft: ROW_PADDING_LEFT,
+    paddingRight: ROW_PADDING_RIGHT,
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#fff',
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   contentContainer: {
-    flex: 0,
+    flex: 1,
     paddingLeft: 0,
     paddingRight: 0,
     paddingTop: 0,
@@ -168,16 +172,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   titleText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '300',
   },
   titleBoldText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
   },
   lastMessageText: {
+    marginTop: 4,
     color: '#808080',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '300',
   },
   extraInfoContainer: {
@@ -187,14 +192,6 @@ const styles = StyleSheet.create({
     color: '#808080',
     fontSize: 12,
     fontWeight: '300',
-  },
-  button: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: '#f000',
   },
   separator: {
     height: 1,

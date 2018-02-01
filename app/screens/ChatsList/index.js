@@ -9,17 +9,14 @@
  * But for optimize, scroll to bottom should call loadMoreData
  */
 
-
 import React, { Component } from 'react';
 import { 
   StyleSheet,
   StatusBar,
-  View, 
-  Text,
+  View,
   Image,
   FlatList,
   RefreshControl,
-  TouchableOpacity,
 } from 'react-native';
 
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -68,6 +65,12 @@ class ChatsListScreen extends Component {
   }
   componentDidMount() {
     this.reloadData();
+    // test
+    // setTimeout(() => {
+    //   const thread = this.state.threads[0];
+    //   this.props.navigation.navigate('ChatSettings', { thread });
+    // }, 1000);
+    // end
   }
   componentWillUnmount() {
     StatusBar.setBarStyle('light-content', true);

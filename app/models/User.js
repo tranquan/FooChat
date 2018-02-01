@@ -16,6 +16,22 @@ export default class User {
     BUSY: 'busy',
     AWAY: 'away',
   };
+
+  static PRESENCE_STATUS_COLOR = {
+    UNKNOWN: '#7c7c7c',
+    ONLINE: '#69E387',
+    OFFLINE: '#7c7c7c',
+    BUSY: '#ff0000',
+    AWAY: '#7c7c7c',
+  };
+
+  static PRESENCE_STATUS_STRING = {
+    UNKNOWN: 'Không xác định',
+    ONLINE: 'Đang hoạt động',
+    OFFLINE: 'Đã thoát',
+    BUSY: 'Đang bận',
+    AWAY: 'Không ở gần',
+  };
   
   uid = '';
   email = '';
@@ -65,6 +81,15 @@ export default class User {
     return standardPhoneNumber.slice(index);
   }
 
+  static getColorForPresenceStatus(status) {
+    switch (status) {
+      case User.PRESENCE_STATUS.ONLINE:
+        return '#69E387';
+      default: 
+        return '#7c7c7c';
+    }
+  }
+
   // UI Logics
   // --------------------------------------------------
 
@@ -92,11 +117,27 @@ export default class User {
 
   presenceStatusColor() {
     if (this.presenceStatus === User.PRESENCE_STATUS.ONLINE) {
-      return '#69E387';
+      return User.PRESENCE_STATUS_COLOR.ONLINE;
+    }
+    if (this.presenceStatus === User.PRESENCE_STATUS.OFFLINE) {
+      return User.PRESENCE_STATUS_COLOR.OFFLINE;
     }
     if (this.presenceStatus === User.PRESENCE_STATUS.BUSY) {
-      return '#ff0000';
+      return User.PRESENCE_STATUS_COLOR.BUSY;
     }
-    return '#7c7c7c';
+    return User.PRESENCE_STATUS_COLOR.UNKNOWN;
+  }
+  
+  presenceStatusString() {
+    if (this.presenceStatus === User.PRESENCE_STATUS.ONLINE) {
+      return User.PRESENCE_STATUS_STRING.ONLINE;
+    }
+    if (this.presenceStatus === User.PRESENCE_STATUS.OFFLINE) {
+      return User.PRESENCE_STATUS_STRING.OFFLINE;
+    }
+    if (this.presenceStatus === User.PRESENCE_STATUS.BUSY) {
+      return User.PRESENCE_STATUS_STRING.BUSY;
+    }
+    return User.PRESENCE_STATUS_STRING.UNKNOWN;
   }
 }

@@ -81,9 +81,17 @@ export default class Thread {
   }
 
   getSingleThreadTargetUser() {
-    const users = this.getUsersArray();
-    const myUserID = Thread.mMyUser.uid;
-    return users[0].uid === myUserID ? users[1] : users[0];
+    // check
+    if (this.isGroupThread()) { 
+      return null; 
+    }
+    // get target
+    if (!this.mSingleThreadTargetUser) {
+      const users = this.getUsersArray();
+      const myUserID = Thread.mMyUser.uid;
+      this.mSingleThreadTargetUser = users[0].uid === myUserID ? users[1] : users[0];
+    }
+    return this.mSingleThreadTargetUser;
   }
 
   createTimeMoment() {
@@ -127,6 +135,19 @@ export default class Thread {
     }
     // others
     return this.title;
+  }
+
+  statusString() {
+    // single
+    if (this.type === THREAD_TYPES.SINGLE) {
+      return this.getSingleThreadTargetUser().presenceStatusString();
+    }
+    // group
+    if (this.type === THREAD_TYPES.GROUP) {
+      return 'todo: group contact status';
+    }
+    // others
+    return 'todo: status';
   }
 
   photoImageURI() {

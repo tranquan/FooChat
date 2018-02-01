@@ -89,7 +89,8 @@ class ChatScreen extends Component {
     this.props.navigation.goBack();
   }
   onNavBarTitlePress = () => {
-
+    const { thread } = this.state;
+    this.props.navigation.navigate('ChatSettings', { thread });
   }
   onSend = (messages = []) => {
     // Utils.log(`ChatScreen: onSend: messages: ${messages.length}`, messages);
@@ -213,7 +214,7 @@ class ChatScreen extends Component {
   }
   // --------------------------------------------------
   renderNavigationBar() {
-    const { thread } = this.state.thread;
+    const { thread } = this.state;
     return (
       <NavigationBar
         thread={thread}

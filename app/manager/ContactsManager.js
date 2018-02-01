@@ -79,7 +79,7 @@ function initContactsManager() {
   // --------------------
 
   const onContactPresenceChange = (snapshot) => {
-    Utils.log(`${LOG_TAG}: onContactPresenceChange: ${snapshot.key}`, snapshot.val());
+    // Utils.log(`${LOG_TAG}: onContactPresenceChange: ${snapshot.key}`, snapshot.val());
     
     const fbContactID = snapshot.key;
     const contactID = FirebaseDatabase.normalUserID(fbContactID);
@@ -198,6 +198,9 @@ function initContactsManager() {
     },
     getContactsArray() {
       return mConvertDictToArray(mContacts);
+    },
+    getContact(userID) {
+      return mContacts[userID];
     },
     addObserver(name, target, callback) {
       // Utils.log(`${LOG_TAG}: addObserver: ${name}, callback: ${callback}`);

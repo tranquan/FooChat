@@ -11,7 +11,7 @@ import KJButton from '../../components/common/KJButton';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: CreateGroupChat/NavigationBar.js';
+const LOG_TAG = 'ChatSettings/NavigationBar.js';
 /* eslint-enable */
 
 // --------------------------------------------------
@@ -19,32 +19,17 @@ const LOG_TAG = '7777: CreateGroupChat/NavigationBar.js';
 // --------------------------------------------------
 
 class NavigationBar extends PureComponent {
-  onCancelPress = () => {
-    this.props.onCancelPress();
-  }
-  onDonePress = () => {
-    this.props.onDonePress();
+  onClosePress = () => {
+    this.props.onClosePress();
   }
   // --------------------------------------------------
-  renderLeftButton() {
+  renderCloseButton() {
     return (
       <KJButton
-        containerStyle={styles.leftButton}
+        containerStyle={styles.closeButton}
         leftIconSource={require('./img/close.png')}
         leftIconStyle={{ marginLeft: -12 }}
-        onPress={this.onCancelPress}
-      />
-    );
-  }
-  renderRightButton() {
-    const { isDoneButtonEnable } = this.props;
-    const doneButtonColor = isDoneButtonEnable ? '#007BFA' : '#808080';
-    return (
-      <KJButton
-        containerStyle={styles.rightButton}
-        title={'Tạo'}
-        titleStyle={{ color: doneButtonColor }}
-        onPress={this.onDonePress}
+        onPress={this.onClosePress}
       />
     );
   }
@@ -52,7 +37,7 @@ class NavigationBar extends PureComponent {
     return (
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>
-          {'Cuộc trò chuyện mới'}
+          {'Quản lý nhóm'}
         </Text>
       </View>
     );
@@ -60,9 +45,8 @@ class NavigationBar extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
-        {this.renderLeftButton()}
+        {this.renderCloseButton()}
         {this.renderTitle()}
-        {this.renderRightButton()}
       </View>
     );
   }
@@ -71,13 +55,11 @@ class NavigationBar extends PureComponent {
 // --------------------------------------------------
 
 NavigationBar.propTypes = {
-  onCancelPress: PropTypes.func,
-  onDonePress: PropTypes.func,
+  onClosePress: PropTypes.func,
 };
 
 NavigationBar.defaultProps = {
-  onCancelPress: () => {},
-  onDonePress: () => { },
+  onClosePress: () => { },
 };
 
 export default NavigationBar;
@@ -94,19 +76,13 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 0,
     height: 64,
-    backgroundColor: '#fff',
+    backgroundColor: '#2fb2ff',
   },
-  leftButton: {
+  closeButton: {
     marginTop: 0,
     width: 64,
     height: 44,
-    backgroundColor: '#f000',
-  },
-  rightButton: {
-    marginTop: 0,
-    width: 64,
-    height: 44,
-    backgroundColor: '#f000',
+    backgroundColor: '#2fb2ff',
   },
   titleContainer: {
     flex: 1,
@@ -114,7 +90,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'stretch',
     marginLeft: 0,
-    marginRight: 0,
+    marginRight: 64,
     backgroundColor: '#0000',
   },
   titleText: {
@@ -123,7 +99,7 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     marginRight: 0,
     backgroundColor: '#ff00',
-    color: '#202020',
+    color: '#fff',
     fontSize: 16,
     fontWeight: '400',
     textAlign: 'center',

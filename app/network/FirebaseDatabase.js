@@ -1,4 +1,10 @@
 /**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
+/**
  * Entity in Realtime Database on firebase will have this format
  * -> <entity>/<entity_uid>/<entity_props>
  * -> uid will be used as the key to access an entity.

@@ -7,7 +7,6 @@
 import React, { PureComponent } from 'react';
 import {
   StyleSheet,
-  Dimensions,
   View,
   Text,
   TouchableOpacity,
@@ -15,7 +14,10 @@ import {
 
 import PropTypes from 'prop-types';
 
+import Styles from '../../constants/styles';
 import KJButton from '../../components/common/KJButton';
+import ContactsManager from '../../manager/ContactsManager';
+import User from '../../models/User';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
@@ -44,19 +46,43 @@ class NavigationBar extends PureComponent {
       />
     );
   }
+  renderPresenceStatus() {
+    const { thread } = this.props;
+    // don't render for group
+    if (thread.isGroupThread()) {
+      return null;
+    }
+    // render presence status color
+    let targetUser = thread.getSingleThreadTargetUser();
+    targetUser = ContactsManager.shared().getContact(targetUser.uid);
+    const statusColor = targetUser ? 
+      targetUser.presenceStatusColor() : 
+      User.PRESENCE_STATUS_COLOR.OFFLINE;
+    return (
+      <View
+        style={[
+          styles.status, 
+          { backgroundColor: statusColor },
+        ]}
+      /> 
+    );
+  }
   renderTitle() {
     const { thread } = this.props;
     return (
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>
-          {'APPAY'}
+          {thread.titleString()}
         </Text>
-        <Text style={styles.subTitleText}>
-          {'4/8 Đang hoạt động'}
-        </Text>
+        <View style={styles.statusContainer}>
+          { this.renderPresenceStatus() }
+          <Text style={styles.statusText}>
+            {thread.statusString()}
+          </Text>
+        </View>
         <TouchableOpacity
-          style={styles.button}
-          onPress={this.onPress}
+          style={Styles.button_overlay}
+          onPress={this.onTitlePress}
         />
       </View>
     );
@@ -94,15 +120,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 0,
     justifyContent: 'flex-start',
-    alignItems: 'center',
+    alignItems: 'stretch',
     alignSelf: 'stretch',
     paddingTop: 20,
-    paddingBottom: 0,
+    paddingBottom: 8,
     height: 64,
     backgroundColor: '#fff',
   },
   rowContainer: {
-    flex: 0,
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -131,26 +157,34 @@ const styles = StyleSheet.create({
     marginRight: 0,
     backgroundColor: '#ff00',
     color: '#202020',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '400',
   },
-  subTitleText: {
+  statusContainer: {
     flex: 0,
-    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: 0,
+  },
+  statusText: {
+    flex: 1,
     marginLeft: 0,
     marginRight: 0,
     backgroundColor: '#ff00',
     color: '#808080',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '300',
   },
-  button: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: '#f000',
+  status: {
+    flex: 0,
+    marginRight: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 0,
+    borderColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   separator: {
     position: 'absolute',

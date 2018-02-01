@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import React, { Component } from 'react';
 import { DrawerNavigator, StackNavigator, TabNavigator, NavigationActions } from 'react-navigation';
 
@@ -14,6 +20,7 @@ import SlideMenu from '../SlideMenu';
 import ContactsList from '../ContactsList';
 import ChatsList from '../ChatsList';
 import Chat from '../Chat';
+import ChatSettings from '../ChatSettings';
 import CreateGroupChat from '../CreateGroupChat';
 import Profile from '../Profile';
 
@@ -55,6 +62,7 @@ const MainModalNavigator = StackNavigator(
   {
     MainTabNavigator: { screen: MainTabNavigator },
     CreateGroupChat: { screen: CreateGroupChat },
+    ChatSettings: { screen: ChatSettings },
   },
   {
     mode: 'modal',
