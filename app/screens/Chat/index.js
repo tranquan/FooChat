@@ -7,7 +7,6 @@
 import React, { Component } from 'react';
 import { 
   StyleSheet,
-  StatusBar,
   View, 
   Text, 
   Image,
@@ -55,7 +54,6 @@ class ChatScreen extends Component {
     this.members = {};
   }
   componentWillMount() {
-    StatusBar.setBarStyle('dark-content', true);
     // cache current thread
     const { thread } = this.props.navigation.state.params;
     // update state
@@ -78,7 +76,6 @@ class ChatScreen extends Component {
     this.loadPreviousMessages(INITIAL_MESSAGES_LOAD);
   }
   componentWillUnmount() {
-    StatusBar.setBarStyle('light-content', true);
     // remove observer
     const thread = this.state.thread;
     if (!thread) { return; }

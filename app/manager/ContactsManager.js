@@ -75,6 +75,24 @@ function initContactsManager() {
     });
   }
 
+  /**
+   * Create a new contact in device
+   */
+  function mAddPhoneContact(familyName, givenName, phoneNumber) {
+    return new Promise((resolve) => {
+      const contact = {};
+      contact.givenName = givenName;
+      contact.familyName = familyName;
+      contact.phoneNumbers = [{
+        label: 'mobile',
+        number: phoneNumber,
+      }];
+      ReactNativeContacts.addContact(contact, (err) => {
+        resolve(err === null);
+      }); 
+    });
+  }
+
   // EVENT HANDLERs
   // --------------------
 
@@ -281,6 +299,7 @@ function initContactsManager() {
       // get phoneNumbers from phoneContacts
       const standardPhoneNumbers = this.getPhoneContactsStandardPhoneNumbers();
       const phoneNumbersList = standardPhoneNumbers.join(',');
+      Utils.warn('9999', phoneNumbersList);
       const contactsArray = await FirebaseFunctions.getContacts(phoneNumbersList);
       for (let i = 0; i < contactsArray.length; i += 1) {
         const contact = contactsArray[i];
@@ -294,6 +313,10 @@ function initContactsManager() {
       // re-subscribe
       mSubscribeContactsPresence();
       return mContacts;
+    },
+    // --------------------------------------------------
+    async addPhoneContact(familyName, givenName, phoneNumber) {
+      return mAddPhoneContact(familyName, givenName, phoneNumber);
     },
   };
 }

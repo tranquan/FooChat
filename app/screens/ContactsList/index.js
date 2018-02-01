@@ -7,9 +7,7 @@
 import React, { Component } from 'react';
 import { 
   StyleSheet,
-  StatusBar,
-  View, 
-  Text,
+  View,
   Image,
   FlatList,
   RefreshControl,
@@ -66,10 +64,10 @@ class ContactsListScreen extends Component {
   }
   // --------------------------------------------------
   onNavBarInboxPress = () => {
-
+    Utils.log('onNavBarInboxPress');
   }
   onNavBarAddPress = () => {
-    
+    this.props.navigation.navigate('AddNewContact');
   }
   onContactPress = (user) => {
     this.openChatWithUser(user);

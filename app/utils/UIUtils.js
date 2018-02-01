@@ -41,3 +41,16 @@ export function showAlert(message) {
     { cancelable: false },
   );
 }
+
+// export function showConfirmation(
+//   title, message, 
+//   yes = 'Đồng ý', no = 'Đóng', 
+//   onYesCallback, onNoCallback
+// ) {
+//   Alert.alert(
+//     Strings.alert_title,
+//     message,
+//     [{ text: 'Đóng' }],
+//     { cancelable: false },
+//   );
+// }

@@ -19,7 +19,7 @@ const CONTACTS = [
     uid: '2',
     email: 'long.phan@digitel.com.vn',
     fullName: 'Phan Thanh Long',
-    phoneNumber: '0933397604',
+    phoneNumber: '0979531338',
     avatarImage: 'https://pickaface.net/gallery/avatar/acrovin559439058dc7f.png',
     wallImage: null,
     presenceStatus: 'online',

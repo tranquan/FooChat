@@ -7,6 +7,7 @@
 import React, { PureComponent } from 'react';
 import {
   StyleSheet,
+  StatusBar,
   View,
   Text,
 } from 'react-native';
@@ -14,6 +15,7 @@ import {
 import PropTypes from 'prop-types';
 
 import KJButton from '../../components/common/KJButton';
+import BaseNavigationBar from '../../components/NavigationBar';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
@@ -32,43 +34,34 @@ class NavigationBar extends PureComponent {
     this.props.onDonePress();
   }
   // --------------------------------------------------
-  renderCloseButton() {
-    return (
-      <KJButton
-        containerStyle={styles.leftButton}
-        leftIconSource={require('./img/close.png')}
-        leftIconStyle={{ marginLeft: -12 }}
-        onPress={this.onCancelPress}
-      />
-    );
-  }
-  renderRightButton() {
-    const { isDoneButtonEnable } = this.props;
-    const doneButtonColor = isDoneButtonEnable ? '#007BFA' : '#808080';
-    return (
-      <KJButton
-        containerStyle={styles.rightButton}
-        title={'Tạo'}
-        titleStyle={{ color: doneButtonColor }}
-        onPress={this.onDonePress}
-      />
-    );
-  }
-  renderTitle() {
-    return (
-      <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>
-          {'Cuộc trò chuyện mới'}
-        </Text>
-      </View>
-    );
-  }
   render() {
     return (
-      <View style={styles.container}>
-        {this.renderLeftButton()}
-        {this.renderTitle()}
-        {this.renderRightButton()}
+      <View>
+        <StatusBar
+          backgroundColor="#fff"
+          barStyle="dark-content"
+        />
+        <BaseNavigationBar
+          title={'Thêm vào danh bạ'}
+          leftButtons={[
+            <KJButton
+              key={'1'}
+              containerStyle={styles.barButton}
+              leftIconSource={require('./img/close.png')}
+              leftIconStyle={{ marginLeft: 12 }}
+              onPress={this.onCancelPress}
+            />,
+          ]}
+          rightButtons={[
+            <KJButton
+              key={'1'}
+              title={'Thêm  '}
+              titleStyle={{ fontSize: 13, fontWeight: '600', color: '#202020' }}
+              containerStyle={styles.barButton}
+              onPress={this.onDonePress}
+            />,
+          ]}
+        />
       </View>
     );
   }
@@ -102,36 +95,9 @@ const styles = StyleSheet.create({
     height: 64,
     backgroundColor: '#fff',
   },
-  leftButton: {
-    marginTop: 0,
-    width: 64,
+  barButton: {
+    width: 44,
     height: 44,
     backgroundColor: '#f000',
-  },
-  rightButton: {
-    marginTop: 0,
-    width: 64,
-    height: 44,
-    backgroundColor: '#f000',
-  },
-  titleContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    marginLeft: 0,
-    marginRight: 0,
-    backgroundColor: '#0000',
-  },
-  titleText: {
-    flex: 0,
-    alignSelf: 'center',
-    marginLeft: 0,
-    marginRight: 0,
-    backgroundColor: '#ff00',
-    color: '#202020',
-    fontSize: 16,
-    fontWeight: '400',
-    textAlign: 'center',
   },
 });
