@@ -19,17 +19,20 @@ import { connect } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 import Styles from '../../constants/styles';
+import Strings from '../../constants/strings';
 import ChatManager from '../../manager/ChatManager';
 import ContactsManager, { CONTACTS_EVENTS } from '../../manager/ContactsManager';
+import { showAlert } from '../../utils/UIUtils';
 
 import NavigationBar from './NavigationBar';
+import GetContactsRow from './GetContactsRow';
 import ContactRow from './ContactRow';
 
 // --------------------------------------------------
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: ContactsListScreen.js';
+const LOG_TAG = 'ContactsListScreen.js';
 /* eslint-enable */
 
 // -------------------------------------------------- 
@@ -46,17 +49,20 @@ class ContactsListScreen extends Component {
       isRefreshing: false,
       isSpinnerVisible: false,
       spinnerText: '',
+      isContactsPermissionsGranted: true,
+      isRequestContactsPermissionsProcessing: false,
     };
   }
   componentDidMount() {
+    this.checkContactsPermissions();
     this.reloadData();
     this.addObservers();
+
     // test
-    setTimeout(() => {
-      // const target = this.state.contacts[0];
-      // this.openChatWithUser(target);
-      // this.props.navigation.navigate('AddNewContact');
-    }, 1000);
+    // setTimeout(() => {
+    //   const target = this.state.contacts[0];
+    //   this.openChatWithUser(target);
+    // }, 1000);
     // end
   }
   componentWillUnmount() {
@@ -64,13 +70,17 @@ class ContactsListScreen extends Component {
   }
   // --------------------------------------------------
   onNavBarInboxPress = () => {
-    Utils.log('onNavBarInboxPress');
+    Utils.log(`${LOG_TAG} onNavBarInboxPress`);
   }
   onNavBarAddPress = () => {
     this.props.navigation.navigate('AddNewContact');
   }
   onContactPress = (user) => {
     this.openChatWithUser(user);
+  }
+  onGetContactsPress = () => {
+    Utils.log(`${LOG_TAG} onGetContactsPress`);
+    this.requestContactsPermissions();
   }
   // --------------------------------------------------
   reloadData = () => {
@@ -86,6 +96,36 @@ class ContactsListScreen extends Component {
         this.setState({
           isRefreshing: false,
         });
+      }
+    };
+    asyncTask();
+  }
+  checkContactsPermissions() {
+    const asyncTask = async () => {
+      try {
+        const isGranted = await ContactsManager.shared().checkContactsPermissions();
+        this.setState({
+          isContactsPermissionsGranted: isGranted,
+        });
+      } catch (err) {
+        Utils.log(`${LOG_TAG} checkContactsPermissions: exc: `, err);
+      }
+    };
+    asyncTask();
+  }
+  requestContactsPermissions() {
+    const asyncTask = async () => {
+      try {
+        const isSuccess = await ContactsManager.shared().requestContactsPermissions();
+        if (!isSuccess) {
+          showAlert(Strings.contacts_access_guide);
+          return;
+        }
+        this.setState({
+          isContactsPermissionsGranted: true,
+        });
+      } catch (err) {
+        Utils.log(`${LOG_TAG} requestContactsPermissions: exc: `, err);
       }
     };
     asyncTask();
@@ -162,6 +202,16 @@ class ContactsListScreen extends Component {
       />
     );
   }
+  renderGetContactsRow() {
+    if (this.state.isContactsPermissionsGranted) { return null; }
+    return (
+      <View style={{ flex: 0, paddingBottom: 12 }}>
+        <GetContactsRow
+          onPress={this.onGetContactsPress}
+        />
+      </View>
+    );
+  }
   renderContactsList() {
     const { contacts, contactsExtraData } = this.state;
     return (
@@ -211,6 +261,7 @@ class ContactsListScreen extends Component {
     return (
       <View style={styles.container}>
         {this.renderNavigationBar()}
+        {this.renderGetContactsRow()}
         {this.renderContactsList()}
         {this.renderSpinner()}
       </View>

@@ -210,7 +210,7 @@ function initChatManager() {
   }
 
   function mSubscribeNewMessageInThread(threadID) {
-    Utils.log(`${LOG_TAG}: subscribeNewMessageInThread: ${threadID}`);
+    // Utils.log(`${LOG_TAG}: subscribeNewMessageInThread: ${threadID}`);
     const threadsMessagesRef = FirebaseDatabase.getThreadsMessagesRef();
     // un-subscribe old path
     const path = `${threadsMessagesRef.key}/${threadID}/messages`;

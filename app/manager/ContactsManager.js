@@ -32,6 +32,7 @@ function initContactsManager() {
   let mObservers = {}; // key is event name
   let mPhoneContacts = {}; // contacts from device, keep phoneNumber only
   let mContacts = {}; // appay contacts, key is userID
+  let mIsContactsPermissionsGranted = true; // contacts permissions
 
   /**
    * Setup user presence (aka online/offline)
@@ -62,14 +63,13 @@ function initContactsManager() {
   function mGetPhoneContactsFromDevice() {
     return new Promise((resolve) => {
       ReactNativeContacts.getAll((err, contacts) => {
-        // Utils.log(`${LOG_TAG}: mGetAllPhoneContacts: contacts: `, contacts);
         // error
         if (err) {
-          Utils.warn(`${LOG_TAG}: mGetAllPhoneContacts: error: `, err);
+          Utils.warn(`${LOG_TAG}: mGetPhoneContactsFromDevice: error: `, err);
           resolve([]);
           return;
         }
-        // Utils.warn(`${LOG_TAG}: mGetAllPhoneContacts: phones: `, mPhoneContacts);
+        // Utils.warn(`${LOG_TAG}: mGetPhoneContactsFromDevice: contacts: `, contacts);
         resolve(contacts);
       });
     });
@@ -248,6 +248,41 @@ function initContactsManager() {
       mObservers[name] = list;
     },
     // --------------------------------------------------
+    isContactsPermissionsGranted() {
+      return mIsContactsPermissionsGranted;
+    },
+    async checkContactsPermissions() {
+      return new Promise((resolve, reject) => {
+        ReactNativeContacts.checkPermission((err, result) => {
+          if (err) {
+            Utils.warn(`${LOG_TAG}: checkContactsPermission: `, err);
+          }
+          if (result === 'authorized') {
+            mIsContactsPermissionsGranted = true;
+            resolve(true);
+          } else {
+            mIsContactsPermissionsGranted = false;
+            resolve(false);
+          }
+        });
+      });
+    },
+    async requestContactsPermissions() {
+      return new Promise((resolve, reject) => {
+        ReactNativeContacts.requestPermission((err, result) => {
+          if (err) {
+            Utils.warn(`${LOG_TAG}: requestContactsPermission: `, err);
+          }
+          if (result === 'authorized') {
+            mIsContactsPermissionsGranted = true;
+            resolve(true);
+          } else {
+            mIsContactsPermissionsGranted = false;
+            resolve(false);
+          }
+        });
+      });
+    },
     /**
      * Reload contacts from device (phone contacts)
      * @returns dictionary of Contact (not user)
@@ -298,8 +333,8 @@ function initContactsManager() {
       
       // get phoneNumbers from phoneContacts
       const standardPhoneNumbers = this.getPhoneContactsStandardPhoneNumbers();
+      if (standardPhoneNumbers.length === 0) { return; }
       const phoneNumbersList = standardPhoneNumbers.join(',');
-      Utils.warn('9999', phoneNumbersList);
       const contactsArray = await FirebaseFunctions.getContacts(phoneNumbersList);
       for (let i = 0; i < contactsArray.length; i += 1) {
         const contact = contactsArray[i];
