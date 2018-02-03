@@ -61,17 +61,14 @@ class FirebaseDatabase {
   // -> for instance: if add user to thread, caller need to check whether thread exists or not
   // --------------------------------------------------
 
-  static mRemoveUserNonMetaData(user) {
-    const userMetaData = Object.assign({}, user);
-    delete userMetaData.threads;
-    delete userMetaData.presenceStatus;
-    delete userMetaData.lastTimeOnline;
-    return userMetaData;
-  }
-
+  /**
+   * Update user's properties
+   * @param {string} userID 
+   * @param {Object} user 
+   */
   static mUpdateUser(userID, user) {
     // filter out non-metadata props
-    const userMetaData = FirebaseDatabase.mRemoveUserNonMetaData(user);
+    const userMetaData = FirebaseDatabase.mGetUserMetaData(user);
     // request
     return new Promise((resolve) => {
       const fbUserID = FirebaseDatabase.firebaseUserID(userID);
@@ -80,6 +77,23 @@ class FirebaseDatabase {
         resolve(err === null);
       });
     });
+  }
+
+  /**
+   * Filter-out only what is metadata from user
+   * @param {Object} user 
+   */
+  static mGetUserMetaData(user) {
+    const metaData = {
+      uid: user.uid,
+      avatarImage: user.avatarImage,
+      wallImage: user.wallImage,
+      email: user.email,
+      fullName: user.fullName,
+      mPhoneNumber: user.mPhoneNumber,
+      standardPhoneNumber: user.standardPhoneNumber,
+    };
+    return metaData;
   }
 
   /**
@@ -102,8 +116,8 @@ class FirebaseDatabase {
       const members = {};
       const fbUserID1 = FirebaseDatabase.firebaseUserID(user1.uid);
       const fbUserID2 = FirebaseDatabase.firebaseUserID(user2.uid);
-      const user1MetaData = FirebaseDatabase.mRemoveUserNonMetaData(user1);
-      const user2MetaData = FirebaseDatabase.mRemoveUserNonMetaData(user2);
+      const user1MetaData = FirebaseDatabase.mGetUserMetaData(user1);
+      const user2MetaData = FirebaseDatabase.mGetUserMetaData(user2);
       members[fbUserID1] = user1MetaData;
       members[fbUserID2] = user2MetaData;
       THREADS_REF.child(threadID).set({
@@ -136,7 +150,7 @@ class FirebaseDatabase {
     const members = {};
     for (let i = 0; i < users.length; i += 1) {
       const user = users[i];
-      const userMetaData = FirebaseDatabase.mRemoveUserNonMetaData(user);
+      const userMetaData = FirebaseDatabase.mGetUserMetaData(user);
       const fbUserID = FirebaseDatabase.firebaseUserID(user.uid);
       members[fbUserID] = { ...userMetaData };
     }
@@ -249,10 +263,11 @@ class FirebaseDatabase {
    * - The thread's updateTime on `users/<user_id>/threads/<thread_id>` 
    *  will also be updated by Cloud Functions
    * @param {string} threadID 
-   * @param {Object} metaData
+   * @param {Object} thread (Object or Thread)
    * @returns true/false
    */
-  static mUpdateThreadMetaData(threadID, metaData) {
+  static mUpdateThreadMetaData(threadID, thread) {
+    const metaData = FirebaseDatabase.mGetThreadMetaData(thread);
     return new Promise((resolve, reject) => {
       THREADS_REF.child(threadID).update({
         ...metaData,
@@ -266,6 +281,21 @@ class FirebaseDatabase {
         }
       });
     });
+  }
+
+  /**
+   * Filter-out only what is metadata from thread
+   * - for example: not get users, type, isDeleted, etc
+   *   these props will be updated through other functions
+   * @param {string} thread
+   */
+  static mGetThreadMetaData(thread) {
+    const metaData = {
+      uid: thread.uid,
+      title: thread.title,
+      photoImage: thread.photoImage,
+    };
+    return metaData;
   }
 
   /**
@@ -752,7 +782,44 @@ class FirebaseDatabase {
       await Promise.all(tasks);
       return true;
     } catch (err) {
-      Utils.warn(`${LOG_TAG}: removeUsersFromGroupThread exc: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: removeUsersFromGroupThread exc: `, err);
+      return false;
+    }
+  }
+
+  /**
+   * Set a user to be admin of a thread
+   * @param {string} threadID 
+   * @param {string} userID 
+   */
+  static async setThreadAdmin(threadID, userID) {
+    try {
+      // is thread exist
+      const thread = await FirebaseDatabase.getThread(threadID);
+      if (!thread) {
+        Utils.warn(`${LOG_TAG}: setThreadAdmin thread is not found: ${threadID}`);
+        return false;
+      }
+      // is thread a group
+      if (thread.type !== THREAD_TYPES.GROUP) {
+        Utils.warn(`${LOG_TAG}: setThreadAdmin: thread is not a group: ${thread.type}`);
+        return false;
+      }
+      // update admin
+      return new Promise((resolve, reject) => {
+        const threadRef = THREADS_REF.child(`${threadID}`);
+        threadRef.child('adminID').set(
+          userID
+        , (err) => {
+          if (!err) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        });
+      }); 
+    } catch (err) {
+      Utils.warn(`${LOG_TAG}: setThreadAdmin exc: `, err);
       return false;
     }
   }
@@ -765,6 +832,8 @@ class FirebaseDatabase {
    */
   static async updateGroupThreadMetadata(threadID, metaData) {
     try {
+      // filter-out invalid metaData
+      delete metaData.adminID;
       // is thread exist
       const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {

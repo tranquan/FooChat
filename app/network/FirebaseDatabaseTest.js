@@ -46,11 +46,7 @@ class FirebaseDatabaseTest {
       const asyncTask = async () => {
         try {
 
-          // FirebaseDatabaseTest.testUpdateUser();
-          // FirebaseDatabase.setupPresence('1');
-
-          // const threads = await FirebaseDatabase.getThreadsOfUser('1');
-          // Utils.warn(`9999: ${threads.length}`, threads);
+          // FirebaseDatabaseTest.testSetThreadAdmin();
 
         } catch (err) {
           Utils.log(`test exception: ${err}`);
@@ -166,7 +162,18 @@ class FirebaseDatabaseTest {
         }
         Utils.log(`testRemoveUserFromGroupThread PASSED: ${thread.uid}`);
       } catch (err) {
-        Utils.log(`testAddUserToGroupThread FAILED: ${err}`);
+        Utils.log(`testAddUserToGroupThread FAILED: `, err);
+      }
+    };
+    asyncTask();
+  }
+
+  static testSetThreadAdmin() {
+    const asyncTask = async () => {
+      try {
+        const result = await FirebaseDatabase.setThreadAdmin('-L3yTMe9_LRd6zkUpKaB', '1');
+      } catch (err) {
+        Utils.log(`testSetThreadAdmin FAILED: `, err);
       }
     };
     asyncTask();

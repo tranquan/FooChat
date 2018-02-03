@@ -20,9 +20,8 @@ export default class Thread {
   // props
   uid = '';
   type = '';
-  admiID = '';
   users = [];
-  messages = [];
+  adminID = '';
   createTime = 0;
   updateTime = 0;
   isDeleted = false;

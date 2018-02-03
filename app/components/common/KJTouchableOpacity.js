@@ -28,6 +28,11 @@ class KJTouchableOpacity extends PureComponent {
       isTouchDelay: false,
     };
   }
+  componentWillUnmount() {
+    if (this.delayTimer) {
+      clearTimeout(this.delayTimer);
+    }
+  }
   // --------------------------------------------------
   onPress = () => {
     const {
@@ -38,8 +43,9 @@ class KJTouchableOpacity extends PureComponent {
     // make toucha un-available in 500ms 
     // so that user cannot tap rapidly and cause un-expected behaviour
     this.setState({ isTouchDelay: true });
-    setTimeout(() => {
+    this.delayTimer = setTimeout(() => {
       this.setState({ isTouchDelay: false });
+      this.delayTimer = null;
     }, delayTime);
     // press
     this.props.onPress();

@@ -4,6 +4,11 @@
  * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
  */
 
+ /**
+  * Navigation Params:
+  * - members: list of User, create group thread with a pre-filled list of User
+  */
+
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -33,7 +38,7 @@ import MemberCell from './MemberCell';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: CreateGroupChat.js';
+const LOG_TAG = 'CreateGroupChat.js';
 /* eslint-enable */
 
 // --------------------------------------------------
@@ -47,17 +52,27 @@ class CreateGroupChat extends Component {
     this.state = {
       isSpinnerVisible: false,
       spinnerText: 'Đang xử lý',
-      isMembersSelected: {},
       contacts: [],
       contactsExtraData: false,
       members: [],
       membersExtraData: false,
+      isMembersSelected: {},
     };
   }
   componentWillMount() {
+    // get members if having
+    const navParams = this.props.navigation.state.params || {};
+    const members = navParams.members || [];
+    const isMembersSelected = {};
+    members.forEach(user => {
+      isMembersSelected[user.uid] = true;
+    });
+    // get list of contacts
     const contacts = ContactsManager.shared().getContactsArray();
     this.setState({
       contacts,
+      members,
+      isMembersSelected,
     });
   }
   // --------------------------------------------------

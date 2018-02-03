@@ -334,12 +334,9 @@ function initChatManager() {
       mObservers[name] = list;
     },
     // --------------------------------------------------
-    // async getContacts() {
-    //   return mContacts;
-    // },
     async getThread(threadID) {
       const thread = await FirebaseDatabase.getThread(threadID);
-      return thread;
+      return Object.assign(new Thread(), thread);
     },
     async getMyThreads(fromUpdateTime = null, maxThreadsFetch = 44) {
       const threads = 
@@ -356,11 +353,32 @@ function initChatManager() {
       return Object.assign(new Thread(), thread);
     },
     async createGroupThread(users, metaData) {
+      metaData.adminID = mMyUser.uid;
       const thread = await FirebaseDatabase.createGroupThread(users, metaData);
-      if (!thread) {
-        return null;
+      if (!thread) { 
+        return null; 
       }
       return Object.assign(new Thread(), thread);
+    },
+    async setThreadAdmin(threadID, userID) {
+      const results = await FirebaseDatabase.setThreadAdmin(threadID, userID);
+      return results;
+    },
+    async addUsersToGroupThread(threadID, users) {
+      return FirebaseDatabase.addUsersToGroupThread(threadID, users);
+    },
+    async removeUsersFromGroupThread(threadID, userIDs) {
+      // check thread
+      const thread = await FirebaseDatabase.getThread(threadID);
+      if (!thread) { 
+        return false; 
+      }
+      // only allow to remove if admin is me
+      if (thread.adminID !== mMyUser.uid) {
+        return false;
+      }
+      // remove
+      return FirebaseDatabase.removeUsersFromGroupThread(threadID, userIDs);
     },
     async sendMessage(message, threadID) {
       const myMessage = { ...message, authorID: mMyUser.uid };
