@@ -110,7 +110,10 @@ MODULES = [
 	'react-native-contacts',
   'react-native-device-info',
 	'react-native-fetch-blob',
-	'react-native-firebase'
+	'react-native-firebase',
+	'react-native-image-resizer',
+	'react-native-image-picker',
+	'react-native-vector-icons'
 ]
 
 # loop through node_modules and override

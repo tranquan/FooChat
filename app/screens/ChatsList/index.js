@@ -65,6 +65,7 @@ class ChatsListScreen extends Component {
   }
   componentDidMount() {
     this.reloadData();
+    
     // test
     // setTimeout(() => {
     //   const thread = this.state.threads[0];

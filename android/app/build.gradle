@@ -137,14 +137,16 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-vector-icons')
-  compile project(':react-native-contacts')
-  compile project(':react-native-fetch-blob')
-  compile project(':react-native-device-info')
   compile project(':realm')
   compile(project(':react-native-firebase')) {
     transitive = false
   }
+  compile project(':react-native-contacts')
+  compile project(':react-native-fetch-blob')
+  compile project(':react-native-device-info')
+  compile project(':react-native-image-resizer')
+  compile project(':react-native-image-picker')
+  compile project(':react-native-vector-icons')
   // Firebase dependencies
   compile "com.google.android.gms:play-services-base:11.8.0"
   compile "com.google.firebase:firebase-core:11.8.0"

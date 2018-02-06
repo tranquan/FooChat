@@ -7,7 +7,6 @@
 import React, { Component } from 'react';
 import {
   StyleSheet,
-  StatusBar,
   ScrollView,
   View,
   Text,
@@ -17,11 +16,18 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import ImageResizer from 'react-native-image-resizer';
+import Modal from 'react-native-modal';
+import Spinner from 'react-native-loading-spinner-overlay';
+
 import Styles from '../../constants/styles';
 import Strings from '../../constants/strings';
 import KJButton from '../../components/common/KJButton';
+import TextInputBox from '../../components/TextInputBox';
 import ContactsManager from '../../manager/ContactsManager';
 import ChatManager from '../../manager/ChatManager';
+import FirebaseStorage from '../../network/FirebaseStorage';
+import { showAlert } from '../../utils/UIUtils';
 
 import NavigationBar from './NavigationBar';
 import ThreadRow from './ThreadRow';
@@ -32,7 +38,7 @@ import TextRow from './TextRow';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: ChatSettings.js';
+const LOG_TAG = 'ChatSettings.js';
 /* eslint-enable */
 
 // --------------------------------------------------
@@ -44,28 +50,55 @@ class ChatSettings extends Component {
     super(props);
 
     this.state = { 
+      isImageProcessing: false,
       isNotificationOn: true,
       isFavoriteOn: false,
+      isTextInputVisible: false,
+      isSpinnerVisible: false,
     };
   }
   componentWillMount() {
-    StatusBar.setBarStyle('light-content', true);
     // cache current thread
-    const { thread } = this.props.navigation.state.params;
+    const navParams = this.props.navigation.state.params || {};
+    const thread = navParams.thread;
     // update state
     this.setState({
       thread,
     });
   }
-  componentDidMount() {
-    
-  }
-  componentWillUnmount() {
-    StatusBar.setBarStyle('dark-content', true);
-  }
   // --------------------------------------------------
   onClosePress = () => {
     this.props.navigation.goBack();
+  }
+  onPhotoPress = () => {
+    this.pickImage()
+      .then(response => {
+        // user cancel
+        if (response === null) { return; }
+        // resize image & upload
+        this.showSpinner();
+        this.resizeImage(response.uri, 256, 256)
+          .then(imageURI => {
+            this.uploadImage(imageURI);
+          })
+          .catch((err) => {
+            Utils.warn(`${LOG_TAG} resizeImage error: `, error);
+            this.hideSpinner();
+            setTimeout(() => {
+              showAlert(Strings.camera_access_error);
+            }, 250);
+          });
+      })
+      .catch((err) => {
+        Utils.warn(`${LOG_TAG} pickImage error: `, err);
+        this.hideSpinner();
+        setTimeout(() => {
+          showAlert(Strings.camera_access_error);
+        }, 250);
+      });
+  }
+  onTitlePress = () => {
+    this.showTextInput();
   }
   onNotificationToggle = (isOn) => {
     this.setState({
@@ -90,6 +123,114 @@ class ChatSettings extends Component {
   removeMembers(members) {
 
   }
+  pickImage() {
+    const title = 'Cập nhật hình đại diện';
+    return new Promise((resolve, reject) => {
+      const ImagePicker = require('react-native-image-picker');
+      const options = {
+        title,
+        cancelButtonTitle: 'Đóng',
+        takePhotoButtonTitle: 'Chụp hình mới',
+        chooseFromLibraryButtonTitle: 'Chọn từ Album',
+        storageOptions: {
+          skipBackup: true,
+          path: 'images',
+        },
+      };
+      ImagePicker.showImagePicker(options, (response) => {
+        if (response.error) {
+          reject(response.error);
+        } else if (response.didCancel) {
+          resolve(null);
+        } else {
+          resolve(response);
+        }
+      });
+    });
+  }
+  resizeImage(fileURI, width = 512, height = 512) {
+    return ImageResizer.createResizedImage(fileURI, width, height, 'JPEG', 80)
+      .then((response) => {
+        return response.uri;
+      })
+      .catch((error) => {
+        Utils.warn(`${LOG_TAG} resizeImage error: `, error);
+        return Promise.reject(error);
+      });
+  }
+  uploadImage(fileURI) {
+    const threadID = this.state.thread.uid;
+    let uploadTask = null;
+    // create upload task
+    uploadTask = FirebaseStorage.uploadChatImage(threadID, fileURI);
+    if (!uploadTask) { return; }
+    // upload
+    uploadTask.on('state_changed', (snapshot) => { // eslint-disable-line
+      // progress
+      // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      // Utils.log(`${LOG_TAG} uploadImage progress: ${progress} %`);
+    }, (error) => {
+      // error
+      Utils.warn(`${LOG_TAG} uploadImage: error: `, error);
+      this.setState({ isImageProcessing: false });
+      setTimeout(() => {
+        showAlert(Strings.upload_image_error);
+      }, 250);
+    }, (snapshot) => {
+      // success
+      Utils.log(`${LOG_TAG} uploadImage: `, snapshot);
+      const photoImage = snapshot.downloadURL;
+      this.updateThreadMetadata(null, photoImage);
+      setTimeout(() => {
+        this.setState({ isImageProcessing: false });
+      }, 250);
+    });
+  }
+  updateThreadMetadata(title = null, photoImage = null) {
+    this.showSpinner();
+    const asyncTask = async () => {
+      try {
+        const threadID = this.state.thread.uid;
+        const result = await ChatManager.shared().updateGroupThreadMetadata(threadID, {
+          title,
+          photoImage,
+        });
+        this.hideSpinner();
+        setTimeout(() => {
+          if (!result) {
+            showAlert(Strings.update_thread_error);
+          }
+        }, 250);
+      } catch (err) {
+        this.hideSpinner();
+        setTimeout(() => {
+          showAlert(Strings.update_thread_error);
+        }, 250);
+      }
+    };
+    asyncTask();
+  }
+  showTextInput() {
+    this.setState({
+      isTextInputVisible: true,
+    });
+  }
+  hideTextInput() {
+    this.setState({
+      isTextInputVisible: false,
+    });
+  }
+  showSpinner(text = 'Đang xử lý') {
+    this.setState({
+      isSpinnerVisible: true,
+      spinnerText: text,
+    });
+  }
+  hideSpinner() {
+    this.setState({
+      isSpinnerVisible: false,
+    });
+  }
   // --------------------------------------------------
   renderNavigationBar() {
     return (
@@ -104,6 +245,8 @@ class ChatSettings extends Component {
       <View style={styles.threadDetailsCotainer}>
         <ThreadRow 
           thread={thread}
+          onPhotoPress={this.onPhotoPress}
+          onTitlePress={this.onTitlePress}
         />
       </View>
     );
@@ -243,6 +386,49 @@ class ChatSettings extends Component {
       </View>
     );
   }
+  renderTextInputBox() {
+    const { isTextInputVisible } = this.state;
+    const groupName = this.state.thread.title;
+    return (
+      <Modal
+        isVisible={isTextInputVisible}
+        animationIn={'slideInUp'}
+        animationOut={'slideOutDown'}
+        backdropOpacity={0.5}
+      >
+        <TextInputBox
+          title={'Đổi tên nhóm'}
+          initInputValue={groupName}
+          inputPlaceholder={'Tên nhóm'}
+          onYesPress={(text) => {
+            const newGroupName = text.trim();
+            if (newGroupName.length <= 0) { return; }
+            this.hideTextInput();
+            setTimeout(() => {
+              this.updateThreadMetadata(newGroupName);
+            }, 500);
+          }}
+          onCancelPress={() => {
+            this.hideTextInput();
+          }}
+        />
+      </Modal>
+    );
+  }
+  renderSpinner() {
+    const {
+      isSpinnerVisible,
+      spinnerText,
+    } = this.state;
+    return (
+      <Spinner
+        visible={isSpinnerVisible}
+        textContent={spinnerText}
+        textStyle={{ marginTop: 4, color: '#fff' }}
+        overlayColor="#00000080"
+      />
+    );
+  }
   render() {
     return (
       <View style={styles.container}>
@@ -255,6 +441,8 @@ class ChatSettings extends Component {
           {this.renderMembers()}
           {this.renderSharedContent()}
           {this.renderCommands()}
+          {this.renderTextInputBox()}
+          {this.renderSpinner()}
         </ScrollView>
       </View>
     );

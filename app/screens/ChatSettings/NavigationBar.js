@@ -1,6 +1,13 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import React, { PureComponent } from 'react';
 import {
   StyleSheet,
+  StatusBar,
   View,
   Text,
 } from 'react-native';
@@ -45,6 +52,10 @@ class NavigationBar extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
+        <StatusBar
+          backgroundColor="#fff"
+          barStyle="dark-content"
+        />
         {this.renderCloseButton()}
         {this.renderTitle()}
       </View>

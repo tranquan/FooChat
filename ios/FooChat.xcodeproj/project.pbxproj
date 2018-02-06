@@ -37,6 +37,8 @@
 		BA15B5CB201645DB0034F0BA /* libRCTContacts.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA15B5CA201645780034F0BA /* libRCTContacts.a */; };
 		BA5C28CF1FF6A31A00CEF037 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA5C28CB1FF6A30A00CEF037 /* libRNDeviceInfo.a */; };
 		BA5C28D21FF6A6C300CEF037 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BA5C28D11FF6A6C300CEF037 /* GoogleService-Info.plist */; };
+		BAB26D242028C148003FA86F /* libRCTImageResizer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BAB26D232028C11E003FA86F /* libRCTImageResizer.a */; };
+		BAB26D252028C14F003FA86F /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BAB26D1D2028C118003FA86F /* libRNImagePicker.a */; };
 		BAF1F4B32015930F0050A6BC /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BAF1F4B1201592EC0050A6BC /* libRNFetchBlob.a */; };
 		BCBD5E8A342C4FDF867EECF6 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0B2398D4DD914A00B1B6E26C /* Entypo.ttf */; };
 		DE86A541D7BC4567A39CFA19 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 79D5888F15D64D25A7053F90 /* libRNFirebase.a */; };
@@ -326,6 +328,20 @@
 			remoteGlobalIDString = E72EC1401F7ABB5A0001BC90;
 			remoteInfo = "RNDeviceInfo-tvOS";
 		};
+		BAB26D1C2028C118003FA86F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BAB26D182028C118003FA86F /* RNImagePicker.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 014A3B5C1C6CF33500B6D375;
+			remoteInfo = RNImagePicker;
+		};
+		BAB26D222028C11E003FA86F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BAB26D1E2028C11E003FA86F /* RCTImageResizer.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5D72D2E81C16249000E22EC1;
+			remoteInfo = RCTImageResizer;
+		};
 		BAF1F4B0201592EC0050A6BC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */;
@@ -374,6 +390,8 @@
 		BA15B5C5201645780034F0BA /* RCTContacts.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTContacts.xcodeproj; path = "../node_modules/react-native-contacts/ios/RCTContacts.xcodeproj"; sourceTree = "<group>"; };
 		BA5C28951FF6A30A00CEF037 /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
 		BA5C28D11FF6A6C300CEF037 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "FooChat/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		BAB26D182028C118003FA86F /* RNImagePicker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNImagePicker.xcodeproj; path = "../node_modules/react-native-image-picker/ios/RNImagePicker.xcodeproj"; sourceTree = "<group>"; };
+		BAB26D1E2028C11E003FA86F /* RCTImageResizer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTImageResizer.xcodeproj; path = "../node_modules/react-native-image-resizer/ios/RCTImageResizer.xcodeproj"; sourceTree = "<group>"; };
 		BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/react-native-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
 		C358E1EA616C43658B589263 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		E3BC833BE7EBC0E6F1B981BE /* Pods-FooChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FooChat.release.xcconfig"; path = "Pods/Target Support Files/Pods-FooChat/Pods-FooChat.release.xcconfig"; sourceTree = "<group>"; };
@@ -389,6 +407,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BAB26D252028C14F003FA86F /* libRNImagePicker.a in Frameworks */,
+				BAB26D242028C148003FA86F /* libRCTImageResizer.a in Frameworks */,
 				BA15B5CB201645DB0034F0BA /* libRCTContacts.a in Frameworks */,
 				BAF1F4B32015930F0050A6BC /* libRNFetchBlob.a in Frameworks */,
 				BA5C28CF1FF6A31A00CEF037 /* libRNDeviceInfo.a in Frameworks */,
@@ -577,6 +597,7 @@
 				BA15B5C5201645780034F0BA /* RCTContacts.xcodeproj */,
 				00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */,
 				00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */,
+				BAB26D1E2028C11E003FA86F /* RCTImageResizer.xcodeproj */,
 				78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */,
 				00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */,
 				139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */,
@@ -588,6 +609,7 @@
 				BA5C28951FF6A30A00CEF037 /* RNDeviceInfo.xcodeproj */,
 				BAF1F486201592EB0050A6BC /* RNFetchBlob.xcodeproj */,
 				4C2BB4C6F1B24471B242637D /* RNFirebase.xcodeproj */,
+				BAB26D182028C118003FA86F /* RNImagePicker.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -673,6 +695,22 @@
 			children = (
 				BA5C28CB1FF6A30A00CEF037 /* libRNDeviceInfo.a */,
 				BA5C28CD1FF6A30A00CEF037 /* libRNDeviceInfo-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BAB26D192028C118003FA86F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BAB26D1D2028C118003FA86F /* libRNImagePicker.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BAB26D1F2028C11E003FA86F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BAB26D232028C11E003FA86F /* libRCTImageResizer.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -779,6 +817,10 @@
 					ProjectRef = 00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */;
 				},
 				{
+					ProductGroup = BAB26D1F2028C11E003FA86F /* Products */;
+					ProjectRef = BAB26D1E2028C11E003FA86F /* RCTImageResizer.xcodeproj */;
+				},
+				{
 					ProductGroup = 78C398B11ACF4ADC00677621 /* Products */;
 					ProjectRef = 78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */;
 				},
@@ -821,6 +863,10 @@
 				{
 					ProductGroup = BA5C283C1FF6553700CEF037 /* Products */;
 					ProjectRef = 4C2BB4C6F1B24471B242637D /* RNFirebase.xcodeproj */;
+				},
+				{
+					ProductGroup = BAB26D192028C118003FA86F /* Products */;
+					ProjectRef = BAB26D182028C118003FA86F /* RNImagePicker.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1111,6 +1157,20 @@
 			remoteRef = BA5C28CC1FF6A30A00CEF037 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		BAB26D1D2028C118003FA86F /* libRNImagePicker.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNImagePicker.a;
+			remoteRef = BAB26D1C2028C118003FA86F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BAB26D232028C11E003FA86F /* libRCTImageResizer.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTImageResizer.a;
+			remoteRef = BAB26D222028C11E003FA86F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		BAF1F4B1201592EC0050A6BC /* libRNFetchBlob.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1250,6 +1310,8 @@
 					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
 					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
 					"$(SRCROOT)/../node_modules/react-native-contacts/ios",
+					"$(SRCROOT)/../node_modules/react-native-image-picker/ios",
+					"$(SRCROOT)/../node_modules/react-native-image-resizer/ios",
 				);
 				INFOPLIST_FILE = FooChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1282,6 +1344,8 @@
 					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
 					"$(SRCROOT)/../node_modules/react-native-fetch-blob/ios",
 					"$(SRCROOT)/../node_modules/react-native-contacts/ios",
+					"$(SRCROOT)/../node_modules/react-native-image-picker/ios",
+					"$(SRCROOT)/../node_modules/react-native-image-resizer/ios",
 				);
 				INFOPLIST_FILE = FooChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

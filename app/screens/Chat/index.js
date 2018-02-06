@@ -36,10 +36,10 @@ const INITIAL_MESSAGES_LOAD = 255;
 const PREVIOUS_MESSAGES_LOAD = 65;
 
 // -------------------------------------------------- 
-// ChatScreen
+// Chat
 // --------------------------------------------------
 
-class ChatScreen extends Component {
+class Chat extends Component {
   constructor(props) {
     super(props);
 
@@ -249,7 +249,7 @@ class ChatScreen extends Component {
 
 // --------------------------------------------------
 
-ChatScreen.navigationOptions = () => ({
+Chat.navigationOptions = () => ({
   title: 'Chat',
   header: null,
   headerBackTitle: ' ',
@@ -263,7 +263,7 @@ ChatScreen.navigationOptions = () => ({
 // react-redux
 // --------------------------------------------------
 
-ChatScreen.contextTypes = {
+Chat.contextTypes = {
   store: PropTypes.object.isRequired,
 };
 
@@ -275,7 +275,7 @@ const mapDispatchToProps = () => ({
 
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ChatScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(Chat);
 
 
 // --------------------------------------------------

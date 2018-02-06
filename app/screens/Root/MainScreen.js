@@ -45,12 +45,12 @@ const ChatsListStackNavigator = StackNavigator({
 // each tab is a stack navigator
 const MainTabNavigator = TabNavigator(
   {
-    ContactsListTab: { screen: ContactsListStackNavigator },
     ChatsListTab: { screen: ChatsListStackNavigator },
+    ContactsListTab: { screen: ContactsListStackNavigator },
     ProfileTab: { screen: Profile },
   },
   {
-    initialRouteName: 'ContactsListTab',
+    initialRouteName: 'ChatsListTab',
     tabBarPosition: 'bottom',
     animationEnabled: true,
     tabBarOptions: {

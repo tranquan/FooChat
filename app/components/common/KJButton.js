@@ -70,6 +70,7 @@ class KJButton extends PureComponent {
               resizeMode="contain"
             />
         }
+        {this.props.children}
       </KJTouchableOpacity>
     );
   }

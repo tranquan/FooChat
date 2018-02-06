@@ -25,14 +25,11 @@ const PHOTO_SIZE = 60;
 // --------------------------------------------------
 
 class ThreadRow extends PureComponent {
-  onPress = () => {
-    this.props.onPress(this.props.thread);
+  onTitlePress = () => {
+    this.props.onTitlePress(this.props.thread);
   }
-  onEditTitlePress = () => {
-    this.props.onEditTitlePress(this.props.thread);
-  }
-  onEditPhotoPress = () => {
-    this.props.onEditPhotoPress(this.props.thread);
+  onPhotoPress = () => {
+    this.props.onPhotoPress(this.props.thread);
   }
   // --------------------------------------------------
   renderPhoto() {
@@ -47,7 +44,7 @@ class ThreadRow extends PureComponent {
         />
         <TouchableOpacity
           style={Styles.button_overlay}
-          onPress={this.onEditPhotoPress}
+          onPress={this.onPhotoPress}
         />
       </View>
     );
@@ -69,7 +66,7 @@ class ThreadRow extends PureComponent {
                 containerStyle={styles.editButton}
                 leftIconSource={require('./img/edit.png')}
                 leftIconStyle={{ width: 24, height: 24 }}
-                onPress={this.onBackPress}
+                onPress={this.onTitlePress}
               />
           }
         </View>
@@ -82,26 +79,18 @@ class ThreadRow extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
-
         <View style={styles.rowContainer}>
           {this.renderPhoto()}
           {this.renderContent()}
         </View>
-
-        <TouchableOpacity
-          style={Styles.button_overlay}
-          onPress={this.onPress}
-        />
-        
       </View>
     );
   }
 }
 
 ThreadRow.defaultProps = {
-  onPress: () => { },
-  onEditTitlePress: () => { },
-  onEditPhotoPress: () => { },
+  onTitlePress: () => {},
+  onPhotoPress: () => {},
 };
 
 export default ThreadRow;

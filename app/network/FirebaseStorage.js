@@ -1,4 +1,10 @@
 /**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
+/**
  * Firebase Cloud Storage
  * - use to upload/download files, images
  * - client will upload file to storage & get the url to insert into database
@@ -11,7 +17,7 @@ import moment from 'moment/min/moment-with-locales';
 
 /* eslint-disable */
 import Utils from '../utils/Utils';
-const LOG_TAG = '7777: FirebaseStorage.js';
+const LOG_TAG = 'FirebaseStorage.js';
 /* eslint-enable */
 
 // --------------------------------------------------
@@ -75,7 +81,7 @@ class FirebaseStorage {
 
   /**
    * Upload an image in chat
-   * @param {*} threadID
+   * @param {string} threadID
    */
   static uploadChatImage(threadID, fileURI) {
     const updateTime = moment().unix();
