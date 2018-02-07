@@ -20,6 +20,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 
 import Styles from '../../constants/styles';
 import Strings from '../../constants/strings';
+import DelaySearchBar from '../../components/DelaySearchBar';
 import ChatManager from '../../manager/ChatManager';
 import ContactsManager, { CONTACTS_EVENTS } from '../../manager/ContactsManager';
 import { showAlert } from '../../utils/UIUtils';
@@ -27,6 +28,8 @@ import { showAlert } from '../../utils/UIUtils';
 import NavigationBar from './NavigationBar';
 import GetContactsRow from './GetContactsRow';
 import ContactRow from './ContactRow';
+
+const removeDiacritics = require('diacritics').remove;
 
 // --------------------------------------------------
 
@@ -44,13 +47,13 @@ class ContactsListScreen extends Component {
     super(props);
 
     this.state = {
+      searchText: '',
+      isContactsPermissionsGranted: true,
       contacts: [],
       contactsExtraData: false,
       isRefreshing: false,
-      isSpinnerVisible: false,
       spinnerText: '',
-      isContactsPermissionsGranted: true,
-      isRequestContactsPermissionsProcessing: false,
+      isSpinnerVisible: false,
     };
   }
   componentDidMount() {
@@ -82,7 +85,23 @@ class ContactsListScreen extends Component {
     Utils.log(`${LOG_TAG} onGetContactsPress`);
     this.requestContactsPermissions();
   }
+  onSearchBarChangeText = (text) => {
+    Utils.log(`${LOG_TAG} onSearchBarChangeText ${text}`);
+    this.setState({ searchText: text });
+  }
   // --------------------------------------------------
+  getContacts() {
+    let contacts = this.state.contacts;
+    const searchText = removeDiacritics(this.state.searchText.trim());
+    if (searchText && searchText.length > 0) {
+      contacts = contacts.filter((user) => {
+        const name = user.fullNameNoDiacritics();
+        const matchFullName = name.search(new RegExp(searchText, 'i')) !== -1;
+        return matchFullName;
+      });
+    }
+    return contacts;
+  }
   reloadData = () => {
     const asyncTask = async () => {
       try {
@@ -212,8 +231,25 @@ class ContactsListScreen extends Component {
       </View>
     );
   }
+  renderSearchBar() {
+    return (
+      <View style={styles.searchBarContainer}>
+        <DelaySearchBar
+          searchBarProps={{
+            placeholder: 'Tìm kiếm mọi người',
+          }}
+          containerStyle={{ backgroundColor: '#f5f5f5' }}
+          inputStyle={{ backgroundColor: '#fff' }}
+          onChangeText={this.onSearchBarChangeText}
+        />
+        <View style={styles.topLine} />
+        <View style={styles.bottomLine} />
+      </View>
+    );
+  }
   renderContactsList() {
-    const { contacts, contactsExtraData } = this.state;
+    const { contactsExtraData } = this.state;
+    const contacts = this.getContacts();
     return (
       <FlatList
         refreshControl={
@@ -262,6 +298,7 @@ class ContactsListScreen extends Component {
       <View style={styles.container}>
         {this.renderNavigationBar()}
         {this.renderGetContactsRow()}
+        {this.renderSearchBar()}
         {this.renderContactsList()}
         {this.renderSpinner()}
       </View>

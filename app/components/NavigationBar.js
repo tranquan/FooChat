@@ -74,6 +74,7 @@ class NavigationBar extends PureComponent {
 // --------------------------------------------------
 
 NavigationBar.propTypes = {
+  barButtonSize: PropTypes.number,
   renderTitle: PropTypes.func,
   onCancelPress: PropTypes.func,
   onDonePress: PropTypes.func,
