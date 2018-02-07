@@ -18,6 +18,7 @@ import {
 
 import SlideMenu from '../SlideMenu';
 import AddNewContact from '../AddNewContact';
+import AddChatMember from '../AddChatMember';
 import ContactsList from '../ContactsList';
 import ChatsList from '../ChatsList';
 import Chat from '../Chat';
@@ -63,6 +64,7 @@ const MainModalNavigator = StackNavigator(
   {
     MainTabNavigator: { screen: MainTabNavigator },
     AddNewContact: { screen: AddNewContact },
+    AddChatMember: { screen: AddChatMember },
     CreateGroupChat: { screen: CreateGroupChat },
     ChatSettings: { screen: ChatSettings },
   },

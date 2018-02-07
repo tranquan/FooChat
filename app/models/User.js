@@ -101,6 +101,10 @@ export default class User {
   // UI Logics
   // --------------------------------------------------
 
+  isMe() {
+    return this.uid === User.mMyUser.uid;
+  }
+
   avatarImageURI() {
     if (!this.avatarImage || this.avatarImage.length === 0) {
       return this.avatarImagePlaceholder();

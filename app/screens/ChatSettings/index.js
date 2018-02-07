@@ -48,6 +48,7 @@ class ChatSettings extends Component {
     super(props);
 
     this.state = {
+      thread: null,
       isNotificationOn: true,
       isFavoriteOn: false,
       isTextInputVisible: false,
@@ -57,11 +58,9 @@ class ChatSettings extends Component {
   componentWillMount() {
     // cache current thread
     const navParams = this.props.navigation.state.params || {};
-    const thread = navParams.thread;
+    const thread = navParams.thread || null;
     // update state
-    this.setState({
-      thread,
-    });
+    this.setState({ thread });
   }
   // --------------------------------------------------
   onClosePress = () => {
@@ -107,19 +106,33 @@ class ChatSettings extends Component {
       isFavoriteOn: isOn,
     });
   }
-  onRemoveMember = (member) => {
-    this.removeMembers([member]);
+  onRemoveMemberPress = (member) => {
+    this.showSpinner();
+    const asyncTask = async () => {
+      try {
+        const thread = this.state.thread;
+        const result = 
+          await ChatManager.shared().removeUsersFromGroupThread(thread.uid, [member.uid]);
+        this.hideSpinner();
+        if (!result) {
+          setTimeout(() => {
+            showAlert(Strings.update_thread_error);
+          }, 250);
+        }
+      } catch (err) {
+        this.hideSpinner();
+        setTimeout(() => {
+          showAlert(Strings.update_thread_error);
+        }, 250);
+      }
+    };
+    asyncTask();
   }
-  onAddMember = () => {
-    // open add member
+  onAddMemberPress = () => {
+    const thread = this.state.thread;
+    this.props.navigation.navigate('AddChatMember', { thread });
   }
   // --------------------------------------------------
-  addMembers(members) {
-    ChatManager.shared().addUsersToGroupThread();
-  }
-  removeMembers(members) {
-
-  }
   pickImage() {
     const title = 'Cập nhật hình đại diện';
     return new Promise((resolve, reject) => {
@@ -287,6 +300,15 @@ class ChatSettings extends Component {
     if (thread.isSingleThread()) { return null; } 
     // render
     const members = thread.getUsersArray();
+    for (let i = 0; i < members.length; i += 1) {
+      if (members[i].isMe()) {
+        if (i === 0) { break; }
+        const temp = members[0];
+        members[0] = members[i];
+        members[i] = temp;
+        break;
+      }
+    }
     return (
       <View style={styles.membersContainer}>
         { this.renderMembersSectionHeader() }
@@ -316,19 +338,21 @@ class ChatSettings extends Component {
           containerStyle={{}}
           leftIconSource={require('./img/add_contact.png')}
           leftIconStyle={{ marginLeft: 0 }}
-          onPress={this.onAddMoreMemberPress}
+          onPress={this.onAddMemberPress}
         />
       </View>
     );
   }
   renderMember(user) {
     const myUser = this.props.myUser;
+    const thread = this.state.thread;
+    const isDeleteAble = thread.adminID === myUser.uid && user.uid !== myUser.uid;
     return (
       <MemberRow
         key={user.uid}
         user={user}
-        isDeleteButtonHidden={user.uid === myUser.uid}
-        onDeletePress={this.onRemoveMember}
+        isDeleteButtonHidden={!isDeleteAble}
+        onDeletePress={this.onRemoveMemberPress}
       />
     );
   }

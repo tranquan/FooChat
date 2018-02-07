@@ -759,16 +759,17 @@ class FirebaseDatabase {
    * @param {string} threadID 
    */
   static async removeUsersFromGroupThread(threadID, userIDs) {
+    Utils.warn(`${LOG_TAG}: thread is not found: ${threadID}`, userIDs);
     try {
       // is thread exist
       const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {
-        Utils.warn(`removeUsersFromGroupThread: thread is not found: ${threadID}`);
+        Utils.warn(`${LOG_TAG}: removeUsersFromGroupThread: thread is not found: ${threadID}`);
         return false;
       }
       // is thread a group
       if (thread.type !== THREAD_TYPES.GROUP) {
-        Utils.warn(`removeUsersFromGroupThread: thread is not a group: ${thread.type}`);
+        Utils.warn(`${LOG_TAG}: removeUsersFromGroupThread: thread is not a group: ${thread.type}`);
         return false;
       }
       // remove users from thread
@@ -806,17 +807,17 @@ class FirebaseDatabase {
         return false;
       }
       // update admin
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const threadRef = THREADS_REF.child(`${threadID}`);
         threadRef.child('adminID').set(
           userID
         , (err) => {
-          if (!err) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        });
+            if (!err) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          }); // eslint-disable-line
       }); 
     } catch (err) {
       Utils.warn(`${LOG_TAG}: setThreadAdmin exc: `, err);
@@ -832,8 +833,6 @@ class FirebaseDatabase {
    */
   static async updateGroupThreadMetadata(threadID, metaData) {
     try {
-      // filter-out invalid metaData
-      delete metaData.adminID;
       // is thread exist
       const thread = await FirebaseDatabase.getThread(threadID);
       if (!thread) {
@@ -845,8 +844,10 @@ class FirebaseDatabase {
         Utils.warn(`${LOG_TAG}: updateGroupThreadMetadata: thread is not a group: ${thread.type}`);
         return false;
       }
+      // filter-out invalid metaData
+      const threadMetadata = FirebaseDatabase.mGetThreadMetaData(metaData);
       // update
-      await FirebaseDatabase.mUpdateThreadMetaData(threadID, metaData);
+      await FirebaseDatabase.mUpdateThreadMetaData(threadID, threadMetadata);
       return true;
     } catch (err) {
       Utils.warn(`${LOG_TAG}: updateGroupThreadMetadata exc: ${err}`, err);

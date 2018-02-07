@@ -9,18 +9,17 @@ import {
   StyleSheet,
   View,
   Text,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 
-import Styles from '../../constants/styles';
-import KJButton from '../../components/common/KJButton';
 import KJImage from '../../components/common/KJImage';
 
 // --------------------------------------------------
 
 /* eslint-disable */
-import Utils from 'app/utils/Utils';
-const LOG_TAG = 'ContactRow.js';
+import Utils from '../../utils/Utils';
+const LOG_TAG = '7777: ContactRow.js';
 /* eslint-enable */
 
 const ROW_PADDING_LEFT = 20;
@@ -29,14 +28,13 @@ const AVATAR_SIZE = 46;
 const AVATAR_CONTENT_SPACING = 10;
 
 // --------------------------------------------------
-// MemberRow
+// ContactRow
 // --------------------------------------------------
 
-class MemberRow extends PureComponent {
-  onDeletePress = () => {
-    this.props.onDeletePress(this.props.user);
+class ContactRow extends PureComponent {
+  onPress = () => {
+    this.props.onPress(this.props.user);
   }
-  // --------------------------------------------------
   renderAvatar() {
     const { user } = this.props;
     const presenceStatusColor = user.presenceStatusColor();
@@ -59,45 +57,52 @@ class MemberRow extends PureComponent {
   }
   renderContent() {
     const { user } = this.props;
-    const isMe = user.isMe() ? ' (Tôi)' : '';
     return (
-      <Text style={styles.titleText}>
-        {`${user.fullName}${isMe}`}
+      <Text style={styles.title}>
+        {`${user.fullName}`}
       </Text>
     );
   }
-  renderDeleteButton() {
-    const { isDeleteButtonHidden } = this.props;
-    if (isDeleteButtonHidden) { return null; }
+  renderSelected() {
+    const { isSelected } = this.props;
+    const icon = isSelected ? 
+      require('./img/checked.png') : 
+      require('./img/nochecked.png');
     return (
-      <KJButton
-        containerStyle={styles.deleteButton}
-        title={'Xóa'}
-        titleStyle={styles.deleteButtonTitle}
-        onPress={this.onDeletePress}
+      <Image
+        style={{ width: 22, height: 22 }}
+        source={icon}
+        resizeMode="contain"
       />
     );
   }
   render() {
     return (
       <View style={styles.container}>
+
         <View style={styles.rowContainer}>
           {this.renderAvatar()}
           {this.renderContent()}
-          {this.renderDeleteButton()}
+          {this.renderSelected()}
         </View>
+
         <View style={styles.separator} />
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={this.onPress}
+        />
       </View>
     );
   }
 }
 
-MemberRow.defaultProps = {
-  isDeleteButtonHidden: false,
-  onDeletePress: () => {},
+ContactRow.defaultProps = {
+  isSelected: true,
+  onPress: () => { },
 };
 
-export default MemberRow;
+export default ContactRow;
 
 // --------------------------------------------------
 
@@ -117,8 +122,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingTop: 8,
     paddingBottom: 8,
-    paddingLeft: ROW_PADDING_LEFT,
-    paddingRight: ROW_PADDING_RIGHT,
+    paddingLeft: 20,
+    paddingRight: 20,
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#fff',
@@ -133,6 +138,16 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     backgroundColor: '#fff',
   },
+  contentContainer: {
+    flex: 0,
+    paddingLeft: ROW_PADDING_LEFT,
+    paddingRight: ROW_PADDING_RIGHT,
+    paddingTop: 0,
+    paddingBottom: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    backgroundColor: '#fff',
+  },
   avatarImage: {
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
@@ -141,10 +156,10 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
     backgroundColor: '#fff',
   },
-  titleText: {
+  title: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '300',
+    fontWeight: '600',
   },
   status: {
     position: 'absolute',
@@ -157,17 +172,13 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
     backgroundColor: '#ff0',
   },
-  deleteButton: {
-    flex: 0,
-    width: 48,
-    height: 26,
-    borderColor: '#d0021b',
-    borderWidth: 1.0,
-    borderRadius: 4.0,
-  },
-  deleteButtonTitle: {
-    fontSize: 14,
-    color: '#d0021b',
+  button: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: '#f000',
   },
   separator: {
     height: 1,

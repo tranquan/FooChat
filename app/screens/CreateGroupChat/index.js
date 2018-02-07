@@ -14,7 +14,6 @@ import {
   StyleSheet,
   View,
   Image,
-  StatusBar,
   FlatList,
   Alert,
 } from 'react-native';

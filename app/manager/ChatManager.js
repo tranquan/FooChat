@@ -354,8 +354,8 @@ function initChatManager() {
       return Object.assign(new Thread(), thread);
     },
     async createGroupThread(users, metaData) {
-      metaData.adminID = mMyUser.uid;
-      const thread = await FirebaseDatabase.createGroupThread(users, metaData);
+      const threadMetadata = Object.assign({ adminID: mMyUser.uid, metaData });
+      const thread = await FirebaseDatabase.createGroupThread(users, threadMetadata);
       if (!thread) { 
         return null; 
       }
@@ -370,32 +370,27 @@ function initChatManager() {
     },
     async addUsersToGroupThread(threadID, users) {
       // add
-      const result = FirebaseDatabase.addUsersToGroupThread(threadID, users);
+      const result = await FirebaseDatabase.addUsersToGroupThread(threadID, users);
       if (!result) {
-        return false
-      }
-      // add a notice message remove by admin
-      const notice = Message.newNoticeMessage('users added by admin');
-      await FirebaseDatabase.sendMessage(notice, threadID);
-    },
-    async removeUsersFromGroupThread(threadID, userIDs) {
-      // get thread
-      const thread = await FirebaseDatabase.getThread(threadID);
-      if (!thread) { 
-        return false; 
-      }
-      // only allow to remove if admin is me
-      if (thread.adminID !== mMyUser.uid) {
+        Utils.warn(`${LOG_TAG}: addUsersToGroupThread: firebase db err`);
         return false;
       }
+      // add a notice message remove by admin
+      // const notice = Message.newNoticeMessage('users added by admin');
+      // await FirebaseDatabase.sendMessage(notice, threadID);
+      return true;
+    },
+    async removeUsersFromGroupThread(threadID, userIDs) {
       // remove
       const result = await FirebaseDatabase.removeUsersFromGroupThread(threadID, userIDs);
       if (!result) {
-        return false
+        Utils.warn(`${LOG_TAG}: removeUsersFromGroupThread: firebase db err`);
+        return false;
       }
       // add a notice message remove by admin
-      const notice = Message.newNoticeMessage('users removed by admin');
-      await FirebaseDatabase.sendMessage(notice, threadID);
+      // const notice = Message.newNoticeMessage('users removed by admin');
+      // await FirebaseDatabase.sendMessage(notice, threadID);
+      return true;
     },
     async leaveGroupThread(threadID) {
       // get thread
@@ -411,7 +406,7 @@ function initChatManager() {
       // re-assing admin if I am admin
       if (thread.adminID === mMyUser.uid) {
         const members = thread.users();
-        const newAdminID = '';
+        let newAdminID = '';
         for (let i = 0; i < members.length; i += 1) {
           const member = members[i];
           if (member.uid !== mMyUser.uid) {
@@ -420,9 +415,10 @@ function initChatManager() {
           }
         }
         if (newAdminID.length > 0) {
-          FirebaseDatabase.setThreadAdmin(threadID, newAdminID);
+          await FirebaseDatabase.setThreadAdmin(threadID, newAdminID);
         }
       }
+      return true;
     },
     async sendMessage(message, threadID) {
       const myMessage = { ...message, authorID: mMyUser.uid };

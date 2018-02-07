@@ -58,7 +58,7 @@ export default class Thread {
   isGroupThread() {
     return this.type === THREAD_TYPES.GROUP;
   }
-
+  
   getUsersArray() {
     // get keys
     const usersObj = this.users;
