@@ -2,10 +2,18 @@
  * Chat User
  */
 
-import moment from 'moment/min/moment-with-locales';
+import { getAvatarPlaceholder, getWallPlaceholder, hidePhoneNumber } from 'app/utils/UIUtils';
 
-import Utils from '../utils/Utils';
-import { getAvatarPlaceholder, getWallPlaceholder } from '../utils/UIUtils';
+const removeDiacritics = require('diacritics').remove;
+
+/* eslint-disable */
+import Utils from 'app/utils/Utils';
+const LOG_TAG = 'User.js';
+/* eslint-enable */
+
+// --------------------------------------------------
+// User
+// --------------------------------------------------
 
 export default class User {
 
@@ -113,6 +121,20 @@ export default class User {
 
   wallImagePlaceholder() {
     return getWallPlaceholder();
+  }
+
+  hiddenPhoneNumer() {
+    if (!this.mHiddenPhoneNumber) {
+      this.mHiddenPhoneNumber = hidePhoneNumber(this.phoneNumber);
+    }
+    return this.mHiddenPhoneNumber;
+  }
+
+  fullNameNoDiacritics() {
+    if (!this.mFullNameNoDiacritics) {
+      this.mFullNameNoDiacritics = removeDiacritics(this.fullName);
+    }
+    return this.mFullNameNoDiacritics;
   }
 
   presenceStatusColor() {

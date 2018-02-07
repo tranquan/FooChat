@@ -34,12 +34,17 @@ import NavigationBar from './NavigationBar';
 import ContactRow from './ContactRow';
 import MemberCell from './MemberCell';
 
+const _ = require('lodash');
+const removeDiacritics = require('diacritics').remove;
+
 // --------------------------------------------------
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
 const LOG_TAG = 'CreateGroupChat.js';
 /* eslint-enable */
+
+const SEARCH_DELAY = 500;
 
 // --------------------------------------------------
 // CreateGroupChat.js
@@ -57,6 +62,7 @@ class CreateGroupChat extends Component {
       members: [],
       membersExtraData: false,
       isMembersSelected: {},
+      searchText: '',
     };
   }
   componentWillMount() {
@@ -86,9 +92,11 @@ class CreateGroupChat extends Component {
   }
   onSearchBarChangeText = (text) => {
     Utils.log(`${LOG_TAG} onSearchBarChangeText: ${text}`);
+    this.debounceSetSearchText(text);
   }
   onSearchBarClearText = (text) => {
     Utils.log(`${LOG_TAG} onSearchBarClearText: ${text}`);
+    this.debounceSetSearchText('');
   }
   onContactPress = (user) => {
     // check user
@@ -124,6 +132,22 @@ class CreateGroupChat extends Component {
     }));
   }
   // --------------------------------------------------
+  getContacts() {
+    let contacts = this.state.contacts;
+    const searchText = removeDiacritics(this.state.searchText.trim());
+    if (searchText && searchText.length > 0) {
+      contacts = contacts.filter((user) => {
+        const name = user.fullNameNoDiacritics();
+        const matchFullName = name.search(new RegExp(searchText, 'i')) !== -1;
+        return matchFullName;
+      });
+    }
+    return contacts;
+  }
+  setSearchText = (text) => {
+    this.setState({ searchText: text });
+  }
+  debounceSetSearchText = _.debounce(this.setSearchText, SEARCH_DELAY);
   createGroupChat() {
     // add me to memebers as well
     const members = this.state.members.map(item => Object.assign({}, item));
@@ -149,6 +173,7 @@ class CreateGroupChat extends Component {
     };
     asyncTask();
   }
+  // --------------------------------------------------
   showSpinner(text = 'Đang xử lý') {
     this.setState({
       isSpinnerVisible: true,
@@ -223,10 +248,11 @@ class CreateGroupChat extends Component {
     );
   }
   renderContactsList() {
+    const data = this.getContacts();
     return (
       <View style={styles.contactsListContainer}>
         <FlatList
-          data={this.state.contacts}
+          data={data}
           extraData={this.state.contactsExtraData}
           keyExtractor={item => item.uid}
           renderItem={this.renderContactRow}

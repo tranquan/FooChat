@@ -10,7 +10,6 @@ import {
   ScrollView,
   View,
   Text,
-  Image
 } from 'react-native';
 
 import PropTypes from 'prop-types';
@@ -24,7 +23,6 @@ import Styles from '../../constants/styles';
 import Strings from '../../constants/strings';
 import KJButton from '../../components/common/KJButton';
 import TextInputBox from '../../components/TextInputBox';
-import ContactsManager from '../../manager/ContactsManager';
 import ChatManager from '../../manager/ChatManager';
 import FirebaseStorage from '../../network/FirebaseStorage';
 import { showAlert } from '../../utils/UIUtils';
@@ -49,8 +47,7 @@ class ChatSettings extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { 
-      isImageProcessing: false,
+    this.state = {
       isNotificationOn: true,
       isFavoriteOn: false,
       isTextInputVisible: false,
@@ -82,7 +79,7 @@ class ChatSettings extends Component {
             this.uploadImage(imageURI);
           })
           .catch((err) => {
-            Utils.warn(`${LOG_TAG} resizeImage error: `, error);
+            Utils.warn(`${LOG_TAG} resizeImage error: `, err);
             this.hideSpinner();
             setTimeout(() => {
               showAlert(Strings.camera_access_error);
@@ -118,7 +115,7 @@ class ChatSettings extends Component {
   }
   // --------------------------------------------------
   addMembers(members) {
-
+    ChatManager.shared().addUsersToGroupThread();
   }
   removeMembers(members) {
 
@@ -172,7 +169,7 @@ class ChatSettings extends Component {
     }, (error) => {
       // error
       Utils.warn(`${LOG_TAG} uploadImage: error: `, error);
-      this.setState({ isImageProcessing: false });
+      this.hideSpinner();
       setTimeout(() => {
         showAlert(Strings.upload_image_error);
       }, 250);
@@ -181,9 +178,7 @@ class ChatSettings extends Component {
       Utils.log(`${LOG_TAG} uploadImage: `, snapshot);
       const photoImage = snapshot.downloadURL;
       this.updateThreadMetadata(null, photoImage);
-      setTimeout(() => {
-        this.setState({ isImageProcessing: false });
-      }, 250);
+      this.hideSpinner();
     });
   }
   updateThreadMetadata(title = null, photoImage = null) {

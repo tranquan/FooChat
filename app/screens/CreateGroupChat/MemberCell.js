@@ -21,7 +21,7 @@ import KJImage from '../../components/common/KJImage';
 
 /* eslint-disable */
 import Utils from '../../utils/Utils';
-const LOG_TAG = '7777: MemberCell.js';
+const LOG_TAG = 'MemberCell.js';
 /* eslint-enable */
 
 const AVATAR_SIZE = 60;
@@ -102,7 +102,7 @@ export default MemberCell;
 const styles = StyleSheet.create({
   container: {
     flex: 0,
-    paddingTop: 0,
+    paddingTop: 6,
     paddingBottom: 0,
     paddingLeft: 10,
     paddingRight: 10,
