@@ -31,6 +31,9 @@ const PROFILE_WALL_PATH = `${IMAGES_PATH}/profile_wall`;
 const CHAT_IMAGES_PATH = `${IMAGES_PATH}/chat`;
 const CHAT_FILES_PATH = `${FILES_PATH}/chat`;
 
+const GENERAL_IMAGES_PATH = `${IMAGES_PATH}/general`;
+const GENERAL_FILES_PATH = `${FILES_PATH}/gerneal`;
+
 // --------------------------------------------------
 // FirebaseStorage
 // --------------------------------------------------
@@ -56,7 +59,6 @@ class FirebaseStorage {
   //   storagePath,
   //   onProgress, onError, onSuccess // eslint-disable-line
   // ) {
-
   // }
 
   /**
@@ -97,6 +99,31 @@ class FirebaseStorage {
   static uploadChatFile(threadID, fileURI, fileExtension) {
     const updateTime = moment().unix();
     const storagePath = `${CHAT_FILES_PATH}/${threadID}/file_${updateTime}${fileExtension}`;
+    return FirebaseStorage.uploadFile(fileURI, storagePath);
+  }
+
+  /**
+   * Upload an image in to a common place
+   * @param {string} threadID
+   */
+  static uploadGeneralImage(fileURI) {
+    const now = moment(); 
+    const date = now.format('DD_MM_YYYY');
+    const updateTime = now.unix();
+    const storagePath = `${GENERAL_IMAGES_PATH}/${date}/image_${updateTime}.jpg`;
+    return FirebaseStorage.uploadFile(fileURI, storagePath);
+  }
+
+  /**
+   * Upload a file to a common place
+   * @param {string} threadID 
+   * @param {string} fileExtension file extension, like .zip, .pdf, ... (optional)
+   */
+  static uploadGeneralFile(fileURI, fileExtension) {
+    const now = moment();
+    const date = now.format('DD_MM_YYYY');
+    const updateTime = now.unix();
+    const storagePath = `${GENERAL_FILES_PATH}/${date}/file_${updateTime}${fileExtension}`;
     return FirebaseStorage.uploadFile(fileURI, storagePath);
   }
 }

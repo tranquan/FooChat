@@ -15,17 +15,16 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import ImageResizer from 'react-native-image-resizer';
 import Modal from 'react-native-modal';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import Styles from '../../constants/styles';
-import Strings from '../../constants/strings';
-import KJButton from '../../components/common/KJButton';
-import TextInputBox from '../../components/TextInputBox';
-import ChatManager from '../../manager/ChatManager';
-import FirebaseStorage from '../../network/FirebaseStorage';
-import { showAlert } from '../../utils/UIUtils';
+import Styles from 'app/constants/styles';
+import Strings from 'app/constants/strings';
+import KJButton from 'app/components/common/KJButton';
+import TextInputBox from 'app/components/TextInputBox';
+import ChatManager from 'app/manager/ChatManager';
+import ImageUtils from 'app/utils/ImageUtils';
+import { showInfoAlert } from 'app/utils/UIUtils';
 
 import NavigationBar from './NavigationBar';
 import ThreadRow from './ThreadRow';
@@ -67,33 +66,35 @@ class ChatSettings extends Component {
     this.props.navigation.goBack();
   }
   onPhotoPress = () => {
-    this.pickImage()
-      .then(response => {
-        // user cancel
-        if (response === null) { return; }
-        // resize image & upload
-        this.showSpinner();
-        this.resizeImage(response.uri, 256, 256)
-          .then(imageURI => {
-            this.uploadImage(imageURI);
-          })
-          .catch((err) => {
-            Utils.warn(`${LOG_TAG} resizeImage error: `, err);
-            this.hideSpinner();
-            setTimeout(() => {
-              showAlert(Strings.camera_access_error);
-            }, 250);
-          });
-      })
-      .catch((err) => {
-        Utils.warn(`${LOG_TAG} pickImage error: `, err);
+    // don't allow update single thread title
+    if (this.state.thread.isSingleThread()) {
+      return;
+    }
+    // prompt image picker
+    ImageUtils.pickAndUploadImage(
+      256, 256, 
+      (step) => {
+        if (step === 'resize') {
+          this.showSpinner();
+        }
+      }, null,
+      (step, err) => {
+        Utils.warn(`${LOG_TAG}: pickAndUploadImage err: ${step}`, err);
         this.hideSpinner();
-        setTimeout(() => {
-          showAlert(Strings.camera_access_error);
-        }, 250);
-      });
+        const message = step === 'pick' ? Strings.camera_access_error : Strings.update_thread_error;
+        showInfoAlert(message);
+      },
+      (downloadURL) => {
+        this.updateThreadMetadata(null, downloadURL);
+      },
+    );
   }
   onTitlePress = () => {
+    // don't allow update single thread title
+    if (this.state.thread.isSingleThread()) {
+      return;
+    }
+    // prompt input
     this.showTextInput();
   }
   onNotificationToggle = (isOn) => {
@@ -116,13 +117,13 @@ class ChatSettings extends Component {
         this.hideSpinner();
         if (!result) {
           setTimeout(() => {
-            showAlert(Strings.update_thread_error);
+            showInfoAlert(Strings.update_thread_error);
           }, 250);
         }
       } catch (err) {
         this.hideSpinner();
         setTimeout(() => {
-          showAlert(Strings.update_thread_error);
+          showInfoAlert(Strings.update_thread_error);
         }, 250);
       }
     };
@@ -133,67 +134,6 @@ class ChatSettings extends Component {
     this.props.navigation.navigate('AddChatMember', { thread });
   }
   // --------------------------------------------------
-  pickImage() {
-    const title = 'Cập nhật hình đại diện';
-    return new Promise((resolve, reject) => {
-      const ImagePicker = require('react-native-image-picker');
-      const options = {
-        title,
-        cancelButtonTitle: 'Đóng',
-        takePhotoButtonTitle: 'Chụp hình mới',
-        chooseFromLibraryButtonTitle: 'Chọn từ Album',
-        storageOptions: {
-          skipBackup: true,
-          path: 'images',
-        },
-      };
-      ImagePicker.showImagePicker(options, (response) => {
-        if (response.error) {
-          reject(response.error);
-        } else if (response.didCancel) {
-          resolve(null);
-        } else {
-          resolve(response);
-        }
-      });
-    });
-  }
-  resizeImage(fileURI, width = 512, height = 512) {
-    return ImageResizer.createResizedImage(fileURI, width, height, 'JPEG', 80)
-      .then((response) => {
-        return response.uri;
-      })
-      .catch((error) => {
-        Utils.warn(`${LOG_TAG} resizeImage error: `, error);
-        return Promise.reject(error);
-      });
-  }
-  uploadImage(fileURI) {
-    const threadID = this.state.thread.uid;
-    let uploadTask = null;
-    // create upload task
-    uploadTask = FirebaseStorage.uploadChatImage(threadID, fileURI);
-    if (!uploadTask) { return; }
-    // upload
-    uploadTask.on('state_changed', (snapshot) => { // eslint-disable-line
-      // progress
-      // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      // Utils.log(`${LOG_TAG} uploadImage progress: ${progress} %`);
-    }, (error) => {
-      // error
-      Utils.warn(`${LOG_TAG} uploadImage: error: `, error);
-      this.hideSpinner();
-      setTimeout(() => {
-        showAlert(Strings.upload_image_error);
-      }, 250);
-    }, (snapshot) => {
-      // success
-      Utils.log(`${LOG_TAG} uploadImage: `, snapshot);
-      const photoImage = snapshot.downloadURL;
-      this.updateThreadMetadata(null, photoImage);
-      this.hideSpinner();
-    });
-  }
   updateThreadMetadata(title = null, photoImage = null) {
     this.showSpinner();
     const asyncTask = async () => {
@@ -204,16 +144,14 @@ class ChatSettings extends Component {
           photoImage,
         });
         this.hideSpinner();
-        setTimeout(() => {
-          if (!result) {
-            showAlert(Strings.update_thread_error);
-          }
-        }, 250);
+        if (!result) {
+          showInfoAlert(Strings.update_thread_error);
+        } else {
+          showInfoAlert(Strings.update_thread_success);
+        }
       } catch (err) {
         this.hideSpinner();
-        setTimeout(() => {
-          showAlert(Strings.update_thread_error);
-        }, 250);
+        showInfoAlert(Strings.update_thread_error);
       }
     };
     asyncTask();
@@ -425,7 +363,7 @@ class ChatSettings extends Component {
             this.hideTextInput();
             setTimeout(() => {
               this.updateThreadMetadata(newGroupName);
-            }, 500);
+            }, 250);
           }}
           onCancelPress={() => {
             this.hideTextInput();

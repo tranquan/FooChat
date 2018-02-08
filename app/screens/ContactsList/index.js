@@ -82,11 +82,9 @@ class ContactsListScreen extends Component {
     this.openChatWithUser(user);
   }
   onGetContactsPress = () => {
-    Utils.log(`${LOG_TAG} onGetContactsPress`);
     this.requestContactsPermissions();
   }
   onSearchBarChangeText = (text) => {
-    Utils.log(`${LOG_TAG} onSearchBarChangeText ${text}`);
     this.setState({ searchText: text });
   }
   // --------------------------------------------------

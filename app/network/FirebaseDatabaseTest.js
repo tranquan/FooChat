@@ -47,6 +47,7 @@ class FirebaseDatabaseTest {
         try {
 
           // FirebaseDatabaseTest.testSetThreadAdmin();
+          // FirebaseDatabaseTest.testUpdateUserReadTimeInThread();
 
         } catch (err) {
           Utils.log(`test exception: ${err}`);
@@ -162,7 +163,7 @@ class FirebaseDatabaseTest {
         }
         Utils.log(`testRemoveUserFromGroupThread PASSED: ${thread.uid}`);
       } catch (err) {
-        Utils.log(`testAddUserToGroupThread FAILED: `, err);
+        Utils.log(`testAddUserToGroupThread FAILED: ${err}`, err);
       }
     };
     asyncTask();
@@ -172,8 +173,9 @@ class FirebaseDatabaseTest {
     const asyncTask = async () => {
       try {
         const result = await FirebaseDatabase.setThreadAdmin('-L3yTMe9_LRd6zkUpKaB', '1');
+        Utils.log(`testSetThreadAdmin PASSED: ${result}`);
       } catch (err) {
-        Utils.log(`testSetThreadAdmin FAILED: `, err);
+        Utils.log(`testSetThreadAdmin FAILED: ${err}`, err);
       }
     };
     asyncTask();
@@ -183,6 +185,18 @@ class FirebaseDatabaseTest {
     const asyncTask = async () => {
       try {
         await FirebaseDatabase.mUpdateThreadMetaData(threadID, metaData);
+      } catch (err) {
+        Utils.log(`testAddUserToGroupThread FAILED: ${err}`);
+      }
+    };
+    asyncTask();
+  }
+
+  static testUpdateUserReadTimeInThread() {
+    const asyncTask = async () => {
+      try {
+        const result = await FirebaseDatabase.updateUserReadTimeInThread('-L4jGdS3St_m0TqgK-Tt', '1');
+        Utils.log(`testUpdateUserReadTimeInThread PASSED: ${result}`);
       } catch (err) {
         Utils.log(`testAddUserToGroupThread FAILED: ${err}`);
       }

@@ -74,6 +74,8 @@ class Chat extends Component {
   componentDidMount() {
     // load initial messages
     this.loadPreviousMessages(INITIAL_MESSAGES_LOAD);
+    // update read time
+    ChatManager.shared().updateMyReadTimeInThread(this.state.thread.uid);
   }
   componentWillUnmount() {
     // remove observer

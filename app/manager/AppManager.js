@@ -31,17 +31,17 @@ function initAppManager() {
    * @param {string} name 
    * @param {array} args 
    */
-  function mNotifyObservers(name, ...args) {
-    const observers = mObservers[name];
-    if (observers) {
-      for (let j = 0; j < observers.length; j += 1) {
-        const item = observers[j];
-        if (item.callback) {
-          item.callback.call(item.target, ...args);
-        }
-      }
-    }
-  }
+  // function mNotifyObservers(name, ...args) {
+  //   const observers = mObservers[name];
+  //   if (observers) {
+  //     for (let j = 0; j < observers.length; j += 1) {
+  //       const item = observers[j];
+  //       if (item.callback) {
+  //         item.callback.call(item.target, ...args);
+  //       }
+  //     }
+  //   }
+  // }
 
   // PUBLIC
   // --------------------------------------------------

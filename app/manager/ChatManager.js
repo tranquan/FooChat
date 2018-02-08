@@ -41,7 +41,7 @@ function initChatManager() {
   // const mThreadLastMessages = {};
 
   function mUpdateMyUser() {
-    FirebaseDatabase.updateUser(mMyUser.uid, mMyUser);
+    FirebaseDatabase.updateUserMetadata(mMyUser.uid, mMyUser);
   }
 
   // EVENT HANDLERs
@@ -73,7 +73,7 @@ function initChatManager() {
 
   const onThreadUsersChange = (snapshot) => {
 
-  }
+  };
 
   const onNewMessage = (snapshot) => {
     // Utils.log(`${LOG_TAG}: onNewMessage: ${snapshot.key}`, snapshot.val());
@@ -434,6 +434,9 @@ function initChatManager() {
       return messages.map(message => {
         return Object.assign(new Message(), message);
       });
+    },
+    async updateMyReadTimeInThread(threadID) {
+      return FirebaseDatabase.updateUserReadTimeInThread(threadID, mMyUser.uid);
     },
   };
 }

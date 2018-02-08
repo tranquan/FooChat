@@ -11,6 +11,7 @@ export default {
   contacts_access_guide: `${APP_NAME} needs to access your Contacts. Please open Settings, go to Privacy->Contacts and allow ${APP_NAME}`,
   create_thread_error: 'Unable to create new Thread!',
   update_thread_error: 'Oops! Unable to update Chat! Please try again later',
+  update_thread_success: 'Thread updated!',
   upload_image_error: 'Oops! Unable to upload image. Please try again later',
   unknown_error: 'Oops! There is an error. Please try again later!',
 };

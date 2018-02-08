@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) SaigonMD, Inc - All Rights Reserved
+ * Licensed under the MIT license.
+ * Written by Tran Quan <tranquan221b@gmail.com>, Jan 2018
+ */
+
 import { AsyncStorage } from 'react-native';
 import Reactotron from 'reactotron-react-native';
 import { Configs } from '../constants/configs';

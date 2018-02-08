@@ -21,8 +21,8 @@ import {
 
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import Styles from '../../constants/styles';
-import ChatManager, { CHAT_EVENTS } from '../../manager/ChatManager';
+import Styles from 'app/constants/styles';
+import ChatManager, { CHAT_EVENTS } from 'app/manager/ChatManager';
 
 import NavigationBar from './NavigationBar';
 import ThreadRow from './ThreadRow';

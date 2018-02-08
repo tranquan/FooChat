@@ -66,14 +66,19 @@ class FirebaseDatabase {
    * @param {string} userID 
    * @param {Object} user 
    */
-  static mUpdateUser(userID, user) {
+  static mUpdateUserMetadata(userID, user) {
     // filter out non-metadata props
-    const userMetaData = FirebaseDatabase.mGetUserMetaData(user);
+    const metaData = FirebaseDatabase.mGetUserMetaData(user);
+    Object.keys(metaData).forEach((key) => {
+      if (metaData[key] == null) {
+        delete metaData[key];
+      }
+    });
     // request
     return new Promise((resolve) => {
       const fbUserID = FirebaseDatabase.firebaseUserID(userID);
       const userRef = USERS_REF.child(fbUserID);
-      userRef.update(userMetaData, (err) => {
+      userRef.update(metaData, (err) => {
         resolve(err === null);
       });
     });
@@ -268,6 +273,11 @@ class FirebaseDatabase {
    */
   static mUpdateThreadMetaData(threadID, thread) {
     const metaData = FirebaseDatabase.mGetThreadMetaData(thread);
+    Object.keys(metaData).forEach((key) => {
+      if (metaData[key] == null) {
+        delete metaData[key];
+      }
+    });
     return new Promise((resolve, reject) => {
       THREADS_REF.child(threadID).update({
         ...metaData,
@@ -428,9 +438,9 @@ class FirebaseDatabase {
    * @param {User} user 
    * @returns true/false
    */
-  static async updateUser(userID, user) {
+  static async updateUserMetadata(userID, user) {
     try {
-      const result = await FirebaseDatabase.mUpdateUser(userID, user);
+      const result = await FirebaseDatabase.mUpdateUserMetadata(userID, user);
       return result;
     } catch (err) {
       Utils.warn(`${LOG_TAG}: updateUser exc: ${err}`, err);
@@ -880,7 +890,26 @@ class FirebaseDatabase {
       const newMessage = await FirebaseDatabase.getMessageInThread(threadID, messageID);
       return newMessage;
     } catch (err) {
-      Utils.warn(`${LOG_TAG}: sendMessage exc: ${err}`, err);
+      Utils.warn(`${LOG_TAG}: sendMessage exc: `, err);
+      return false;
+    }
+  }
+
+  /**
+   * Update the readTimes for userID to the current time
+   * @param {string} threadID 
+   * @param {string} userID 
+   */
+  static async updateUserReadTimeInThread(threadID, userID) {
+    try {
+      const readTimesRef = THREADS_REF.child(`${threadID}/readTimes`);
+      const data = {};
+      data[userID] = firebase.database.ServerValue.TIMESTAMP;
+      await readTimesRef.update(data);
+      // await readTimesRef.set(firebase.database.ServerValue.TIMESTAMP);
+      return true;
+    } catch (err) {
+      Utils.warn(`${LOG_TAG}: updateUserReadTimeInThread exc: `, err);
       return false;
     }
   }

@@ -33,24 +33,35 @@ export function hidePhoneNumber(phoneNumber) {
   }).join('');
 }
 
-export function showAlert(message) {
-  Alert.alert(
-    Strings.alert_title,
-    message,
-    [{ text: 'Đóng' }],
-    { cancelable: false },
-  );
+// --------------------------------------------------
+// Alert
+// --------------------------------------------------
+
+export function showAlert(message, title = '', buttons = [], delayTime = 250) {
+  setTimeout(() => {
+    Alert.alert(
+      title,
+      message,
+      buttons,
+      { cancelable: false },
+    );
+  }, delayTime);
 }
 
-// export function showConfirmation(
-//   title, message, 
-//   yes = 'Đồng ý', no = 'Đóng', 
-//   onYesCallback, onNoCallback
-// ) {
-//   Alert.alert(
-//     Strings.alert_title,
-//     message,
-//     [{ text: 'Đóng' }],
-//     { cancelable: false },
-//   );
-// }
+export function showInfoAlert(message, delayTime = 250) {
+  showAlert(message, Strings.alert_title, [], delayTime);
+}
+
+export function showQuestionAlert(message, yes, no, onYesPress, onNoPress, delayTime = 250) {
+  const buttons = [
+    {
+      text: no,
+      onPress: onNoPress,
+    },
+    {
+      text: yes,
+      onPress: onYesPress,
+    },
+  ];
+  showAlert(message, Strings.alert_title, buttons, delayTime);
+}
